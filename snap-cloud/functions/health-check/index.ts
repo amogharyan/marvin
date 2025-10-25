@@ -22,9 +22,9 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey)
 
     // Test database connectivity
-    const { data, error } = await supabase
+    const { data, error, count } = await supabase
       .from('user_profiles')
-      .select('count')
+      .select('id', { count: 'exact' })
       .limit(1)
 
     if (error) {

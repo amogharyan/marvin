@@ -23,7 +23,7 @@ CREATE TABLE meeting_prep (
 CREATE TABLE nutrition_analysis (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-    food_log_id UUID REFERENCES food_logs(id) ON DELETE CASCADE,
+    food_log_id UUID NOT NULL REFERENCES food_logs(id) ON DELETE CASCADE,
     analysis_type TEXT NOT NULL, -- 'daily', 'weekly', 'monthly'
     analysis_period DATE NOT NULL,
     total_calories DECIMAL(8,2) DEFAULT 0,
@@ -59,6 +59,7 @@ CREATE TABLE spatial_memory (
     access_patterns JSONB DEFAULT '{}', -- time patterns when accessed
     spatial_relationships JSONB DEFAULT '{}', -- relative to other objects
     memory_strength DECIMAL(3,2) DEFAULT 1.0, -- decays over time
+    decay_rate DECIMAL(3,2) DEFAULT 0.05, -- time-based decay per day
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -73,6 +74,12 @@ CREATE INDEX idx_nutrition_analysis_user_id ON nutrition_analysis(user_id);
 CREATE INDEX idx_nutrition_analysis_period ON nutrition_analysis(analysis_period);
 CREATE INDEX idx_nutrition_analysis_type ON nutrition_analysis(analysis_type);
 CREATE INDEX idx_nutrition_analysis_food_log ON nutrition_analysis(food_log_id);
+
+-- Migration: Set any existing NULL food_log_id to a valid reference or remove those rows before enforcing NOT NULL
+UPDATE nutrition_analysis SET food_log_id = (
+    SELECT id FROM food_logs WHERE user_id = nutrition_analysis.user_id LIMIT 1
+) WHERE food_log_id IS NULL;
+DELETE FROM nutrition_analysis WHERE food_log_id IS NULL;
 
 CREATE INDEX idx_spatial_memory_user_id ON spatial_memory(user_id);
 CREATE INDEX idx_spatial_memory_object_type ON spatial_memory(object_type);

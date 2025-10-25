@@ -10,6 +10,7 @@ CREATE OR REPLACE FUNCTION create_meeting_preparation(
 ) RETURNS UUID
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
     prep_id UUID;
@@ -59,6 +60,7 @@ CREATE OR REPLACE FUNCTION create_nutrition_analysis(
 ) RETURNS UUID
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
     analysis_id UUID;
@@ -73,11 +75,11 @@ BEGIN
     -- Calculate nutritional totals based on period and type
     IF p_analysis_type = 'daily' THEN
         SELECT
-            COALESCE(SUM((nutrition_data->>'calories')::DECIMAL), 0),
-            COALESCE(SUM((nutrition_data->>'protein')::DECIMAL), 0),
-            COALESCE(SUM((nutrition_data->>'carbs')::DECIMAL), 0),
-            COALESCE(SUM((nutrition_data->>'fat')::DECIMAL), 0),
-            COUNT(*)
+            COALESCE(SUM(NULLIF(nutrition_data->>'calories','')::DECIMAL), 0),
+            COALESCE(SUM(NULLIF(nutrition_data->>'protein','')::DECIMAL), 0),
+            COALESCE(SUM(NULLIF(nutrition_data->>'carbs','')::DECIMAL), 0),
+            COALESCE(SUM(NULLIF(nutrition_data->>'fat','')::DECIMAL), 0),
+            COUNT(*) FILTER (WHERE nutrition_data IS NOT NULL AND NULLIF(nutrition_data->>'calories','') IS NOT NULL)
         INTO total_cals, total_prot, total_carb, total_fat_val, meal_cnt
         FROM food_logs
         WHERE user_id = p_user_id
@@ -85,11 +87,11 @@ BEGIN
 
     ELSIF p_analysis_type = 'weekly' THEN
         SELECT
-            COALESCE(SUM((nutrition_data->>'calories')::DECIMAL), 0),
-            COALESCE(SUM((nutrition_data->>'protein')::DECIMAL), 0),
-            COALESCE(SUM((nutrition_data->>'carbs')::DECIMAL), 0),
-            COALESCE(SUM((nutrition_data->>'fat')::DECIMAL), 0),
-            COUNT(*)
+            COALESCE(SUM(NULLIF(nutrition_data->>'calories','')::DECIMAL), 0),
+            COALESCE(SUM(NULLIF(nutrition_data->>'protein','')::DECIMAL), 0),
+            COALESCE(SUM(NULLIF(nutrition_data->>'carbs','')::DECIMAL), 0),
+            COALESCE(SUM(NULLIF(nutrition_data->>'fat','')::DECIMAL), 0),
+            COUNT(*) FILTER (WHERE nutrition_data IS NOT NULL AND NULLIF(nutrition_data->>'calories','') IS NOT NULL)
         INTO total_cals, total_prot, total_carb, total_fat_val, meal_cnt
         FROM food_logs
         WHERE user_id = p_user_id
@@ -97,8 +99,26 @@ BEGIN
         AND logged_at::date <= p_analysis_period;
     END IF;
 
-    -- Calculate basic nutrition score (0-1 scale)
-    nutrition_scr := LEAST(1.0, (total_cals / 2000.0 + total_prot / 50.0 + meal_cnt / 3.0) / 3.0);
+        -- Normalized, weighted, clamped nutrition score
+        -- Get user-specific baselines (calories, protein, meals) from profile or use defaults
+        DECLARE
+            base_cals DECIMAL := COALESCE(profile_age_weight_activity_defaults->>'calories', '2000')::DECIMAL;
+            base_prot DECIMAL := COALESCE(profile_age_weight_activity_defaults->>'protein', '50')::DECIMAL;
+            base_meals DECIMAL := COALESCE(profile_age_weight_activity_defaults->>'meals', '3')::DECIMAL;
+            w_cals DECIMAL := 0.5;
+            w_prot DECIMAL := 0.3;
+            w_meals DECIMAL := 0.2;
+            cals_ratio DECIMAL := CASE WHEN base_cals > 0 THEN COALESCE(total_cals,0)/base_cals ELSE 0 END;
+            prot_ratio DECIMAL := CASE WHEN base_prot > 0 THEN COALESCE(total_prot,0)/base_prot ELSE 0 END;
+            meals_ratio DECIMAL := CASE WHEN base_meals > 0 THEN meal_cnt/base_meals ELSE 0 END;
+            cals_score DECIMAL := LEAST(GREATEST(cals_ratio,0),1);
+            prot_score DECIMAL := LEAST(GREATEST(prot_ratio,0),1);
+            meals_score DECIMAL := LEAST(GREATEST(meals_ratio,0),1);
+            -- Deficiency checks: penalize if below 80% of baseline
+            IF cals_ratio < 0.8 THEN cals_score := cals_score * 0.7; END IF;
+            IF prot_ratio < 0.8 THEN prot_score := prot_score * 0.7; END IF;
+            IF meals_ratio < 0.8 THEN meals_score := meals_score * 0.7; END IF;
+            nutrition_scr := LEAST(GREATEST((cals_score*w_cals + prot_score*w_prot + meals_score*w_meals),0),1);
 
     INSERT INTO nutrition_analysis (
         user_id,
@@ -149,6 +169,7 @@ CREATE OR REPLACE FUNCTION update_spatial_memory(
 ) RETURNS UUID
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
     memory_id UUID;
@@ -217,6 +238,7 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 BEGIN
     RETURN QUERY
@@ -252,6 +274,7 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 BEGIN
     RETURN QUERY
@@ -267,7 +290,13 @@ BEGIN
     WHERE sm.user_id = p_user_id
     AND sm.object_type = p_object_type
     AND (p_object_identifier IS NULL OR sm.object_identifier = p_object_identifier)
-    AND sm.memory_strength > 0.3  -- Only return memories that haven't decayed too much
+    AND (
+        CASE 
+            WHEN EXTRACT(EPOCH FROM (NOW() - sm.last_seen_timestamp)) / 86400 > 30 THEN 0.1
+            WHEN EXTRACT(EPOCH FROM (NOW() - sm.last_seen_timestamp)) / 86400 > 7 THEN 0.3
+            ELSE sm.memory_strength
+        END > 0.3
+    )
     ORDER BY sm.frequency_score DESC, sm.confidence_level DESC, sm.last_seen_timestamp DESC;
 END;
 $$;

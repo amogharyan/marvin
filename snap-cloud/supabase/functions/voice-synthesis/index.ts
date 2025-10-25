@@ -36,30 +36,47 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
+  const startTime = Date.now();
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+    // Require Authorization header and validate JWT
+    const authHeader = req.headers.get('authorization') || req.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ error: 'Missing or invalid Authorization header' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    const token = authHeader.replace('Bearer ', '').trim();
 
+    // Use shared Supabase client utilities (replace with actual import if available)
+    const supabaseAnon = createClient(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_ANON_KEY') ?? '');
+    const supabaseService = createClient(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '');
+
+    // Validate token and get user_id from JWT
+    const { data: userData, error: userError } = await supabaseAnon.auth.getUser(token);
+    if (userError || !userData?.user?.id) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized: invalid token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    const user_id = userData.user.id;
+
+    // Parse request body (do not trust user_id from body)
     const {
-      user_id,
       text,
       voice_id = 'default',
       speed = 1.0,
       stability = 0.5,
       similarity_boost = 0.75,
       use_cache = true
-    }: VoiceSynthesisRequest = await req.json()
+    }: Omit<VoiceSynthesisRequest, 'user_id'> = await req.json();
 
-    if (!user_id || !text) {
+    if (!text) {
       return new Response(
-        JSON.stringify({ error: 'Missing required fields: user_id, text' }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      )
+        JSON.stringify({ error: 'Missing required field: text' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const startTime = Date.now()
@@ -67,17 +84,17 @@ serve(async (req) => {
     // Generate cache key for the text and voice settings
     const textHash = await generateTextHash(text, voice_id, speed, stability, similarity_boost)
 
-    // Check cache first if enabled
+    // Check cache first if enabled (use anon client for reads)
     if (use_cache) {
-      const cachedAudioUrl = await getCachedAudio(supabase, textHash)
+      const cachedAudioUrl = await getCachedAudio(supabaseAnon, textHash);
       if (cachedAudioUrl) {
-        // Update conversation state
-        await updateConversationState(supabase, user_id, {
+        // Update conversation state (use service client for writes if RLS blocks anon)
+        await updateConversationState(supabaseService, user_id, {
           type: 'voice_synthesis',
           text,
           audio_url: cachedAudioUrl,
           cached: true
-        })
+        });
 
         return new Response(
           JSON.stringify({
@@ -89,7 +106,7 @@ serve(async (req) => {
           {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           }
-        )
+        );
       }
     }
 
@@ -109,16 +126,16 @@ serve(async (req) => {
     if (audioUrl) {
       // Cache the audio if synthesis was successful and not a fallback
       if (!fallbackUsed && use_cache) {
-        await cacheAudio(supabase, textHash, audioUrl)
+        await cacheAudio(supabaseService, textHash, audioUrl); // Only service-role for writes
       }
 
-      // Update conversation state via Realtime
-      await updateConversationState(supabase, user_id, {
+      // Update conversation state via Realtime (service client for writes)
+      await updateConversationState(supabaseService, user_id, {
         type: 'voice_synthesis',
         text,
         audio_url: audioUrl,
         fallback_used: fallbackUsed
-      })
+      });
 
       const response: VoiceSynthesisResponse = {
         audio_url: audioUrl,
@@ -144,7 +161,7 @@ serve(async (req) => {
         error: 'Failed to synthesize voice',
         details: error.message,
         fallback_used: true,
-        processing_time: Date.now() - (Date.now() - 1000) // Approximate
+  processing_time: Date.now() - startTime
       }),
       {
         status: 500,
@@ -165,12 +182,17 @@ async function getCachedAudio(supabase: any, textHash: string): Promise<string |
   try {
     const { data } = await supabase.storage
       .from('voice-cache')
-      .createSignedUrl(`audio/${textHash}.mp3`, 3600) // 1 hour expiry
+      .createSignedUrl(`audio/${textHash}.json`, 3600) // 1 hour expiry
 
-    return data?.signedUrl || null
+    if (!data?.signedUrl) return null;
+    // Fetch the JSON cache entry
+    const resp = await fetch(data.signedUrl);
+    if (!resp.ok) return null;
+    const cacheJson = await resp.json();
+    return cacheJson?.original_url || null;
   } catch (error) {
     // Cache miss is normal
-    return null
+    return null;
   }
 }
 
@@ -276,12 +298,14 @@ async function updateConversationState(supabase: any, userId: string, stateUpdat
       .insert({
         user_id: userId,
         interaction_type: 'voice_synthesis',
-        content: stateUpdate.text,
-        ai_response: `Audio synthesized: ${stateUpdate.audio_url}`,
+        input_data: { text: stateUpdate.text },
+        response_data: {
+          audio_url: stateUpdate.audio_url,
+          cached: !!stateUpdate.cached,
+          fallback_used: !!stateUpdate.fallback_used
+        },
         context: {
           voice_synthesis: true,
-          cached: stateUpdate.cached || false,
-          fallback_used: stateUpdate.fallback_used || false,
           timestamp: new Date().toISOString()
         }
       })

@@ -13,6 +13,7 @@ CREATE OR REPLACE FUNCTION log_object_interaction(
 ) RETURNS UUID
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
     interaction_id UUID;
@@ -49,6 +50,7 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 BEGIN
     RETURN QUERY
@@ -93,6 +95,7 @@ CREATE OR REPLACE FUNCTION update_object_location(
 ) RETURNS UUID
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
     location_id UUID;
@@ -137,6 +140,7 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 BEGIN
     RETURN QUERY
@@ -208,15 +212,16 @@ CREATE OR REPLACE FUNCTION calculate_daily_nutrition(p_user_id UUID, p_date DATE
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
     nutrition_summary JSONB;
 BEGIN
     SELECT jsonb_build_object(
-        'total_calories', COALESCE(SUM((nutrition_data->>'calories')::NUMERIC), 0),
-        'total_protein', COALESCE(SUM((nutrition_data->>'protein')::NUMERIC), 0),
-        'total_carbs', COALESCE(SUM((nutrition_data->>'carbs')::NUMERIC), 0),
-        'total_fat', COALESCE(SUM((nutrition_data->>'fat')::NUMERIC), 0),
+        'total_calories', COALESCE(SUM(NULLIF(nutrition_data->>'calories','')::NUMERIC), 0),
+        'total_protein', COALESCE(SUM(NULLIF(nutrition_data->>'protein','')::NUMERIC), 0),
+        'total_carbs', COALESCE(SUM(NULLIF(nutrition_data->>'carbs','')::NUMERIC), 0),
+        'total_fat', COALESCE(SUM(NULLIF(nutrition_data->>'fat','')::NUMERIC), 0),
         'meal_count', COUNT(*),
         'date', p_date
     ) INTO nutrition_summary
@@ -232,7 +237,7 @@ $$;
 CREATE OR REPLACE FUNCTION find_similar_interactions(
     p_user_id UUID,
     p_query_embedding vector(1536),
-    p_limit INTEGER DEFAULT 5
+        p_limit INTEGER DEFAULT 5
 )
 RETURNS TABLE (
     interaction_id UUID,
@@ -242,7 +247,10 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
+    DECLARE
+        validated_limit INTEGER := LEAST(GREATEST(p_limit, 1), 100);
 BEGIN
     RETURN QUERY
     SELECT
@@ -254,7 +262,7 @@ BEGIN
     WHERE ui.user_id = p_user_id
     AND ui.embedding IS NOT NULL
     ORDER BY ui.embedding <=> p_query_embedding
-    LIMIT p_limit;
+        LIMIT validated_limit;
 END;
 $$;
 
@@ -263,6 +271,7 @@ CREATE OR REPLACE FUNCTION update_user_preferences(p_user_id UUID)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
     updated_preferences JSONB;

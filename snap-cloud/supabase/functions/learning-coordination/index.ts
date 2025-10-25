@@ -36,9 +36,25 @@ serve(async (req) => {
   }
 
   try {
-    const supabase = createClient(
+    // Read Authorization header
+    const authHeader = req.headers.get('Authorization') || req.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Missing or invalid Authorization header' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+    const token = authHeader.replace('Bearer ', '').trim()
+
+    // Create admin client for DB ops
+    const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
+    // Create auth client for identity check
+    const supabaseAuth = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      token
     )
 
     const { user_id, action, interaction_data, pattern_analysis, preference_updates }: LearningRequest = await req.json()
@@ -53,9 +69,36 @@ serve(async (req) => {
       )
     }
 
+    // Authenticate user and bind to user_id
+    const { data: authData, error: authError } = await supabaseAuth.auth.getUser()
+    if (authError || !authData?.user) {
+      return new Response(JSON.stringify({ error: 'Invalid or expired token' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+    if (authData.user.id !== user_id) {
+      return new Response(JSON.stringify({ error: 'Forbidden: user_id does not match authenticated user' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
     let result: any
 
     switch (action) {
+      // Add medication schedule creation with validation
+      case 'create_schedule':
+        if (!interaction_data?.medication_schedule) {
+          throw new Error('medication_schedule required for create_schedule action')
+        }
+        const medication_schedule = interaction_data.medication_schedule
+        if (!medication_schedule.medication_name || !medication_schedule.dosage || 
+            !medication_schedule.schedule_times || !medication_schedule.days_of_week) {
+          throw new Error('medication_schedule must include medication_name, dosage, schedule_times, and days_of_week')
+        }
+        result = await createMedicationSchedule(supabase, user_id, medication_schedule)
+        break
       case 'analyze_patterns':
         result = await analyzeUserPatterns(supabase, user_id, pattern_analysis)
         break
@@ -139,33 +182,52 @@ async function analyzeUserPatterns(supabase: any, userId: string, analysisConfig
 
   // Broadcast real-time learning update
   const channel = supabase.channel(`learning_${userId}`)
-  await channel.send({
-    type: 'broadcast',
-    event: 'patterns_analyzed',
-    payload: {
-      patterns_found: Object.keys(patterns).length,
-      insights_generated: insights.length,
-      analysis_date: new Date().toISOString()
+    // Reliable notification: persist to notifications table, let Realtime deliver
+    const { error: notifError } = await supabaseAdmin.from('notifications').insert({
+      user_id,
+      event_type: 'patterns_analyzed',
+      payload: {
+        patterns_found: Object.keys(patterns).length,
+        insights_generated: insights.length,
+        analysis_date: new Date().toISOString()
+      },
+      created_at: new Date().toISOString()
+    })
+    if (notifError) {
+      console.error('Failed to persist notification:', notifError)
     }
-  })
 
   return {
     patterns,
     insights,
     analysis_period: `${timeRangeDays} days`,
-    patterns_found: Object.keys(patterns).filter(key => patterns[key]?.length > 0).length
+    patterns_found: Object.values(patterns).filter(val => {
+      if (Array.isArray(val)) {
+        return val.length > 0
+      }
+      if (val && typeof val === 'object' && !Array.isArray(val)) {
+        return Object.keys(val).length > 0
+      }
+      return Boolean(val)
+    }).length
   }
 }
 
 async function analyzeMorningRoutine(supabase: any, userId: string, startDate: Date) {
-  const { data: morningInteractions } = await supabase
+  // Query by date only
+  const { data: interactions } = await supabase
     .from('object_interactions')
     .select('*')
     .eq('user_id', userId)
     .gte('interaction_timestamp', startDate.toISOString())
-    .gte('interaction_timestamp', '06:00:00')
-    .lte('interaction_timestamp', '10:00:00')
     .order('interaction_timestamp', { ascending: true })
+
+  // Filter client-side for 06:00–10:00 time window
+  const morningInteractions = (interactions ?? []).filter(row => {
+    const ts = new Date(row.interaction_timestamp)
+    const hour = ts.getHours()
+    return hour >= 6 && hour < 10
+  })
 
   if (!morningInteractions || morningInteractions.length === 0) {
     return { routine_identified: false, patterns: [] }

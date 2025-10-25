@@ -136,22 +136,27 @@ async function syncGoogleCalendar(supabase: any, userId: string, calendarAuth: a
             start_time: event.start.dateTime || event.start.date,
             end_time: event.end.dateTime || event.end.date,
             location: event.location || '',
+            google_event_id: event.id,
             event_data: {
-              google_event_id: event.id,
               attendees: event.attendees || [],
               meeting_link: event.hangoutLink || '',
               creator: event.creator
             },
             synced_at: new Date().toISOString()
           }, {
-            onConflict: 'user_id,event_data->google_event_id'
+            onConflict: 'calendar_events_user_event_unique'
           })
           .select()
 
         if (error) {
           errors.push({ event_id: event.id, error: error.message })
         } else {
-          syncedEvents.push(data)
+          // .select() returns an array, push the first row only
+          if (Array.isArray(data) && data.length > 0) {
+            syncedEvents.push(data[0])
+          } else {
+            syncedEvents.push(data)
+          }
         }
       } catch (eventError) {
         errors.push({ event_id: event.id, error: eventError.message })
@@ -160,15 +165,22 @@ async function syncGoogleCalendar(supabase: any, userId: string, calendarAuth: a
 
     // Broadcast real-time notification about calendar sync
     const channel = supabase.channel(`calendar_${userId}`)
-    await channel.send({
-      type: 'broadcast',
-      event: 'calendar_synced',
-      payload: {
-        synced_count: syncedEvents.length,
-        error_count: errors.length,
-        sync_time: new Date().toISOString()
-      }
-    })
+    const subscription = channel.subscribe()
+    const subResult = await subscription;
+    if (subResult && subResult.status === 'SUBSCRIBED') {
+      await channel.send({
+        type: 'broadcast',
+        event: 'calendar_synced',
+        payload: {
+          synced_count: syncedEvents.length,
+          error_count: errors.length,
+          sync_time: new Date().toISOString()
+        }
+      })
+      await channel.unsubscribe()
+    } else {
+      errors.push({ error: 'Realtime channel subscription failed for calendar sync' })
+    }
 
     return {
       synced_events: syncedEvents,
@@ -228,9 +240,35 @@ async function getCalendarEvents(supabase: any, userId: string, dateRange?: any)
     .order('start_time', { ascending: true })
 
   if (dateRange) {
-    query = query
-      .gte('start_time', dateRange.start_date)
-      .lte('start_time', dateRange.end_date)
+    // Validate and normalize dateRange
+    let { start_date, end_date } = dateRange
+    let startISO: string | undefined
+    let endISO: string | undefined
+    if (start_date) {
+      startISO = new Date(start_date).toISOString()
+      if (isNaN(Date.parse(startISO))) {
+        return { error: 'Invalid start_date in dateRange' }
+      }
+    }
+    if (end_date) {
+      endISO = new Date(end_date).toISOString()
+      if (isNaN(Date.parse(endISO))) {
+        return { error: 'Invalid end_date in dateRange' }
+      }
+    }
+    if (startISO && endISO && startISO > endISO) {
+      return { error: 'dateRange.start_date must be <= dateRange.end_date' }
+    }
+    // Overlap-safe filter: start_time <= end_date AND end_time >= start_date
+    if (startISO && endISO) {
+      query = query
+        .lte('start_time', endISO)
+        .gte('end_time', startISO)
+    } else if (startISO) {
+      query = query.gte('end_time', startISO)
+    } else if (endISO) {
+      query = query.lte('start_time', endISO)
+    }
   }
 
   const { data, error } = await query
@@ -346,14 +384,21 @@ async function createMeetingPrep(supabase: any, userId: string, eventId: string)
 
   // Broadcast real-time notification
   const channel = supabase.channel(`calendar_${userId}`)
-  await channel.send({
-    type: 'broadcast',
-    event: 'meeting_prep_created',
-    payload: {
-      event_id: eventId,
-      meeting_prep: meetingPrep
-    }
-  })
+  const subscription = channel.subscribe()
+  const subResult = await subscription;
+  if (subResult && subResult.status === 'SUBSCRIBED') {
+    await channel.send({
+      type: 'broadcast',
+      event: 'meeting_prep_created',
+      payload: {
+        event_id: eventId,
+        meeting_prep: meetingPrep
+      }
+    })
+    await channel.unsubscribe()
+  } else {
+    throw new Error('Realtime channel subscription failed for meeting prep notification')
+  }
 
   return {
     event: data,

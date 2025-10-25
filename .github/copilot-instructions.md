@@ -47,7 +47,7 @@ Focus strictly on the 68 functional requirements. Avoid building functionality o
 
 ```
 marvin-ar-assistant/
-├── lens-studio/              # Dev 1: AR Core
+├── ar-core/                # Dev 1: AR Core
 │   ├── scripts/             # TypeScript AR logic
 │   │   ├── object-detection.ts
 │   │   ├── ar-overlays.ts
@@ -56,7 +56,7 @@ marvin-ar-assistant/
 │   ├── objects/             # 3D models and assets
 │   └── public/              # AR scene configuration
 │
-├── ai-processing/           # Dev 2: AI & Voice
+├── ai-voice/               # Dev 2: AI & Voice
 │   ├── gemini/             # Visual AI processing
 │   │   ├── multimodal.service.ts
 │   │   ├── vision.service.ts
@@ -70,7 +70,7 @@ marvin-ar-assistant/
 │       ├── embeddings.service.ts
 │       └── learning.service.ts
 │
-├── supabase/               # Dev 3: Supabase Integration
+├── snap-cloud/             # Dev 3: Snap Cloud + Supabase Integration
 │   ├── migrations/         # Database schema migrations
 │   ├── functions/          # Edge Functions (Deno runtime)
 │   │   ├── ai-processing/  # Gemini API integration
@@ -93,7 +93,7 @@ marvin-ar-assistant/
 ### 1. Snap Spectacles AR Platform
 
 ```typescript
-// lens-studio/scripts/object-detection.ts
+// ar-core/scripts/object-detection.ts
 import { ObjectTracking, MLComponent, DeviceTracking } from 'LensStudio';
 
 interface DemoObject {
@@ -141,7 +141,7 @@ class AROverlayManager {
 ### 2. Gemini Multimodal AI Integration
 
 ```typescript
-// ai-processing/gemini/multimodal.service.ts
+// ai-voice/gemini/multimodal.service.ts
 import { GoogleGenAI } from "@google/genai";
 
 interface GeminiRequest {
@@ -225,7 +225,7 @@ class GeminiProcessor {
 ### 3. ElevenLabs Voice Synthesis
 
 ```typescript
-// ai-processing/voice/elevenlabs.service.ts
+// ai-voice/voice/elevenlabs.service.ts
 import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js';
 import { Readable } from 'stream';
 
@@ -285,7 +285,7 @@ class ElevenLabsService {
 ### 4. Chroma Vector Database for Learning
 
 ```typescript
-// ai-processing/memory/chroma.service.ts
+// ai-voice/memory/chroma.service.ts
 import { ChromaApi, OpenAIEmbeddingFunction } from 'chromadb';
 
 interface UserLearningProfile {
@@ -380,7 +380,7 @@ class ChromaLearningService {
 ### 5. Supabase Integration & Edge Functions
 
 ```typescript
-// supabase/functions/ai-processing/index.ts
+// snap-cloud/functions/ai-processing/index.ts
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -452,7 +452,7 @@ export default router;
 ### AR Component Testing
 
 ```typescript
-// lens-studio/scripts/__tests__/object-detection.test.ts
+// ar-core/scripts/__tests__/object-detection.test.ts
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { ObjectDetectionService } from '../object-detection';
 import { MockSnapAPI } from '../__mocks__/snap-api';
@@ -506,7 +506,7 @@ describe('ObjectDetectionService', () => {
 ### AI Integration Testing
 
 ```typescript
-// ai-processing/gemini/__tests__/multimodal.test.ts
+// ai-voice/gemini/__tests__/multimodal.test.ts
 describe('GeminiProcessor', () => {
   let processor: GeminiProcessor;
 
@@ -584,7 +584,7 @@ npm install concurrently winston
 {
   "scripts": {
     "dev": "concurrently \"supabase start\" \"npm run dev:ai\"",
-    "dev:ai": "nodemon --exec ts-node ai-processing/index.ts", 
+    "dev:ai": "nodemon --exec ts-node ai-voice/index.ts", 
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
     "supabase:reset": "supabase db reset",
@@ -593,9 +593,9 @@ npm install concurrently winston
     "build": "tsc --build",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:ar": "jest lens-studio/scripts/__tests__/",
-    "test:ai": "jest ai-processing/__tests__/",
-    "test:supabase": "jest supabase/__tests__/",
+    "test:ar": "jest ar-core/scripts/__tests__/",
+    "test:ai": "jest ai-voice/__tests__/",
+    "test:supabase": "jest snap-cloud/__tests__/",
     "test:integration": "jest devops/integration/__tests__/",
     "demo:setup": "node devops/demo/setup.js",
     "demo:reset": "supabase db reset && node devops/demo/seed.js",
@@ -607,7 +607,7 @@ npm install concurrently winston
 ## 🔧 Environment Configuration
 
 ```typescript
-// supabase/config.toml
+// snap-cloud/config.toml
 [api]
 enabled = true
 port = 54321
@@ -1444,8 +1444,8 @@ Hour 12 checkpoint
 grep -r "pattern" src/
 
 # Find TypeScript files in AR project
-find lens-studio -name "*.ts"
-find ai-processing -name "*.ts"
+find ar-core -name "*.ts"
+find ai-voice -name "*.ts"
 
 # Search with context for AR components
 grep -B 2 -A 2 "ObjectDetection\|AROverlay" src/**/*.ts

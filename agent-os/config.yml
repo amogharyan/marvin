@@ -1,15 +1,13 @@
-version: 2.2.0
-last_compiled: 2025-10-24 23:30:00
+version: 2.1.0
+last_compiled: 2025-10-25 01:08:36
 
 # ================================================
-# GitHub Copilot Integration Settings
+# Compiled with the following settings:
 #
-# Configured for GitHub Copilot workflow with agent-os standards
+# To change these settings, run ~/agent-os/scripts/project-update.sh to re-compile your project with the new settings.
 # ================================================
-profile: github_copilot
-copilot_instructions_enabled: true
-github_copilot_agents: true
-use_copilot_chat: true
-agent_os_commands: true
-standards_as_copilot_knowledge: true
-workspace_context_enabled: true
+profile: default
+claude_code_commands: true
+use_claude_code_subagents: true
+agent_os_commands: false
+standards_as_claude_code_skills: false

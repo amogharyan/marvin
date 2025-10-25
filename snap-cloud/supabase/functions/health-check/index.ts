@@ -31,23 +31,31 @@ serve(async (req) => {
 
     // Test database connectivity
     try {
+      const startTime = Date.now()
       const { data, error } = await supabase
         .from('user_profiles')
-        .select('count(*)')
+        .select('*')
         .limit(1)
+      const endTime = Date.now()
+      const latencyMs = endTime - startTime
 
       if (error) {
-        throw error
-      }
-
-      healthStatus.database = {
-        status: 'connected',
-        response_time: Date.now()
+        healthStatus.database = {
+          status: 'error',
+          error: error.message || String(error)
+        }
+        healthStatus.status = 'degraded'
+      } else {
+        healthStatus.database = {
+          status: 'connected',
+          response_time: latencyMs,
+          row_count: Array.isArray(data) ? data.length : 0
+        }
       }
     } catch (error) {
       healthStatus.database = {
         status: 'error',
-        error: error.message
+        error: error && error.message ? error.message : String(error)
       }
       healthStatus.status = 'degraded'
     }

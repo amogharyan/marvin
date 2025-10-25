@@ -21,6 +21,7 @@ interface ObjectInteractionRequest {
   confidence_score?: number
   context?: any
   session_id?: string
+  object_identifier?: string // Optional: unique identifier for this object instance. If absent, will be generated from position+object_type or position+timestamp.
 }
 
 serve(async (req) => {
@@ -43,6 +44,7 @@ serve(async (req) => {
       confidence_score = 0.0,
       context = {},
       session_id
+      object_identifier
     }: ObjectInteractionRequest = await req.json()
 
     if (!user_id || !object_type || !interaction_type) {
@@ -57,13 +59,14 @@ serve(async (req) => {
 
     // Log the interaction using the database function
     const { data, error } = await supabase.rpc('log_object_interaction', {
-      p_user_id: user_id,
-      p_object_type: object_type,
-      p_interaction_type: interaction_type,
-      p_spatial_data: spatial_data,
-      p_confidence_score: confidence_score,
-      p_context: context,
-      p_session_id: session_id
+          p_user_id: user_id,
+          p_object_type: object_type,
+          p_interaction_type: interaction_type,
+          p_spatial_data: spatial_data,
+          p_confidence_score: confidence_score,
+          p_context: context,
+          p_session_id: session_id,
+          p_object_identifier: object_identifier
     })
 
     if (error) {
@@ -72,10 +75,20 @@ serve(async (req) => {
 
     // Update object location if spatial data is provided
     if (spatial_data && spatial_data.position) {
+      // Use provided object_identifier, or generate one deterministically
+      let objectId = object_identifier;
+      if (!objectId) {
+        // Deterministic: hash of position+object_type+timestamp
+        const pos = spatial_data.position;
+        const base = `${object_type}:${pos.x},${pos.y},${pos.z}`;
+        // Optionally add timestamp for uniqueness if available
+        const ts = context?.timestamp || Date.now();
+        objectId = base + ':' + ts;
+      }
       await supabase.rpc('update_object_location', {
         p_user_id: user_id,
         p_object_type: object_type,
-        p_object_identifier: 'default',
+        p_object_identifier: objectId,
         p_location: spatial_data,
         p_confidence_score: confidence_score
       })
@@ -101,15 +114,37 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        interaction_id: data,
-        timestamp: new Date().toISOString()
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      // Real-time broadcast (pattern from location-tracking)
+      try {
+        const broadcastPayload = {
+          interaction_id: data,
+          object_id: objectId,
+          user_id: user_id ?? null,
+          timestamp: new Date().toISOString()
+        };
+        const { error: broadcastError } = await supabaseAdmin
+          .channel('object_interactions')
+          .send({
+            type: 'broadcast',
+            event: 'object-interaction',
+            payload: broadcastPayload
+          });
+        if (broadcastError) {
+          console.warn('[object-interaction-log] Realtime broadcast error:', broadcastError);
+        }
+      } catch (err) {
+        console.warn('[object-interaction-log] Realtime broadcast exception:', err);
       }
-    )
+      return new Response(
+        JSON.stringify({
+          success: true,
+          interaction_id: data,
+          timestamp: new Date().toISOString()
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
 
   } catch (error) {
     console.error('Object interaction logging error:', error)

@@ -6,8 +6,13 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 BEGIN
+    -- Authorization check: only allow caller for their own user_id
+    IF auth.uid() IS DISTINCT FROM p_user_id THEN
+        RAISE EXCEPTION 'Unauthorized';
+    END IF;
     RETURN QUERY
     SELECT
         oi.object_type,

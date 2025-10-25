@@ -129,24 +129,30 @@ async function createMedicationSchedule(supabase: any, userId: string, schedule:
   }
 
   // Create daily reminders for this schedule
-  const reminderCount = await supabase.rpc('create_daily_medication_reminders', {
+  const { data: reminders_created, error: rpcError } = await supabase.rpc('create_daily_medication_reminders', {
     p_user_id: userId
   })
+  if (rpcError) {
+    throw new Error(`Failed to create daily medication reminders: ${rpcError.message}`)
+  }
 
   // Broadcast real-time notification about new schedule
   const channel = supabase.channel(`health_${userId}`)
-  await channel.send({
+  const { error: sendError } = await channel.send({
     type: 'broadcast',
     event: 'medication_schedule_created',
     payload: {
       schedule: scheduleData,
-      reminders_created: reminderCount.data || 0
+      reminders_created: reminders_created || 0
     }
   })
+  if (sendError) {
+    console.error('Failed to broadcast medication schedule creation:', sendError)
+  }
 
   return {
     schedule: scheduleData,
-    reminders_created: reminderCount.data || 0
+    reminders_created: reminders_created || 0
   }
 }
 
@@ -211,15 +217,30 @@ async function acknowledgeReminder(supabase: any, userId: string, reminderId: st
   }
 
   // Broadcast real-time notification
-  const channel = supabase.channel(`health_${userId}`)
-  await channel.send({
-    type: 'broadcast',
-    event: 'medication_taken',
-    payload: {
-      reminder: data,
-      timestamp: new Date().toISOString()
+      let channel;
+      try {
+        channel = supabase.channel(`health_${userId}`);
+        const broadcastResult = await channel.send({
+          type: 'broadcast',
+          event: 'medication_taken',
+          payload: {
+            reminder: data,
+            timestamp: new Date().toISOString()
+          }
+        });
+        if (broadcastResult?.error || broadcastResult?.status === 'error' || broadcastResult?.status === 'failed') {
+          console.error('Supabase Realtime broadcast error:', broadcastResult?.error || broadcastResult);
+          throw new Error('Failed to broadcast medication taken notification');
+        }
+      } catch (broadcastErr) {
+        console.error('Realtime notification broadcast failed:', broadcastErr);
+        throw broadcastErr;
+      } finally {
+        // Clean up channel if required by Supabase client
+        if (channel && typeof channel.unsubscribe === 'function') {
+          await channel.unsubscribe();
+        }
     }
-  })
 
   return {
     acknowledged_reminder: data

@@ -8,6 +8,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, DELETE',
 }
 
 interface NutritionRequest {
@@ -32,15 +33,37 @@ interface NutritionRequest {
 
 serve(async (req) => {
   // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+    if (req.method === 'OPTIONS') {
+      return new Response('ok', { headers: corsHeaders })
+    }
 
   try {
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+
+    function isValidUrl(url: string | undefined): boolean {
+      if (!url) return false;
+      try {
+        new URL(url);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    if (!SUPABASE_URL || !isValidUrl(SUPABASE_URL)) {
+      console.error('Missing or invalid SUPABASE_URL environment variable.');
+      throw new Error('Missing or invalid SUPABASE_URL environment variable.');
+    }
+    if (!SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('Missing SUPABASE_SERVICE_ROLE_KEY environment variable.');
+      throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY environment variable.');
+    }
+
     const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+      SUPABASE_URL,
+      SUPABASE_SERVICE_ROLE_KEY
+    );
 
     const { user_id, action, food_data, date, week_start }: NutritionRequest = await req.json()
 
@@ -71,10 +94,11 @@ serve(async (req) => {
         result = await analyzeImageFood(supabase, user_id, food_data)
         break
 
-      case 'get_daily_summary':
-        const summaryDate = date || new Date().toISOString().split('T')[0]
-        result = await getDailySummary(supabase, user_id, summaryDate)
-        break
+      case 'get_daily_summary': {
+        const summaryDate = date || new Date().toISOString().split('T')[0];
+        result = await getDailySummary(supabase, user_id, summaryDate);
+        break;
+      }
 
       case 'get_weekly_summary':
         result = await getWeeklySummary(supabase, user_id, week_start)
@@ -292,7 +316,7 @@ async function getNutritionRecommendations(supabase: any, userId: string) {
 
   const recommendations = []
 
-  if (recentSummary.result?.summary?.total_calories < 1200) {
+  if (recentSummary?.summary?.total_calories < 1200) {
     recommendations.push({
       type: 'calorie_increase',
       message: 'Consider eating more calorie-dense foods to meet your daily energy needs.',
@@ -300,7 +324,7 @@ async function getNutritionRecommendations(supabase: any, userId: string) {
     })
   }
 
-  if (recentSummary.result?.summary?.total_protein < 50) {
+  if (recentSummary?.summary?.total_protein < 50) {
     recommendations.push({
       type: 'protein_increase',
       message: 'Add more protein sources like eggs, fish, or legumes to your meals.',
@@ -308,7 +332,7 @@ async function getNutritionRecommendations(supabase: any, userId: string) {
     })
   }
 
-  if (recentSummary.result?.summary?.meal_count < 2) {
+  if (recentSummary?.summary?.meal_count < 2) {
     recommendations.push({
       type: 'meal_frequency',
       message: 'Try to eat at least 3 meals per day for better nutrition distribution.',
