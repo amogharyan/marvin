@@ -76,7 +76,7 @@ An AR-powered personal assistant that follows you through your morning routine, 
 
 2. **Implement Advanced Multimodal AI**
 	 - Deploy Gemini API for visual understanding and natural language processing
-	 - Voice-first interactions through ElevenLabs and Vapi integration
+	 - Voice-first interactions through ElevenLabs and advanced conversational AI
 	 - Real-time conversation with contextual memory through Chroma
 
 3. **Create Seamless AR Experience**
@@ -155,7 +155,7 @@ An AR-powered personal assistant that follows you through your morning routine, 
 ### 4.3 Voice Integration (Priority: Critical)
 
 **FR-015:** System MUST integrate ElevenLabs for natural voice synthesis  
-**FR-016:** System MUST integrate Vapi for real-time voice conversation  
+**FR-016:** System MUST integrate ElevenLabs for advanced conversational AI capabilities  
 **FR-017:** System MUST support hands-free voice commands while using Spectacles  
 **FR-018:** System MUST provide audio feedback through Spectacles speakers  
 **FR-019:** System MUST handle ambient noise in demo hall environment  
@@ -330,7 +330,7 @@ graph LR
 											▼
 ┌──────────────────────────────────────────────┐
 │         AI & Voice Processing                │
-│     Gemini + ElevenLabs + Vapi               │
+│     Gemini + ElevenLabs + Advanced Conversational AI               │
 │                  Dev 2                       │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐   │
 │  │  Visual  │ │  Voice   │ │ Context  │   │
@@ -361,7 +361,7 @@ graph LR
 | Role | Developer | Primary Responsibilities | Key Deliverables |
 |------|-----------|-------------------------|------------------|
 | **AR Core Developer** | Dev 1 | Snap Spectacles integration, object detection, spatial tracking | Lens Studio project, object recognition, AR overlays |
-| **AI & Voice Integration** | Dev 2 | Gemini API, ElevenLabs, Vapi integration, conversational logic | Voice processing, AI responses, multimodal understanding |
+| **AI & Voice Integration** | Dev 2 | Gemini API, ElevenLabs, advanced conversational AI integration, conversational logic | Voice processing, AI responses, multimodal understanding |
 | **Supabase Integration** | Dev 3 | Database design, Edge Functions, Realtime subscriptions, external API coordination | Schema design, Edge Functions, real-time data sync |
 | **Frontend Dashboard & Integration** | Dev 4 | Web dashboard, system integration, testing, demo orchestration | Admin interface, integration testing, demo scripts, backup systems |
 
@@ -382,7 +382,7 @@ graph LR
 											▼
 ┌──────────────────────────────────────────────┐
 │         AI & Voice Processing                │
-│     Gemini + ElevenLabs + Vapi               │
+│     Gemini + ElevenLabs + Advanced Conversational AI               │
 │                  Dev 2                       │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐   │
 │  │  Visual  │ │  Voice   │ │ Context  │   │
@@ -469,7 +469,7 @@ Hour 30-36: Demo Preparation
 {
 	"multimodal": "Gemini API",
 	"voice_synthesis": "ElevenLabs API",
-	"voice_conversation": "Vapi API", 
+	"conversational_ai": "ElevenLabs advanced conversational AI", 
 	"processing": "Real-time streaming",
 	"context": "Conversation history + visual analysis"
 }
@@ -540,7 +540,7 @@ Based on Lens Studio API documentation, key capabilities include:
 4. **Chroma** - Vector embeddings for contextual memory
 
 #### Secondary APIs (High Priority)
-5. **Vapi** - Real-time voice conversation
+5. **ElevenLabs** - Advanced conversational AI integration
 6. **Google Calendar** - Schedule integration
 7. **Health APIs** - Basic health data integration
 
@@ -589,7 +589,7 @@ const learning_stages = {
 #### Technology Implementation (25% weight)
 - ✅ Real AR object detection using Snap Spectacles native capabilities
 - ✅ Working Gemini API integration for multimodal AI understanding
-- ✅ Seamless voice synthesis and conversation through ElevenLabs + Vapi
+- ✅ Seamless voice synthesis and conversation through ElevenLabs + advanced conversational AI
 - ✅ Functional adaptive learning through Chroma vector embeddings
 - ✅ Clean CI/CD pipeline with continuous integration
 - **Target Score: 24/25**
@@ -650,7 +650,7 @@ const learning_stages = {
 | **Gemini API** | Multimodal AI processing | High impact usage |
 | **ElevenLabs** | Voice synthesis | Complete integration |
 | **Chroma** | Vector embeddings | Advanced implementation |
-| **Vapi** | Conversational AI | Real-time integration |
+| **ElevenLabs** | Advanced Conversational AI | Full integration |
 | **Google Calendar** | Data integration | Functional usage |
 | **Promise API** | Health/wellness focus | Potential bonus track |
 
@@ -750,7 +750,7 @@ class IPFSService {
 **Dev 2 (AI & Voice):**
 - Gemini API integration and authentication
 - ElevenLabs voice synthesis setup
-- Basic voice input processing with Vapi
+- Basic voice input processing and conversational logic
 - Simple conversational response logic
 
 **Dev 3 (Backend):**
@@ -782,7 +782,7 @@ class IPFSService {
 
 **Dev 2 (AI & Voice):**
 - Multimodal processing (visual + text context)
-- Context-aware conversation management
+- Context-aware conversation management with ElevenLabs
 - Object-specific AI response generation
 - Voice command parsing and intent recognition
 
@@ -817,7 +817,7 @@ class IPFSService {
 - Chroma integration for contextual memory
 - Learning simulation system ("Day 1 vs Day 30")
 - Personalized suggestion algorithms
-- Advanced conversation context management
+- Advanced conversation context management with ElevenLabs
 
 **Dev 3 (Backend):**
 - User preference learning and storage
@@ -1300,9 +1300,9 @@ chroma:
   integration_level: "Vector embeddings for personalization"
   backup_plan: "Simulated learning with static data"
 
-vapi:
-  status: "Voice conversation"
-  integration_level: "Real-time voice processing"
+elevenlabs_conversational:
+  status: "Advanced Conversational AI"
+  integration_level: "Full conversational AI integration"
   backup_plan: "Basic voice commands only"
 
 google_calendar:
