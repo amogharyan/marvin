@@ -2,12 +2,9 @@
 // Task 1.10: Create Edge Function for processing Gemini API requests with visual context
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createSupabaseClient, getAuthenticatedUser, corsHeaders as sharedCors } from "../../lib/supabaseClient.ts"
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+const corsHeaders = { ...sharedCors }
 
 interface ObjectInteractionRequest {
   user_id: string
@@ -33,10 +30,25 @@ serve(async (req) => {
   }
 
   try {
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    // Initialize Supabase clients
+    const supabase = createSupabaseClient() // anon for reads (RLS enforced)
+    const supabaseAdmin = createSupabaseClient({ serviceRole: true }) // admin only when needed
+  // Authenticate user
+  const authed = await getAuthenticatedUser(req)
+  const effectiveUserId = authed.id
+  // Enforce user_id match if provided in query/body
+  const url = new URL(req.url)
+  let body: any = undefined
+  if (req.method !== 'GET' && req.method !== 'OPTIONS') {
+    try {
+      body = await req.json()
+    } catch {}
+  }
+  const providedUserId = url.searchParams.get('user_id') ?? body?.user_id
+  if (providedUserId && providedUserId !== effectiveUserId) {
+    return new Response('Forbidden', { status: 403, headers: corsHeaders })
+  }
+  // Use effectiveUserId for all reads/writes
 
     // Parse request body
     const body: ObjectInteractionRequest = await req.json()
@@ -93,13 +105,21 @@ serve(async (req) => {
 
     // Update object location if spatial data is provided
     if (spatial_data) {
-      await supabase.rpc('update_object_location', {
+      const { data: locationData, error: locationError } = await supabase.rpc('update_object_location', {
         p_user_id: user_id,
         p_object_type: object_type,
         p_object_identifier: `${object_type}_main`,
         p_location: spatial_data,
         p_confidence_score: confidence_score
       })
+      if (locationError) {
+        // Log error (replace with your logger if available)
+        console.error('Failed to update object location:', locationError)
+        return new Response(
+          JSON.stringify({ error: 'Failed to update object location', details: locationError.message }),
+          { status: 500, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
     }
 
     // Trigger real-time notification
