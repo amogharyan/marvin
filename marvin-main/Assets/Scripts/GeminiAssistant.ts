@@ -303,7 +303,7 @@ export class GeminiAssistant extends BaseScriptComponent {
     ];
 
     // Send the session setup message
-    let modelUri = `models/gemini-2.0-flash-live-preview-04-09`;
+    let modelUri = `models/gemini-2.5-flash-native-audio-preview-09-2025`;
     const sessionSetupMessage = {
       setup: {
         model: modelUri,
