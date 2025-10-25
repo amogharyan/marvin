@@ -1,4 +1,4 @@
-import { DetectedComponent, ComponentType } from "./BreadboardAssistant";
+import { DetectedComponent, ComponentType } from "./MarvinAssistant";
 import Event from "SpectaclesInteractionKit.lspkg/Utils/Event";
 
 // Component detection modes
@@ -50,7 +50,7 @@ interface DetectionSettings {
 @component
 export class ComponentDetector extends BaseScriptComponent {
   @ui.separator
-  @ui.label("Advanced Component Detection and Identification")
+  @ui.label("Marvin - Advanced Object Detection and Identification")
   @ui.separator
   @ui.group_start("Detection Settings")
   @input

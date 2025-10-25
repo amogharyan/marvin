@@ -1,6 +1,6 @@
 import { PinchButton } from "SpectaclesInteractionKit.lspkg/Components/UI/PinchButton/PinchButton";
-import { BreadboardAssistant } from "./BreadboardAssistant";
-import { BreadboardAROverlay } from "./BreadboardAROverlay";
+import { MarvinAssistant } from "./MarvinAssistant";
+import { AROverlay } from "./AROverlay";
 import { SphereController } from "./SphereController";
 import { LSTween } from "LSTween.lspkg/LSTween";
 import Easing from "LSTween.lspkg/TweenJS/Easing";
@@ -14,19 +14,29 @@ enum UIState {
   Initial = "initial",
   Analyzing = "analyzing",
   ShowingGuidance = "showing_guidance",
-  CircuitComplete = "circuit_complete"
+  RecognitionComplete = "recognition_complete"
 }
 
 @component
-export class BreadboardUIBridge extends BaseScriptComponent {
+export class MarvinUIBridge extends BaseScriptComponent {
   @ui.separator
-  @ui.label("Breadboard Circuit Assistant - Main UI Controller")
+  @ui.label("Marvin Object Recognition - Main UI Controller")
   @ui.separator
   @ui.group_start("Core Components")
   @input
-  private breadboardAssistant: BreadboardAssistant;
+  private marvinAssistant: MarvinAssistant;
+
+  // Backward compatibility alias for scene configuration
   @input
-  private arOverlay: BreadboardAROverlay;
+  private breadboardAssistant: MarvinAssistant;
+
+  @input
+  private arOverlay: AROverlay;
+
+  // Backward compatibility alias for scene configuration
+  @input
+  private breadboardAROverlay: AROverlay;
+
   @input
   private sphereController: SphereController;
   @ui.group_end
@@ -42,11 +52,11 @@ export class BreadboardUIBridge extends BaseScriptComponent {
   private statusText: Text;
   @ui.group_end
   @ui.separator
-  @ui.group_start("Analysis Settings")
+  @ui.group_start("Recognition Settings")
   @input
-  private showComponentLabels: boolean = true;
+  private showObjectLabels: boolean = true;
   @input
-  private showConnectionLines: boolean = true;
+  private showRelationshipLines: boolean = true;
   @ui.group_end
 
   // State management
@@ -73,6 +83,14 @@ export class BreadboardUIBridge extends BaseScriptComponent {
   }
 
   private onStart() {
+    // Handle backward compatibility - use old property names if new ones aren't set
+    if (!this.marvinAssistant && this.breadboardAssistant) {
+      this.marvinAssistant = this.breadboardAssistant;
+    }
+    if (!this.arOverlay && this.breadboardAROverlay) {
+      this.arOverlay = this.breadboardAROverlay;
+    }
+
     this.initializeUI();
     this.connectEvents();
     this.updateUIState(UIState.Initial);
@@ -90,7 +108,7 @@ export class BreadboardUIBridge extends BaseScriptComponent {
 
     // Initialize text content
     this.hintTitle.text = "Go!";
-    this.hintText.text = "Press button to start/stop analysis";
+    this.hintText.text = "Press button to start/stop object recognition";
     this.statusText.text = "Ready for Relay";
 
     // Update button text
@@ -98,16 +116,16 @@ export class BreadboardUIBridge extends BaseScriptComponent {
   }
 
   private connectEvents() {
-    // Connect to breadboard assistant events
-    this.breadboardAssistant.componentDetectedEvent.add((component) => {
+    // Connect to marvin assistant events
+    this.marvinAssistant.componentDetectedEvent.add((component) => {
       this.onComponentDetected(component);
     });
 
-    this.breadboardAssistant.circuitCompleteEvent.add((topology) => {
+    this.marvinAssistant.circuitCompleteEvent.add((topology) => {
       this.onCircuitComplete(topology);
     });
 
-    this.breadboardAssistant.updateTextEvent.add((data) => {
+    this.marvinAssistant.updateTextEvent.add((data) => {
       this.updateStatusText(data.text);
     });
 
@@ -142,11 +160,11 @@ export class BreadboardUIBridge extends BaseScriptComponent {
     this.isAnalysisActive = true;
     this.updateUIState(UIState.Analyzing);
 
-    // Start the breadboard assistant for circuit analysis
-    this.breadboardAssistant.createGeminiLiveSession();
-    this.breadboardAssistant.startAnalysis();
+    // Start the assistant for object recognition
+    this.marvinAssistant.createGeminiLiveSession();
+    this.marvinAssistant.startAnalysis();
 
-    // Update UI for Relay analysis mode
+    // Update UI for Marvin analysis mode
     this.updateStatusText("Ask me a question!");
     
     // Hide hint text and title after first button press
@@ -163,7 +181,7 @@ export class BreadboardUIBridge extends BaseScriptComponent {
 
   private stopAnalysis() {
     this.isAnalysisActive = false;
-    this.breadboardAssistant.stopAnalysis();
+    this.marvinAssistant.stopAnalysis();
     this.updateUIState(UIState.Initial);
     this.updateStatusText("Analysis stopped");
     
@@ -198,7 +216,7 @@ export class BreadboardUIBridge extends BaseScriptComponent {
     this.hintText.sceneObject.enabled = true;
     this.hintTitle.sceneObject.enabled = true;
     this.hintText.text = "Press button to start/stop analysis";
-    this.updateStatusText("Ready for Relay");
+    this.updateStatusText("Ready for Marvin");
     
     // Reset the flag so hint can be hidden again on next start
     this.hasPressedButtonOnce = false;
@@ -208,31 +226,16 @@ export class BreadboardUIBridge extends BaseScriptComponent {
 
   private onComponentDetected(component: any) {
     this.detectedComponentsCount++;
-    
-    // Update status based on component type
-    if (component.type === "breadboard") {
-      this.updateStatusText(`Found breadboard at (${component.position.x}, ${component.position.y})`);
-    } else if (component.type === "op_amp") {
-      this.updateStatusText(`Found op amp at (${component.position.x}, ${component.position.y})`);
-    } else {
-      this.updateStatusText(`Detected ${component.type}${component.value ? ' (' + component.value + ')' : ''} - Total: ${this.detectedComponentsCount}`);
-    }
 
-    // Show component label if enabled
-    if (this.showComponentLabels) {
+    // Update status based on component type - generalized for any object
+    this.updateStatusText(`Detected ${component.type}${component.value ? ' (' + component.value + ')' : ''} - Total: ${this.detectedComponentsCount}`);
+
+    // Show object label if enabled
+    if (this.showObjectLabels) {
       this.arOverlay.showComponentLabel(component);
     }
 
-    // Check if we have breadboard and op amp (initial detection complete)
-    const breadboard = this.breadboardAssistant.getDetectedComponents().find(c => c.type === "breadboard");
-    const opAmp = this.breadboardAssistant.getDetectedComponents().find(c => c.type === "op_amp");
-    
-    if (breadboard && opAmp) {
-      this.updateStatusText("Found breadboard and op amp. Ready for start instructions.");
-      this.hintText.text = "Initial detection complete. Waiting for start instructions to begin circuit analysis.";
-    }
-
-    // Check if we have enough components for circuit analysis
+    // Check if we have enough objects for analysis
     if (this.detectedComponentsCount >= 3) {
       this.performCircuitTopologyAnalysis();
     }
@@ -240,16 +243,16 @@ export class BreadboardUIBridge extends BaseScriptComponent {
 
   private onCircuitComplete(topology: any) {
     this.circuitTopologyComplete = true;
-    this.updateUIState(UIState.CircuitComplete);
-    
-    // Show circuit topology visualization
-    if (this.showConnectionLines) {
+    this.updateUIState(UIState.RecognitionComplete);
+
+    // Show relationship visualization
+    if (this.showRelationshipLines) {
       this.arOverlay.showCircuitTopology(topology);
     }
 
     // Update status
-    this.updateStatusText("Circuit topology complete! Non-inverting op amp detected.");
-    this.hintText.text = "Circuit analysis complete. All components and connections identified.";
+    this.updateStatusText("Object recognition complete!");
+    this.hintText.text = "Analysis complete. All objects and relationships identified.";
 
     // Trigger completion event
     this.analysisCompletedEvent.invoke({
@@ -269,9 +272,9 @@ export class BreadboardUIBridge extends BaseScriptComponent {
   private onSphereActivated(isActivated: boolean) {
     if (this.isAnalysisActive) {
       if (isActivated) {
-        this.breadboardAssistant.startAnalysis();
+        this.marvinAssistant.startAnalysis();
       } else {
-        this.breadboardAssistant.stopAnalysis();
+        this.marvinAssistant.stopAnalysis();
       }
     }
   }

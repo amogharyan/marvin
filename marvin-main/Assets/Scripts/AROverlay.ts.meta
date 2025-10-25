@@ -27,6 +27,7 @@
   PackagePolicy: CanBeUnpacked
   ScriptInputsHidden:
     breadboardAssistant: false
+    breadboardDepthMapper: false
     cameraObject: false
     connectionLineWidth: false
     connectionMaterial: false
@@ -40,6 +41,7 @@
     highlightSize: false
     labelMaterial: false
     labelOffset: false
+    marvinAssistant: false
     outlineMaterial: false
     outlineThickness: false
   ScriptTypesHidden:
@@ -51,8 +53,10 @@
   Attachments:
     []
   DefaultScriptInputs:
-    - breadboardAssistant: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
-      depthMapper: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+    - marvinAssistant: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
+      breadboardAssistant: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+      depthMapper: !<MappingBased.AssignableType_2> 00000000-0000-0000-0000-000000000000
+      breadboardDepthMapper: !<MappingBased.AssignableType_3> 00000000-0000-0000-0000-000000000000
       cameraObject: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
       highlightSize: 0.020000
       highlightPulseSpeed: !<float> 1.000000
@@ -72,7 +76,7 @@
       {}
   InputLines:
     - '// @ui {"widget":"separator"}'
-    - '// @ui {"widget":"label", "label":"AR Overlay System for Breadboard Circuit Guidance"}'
+    - '// @ui {"widget":"label", "label":"AR Overlay System for Object Recognition Guidance"}'
     - '// @ui {"widget":"label", "label":"🔧 Setup Guide:"}'
     - '// @ui {"widget":"label", "label":"1. Create a sphere mesh asset in Lens Studio"}'
     - "// @ui {\"widget\":\"label\", \"label\":\"2. Assign it to 'Highlight Mesh' field\"}"
@@ -80,8 +84,10 @@
     - '// @ui {"widget":"label", "label":"4. Choose highlighting method: Inverted Hull (recommended)"}'
     - '// @ui {"widget":"separator"}'
     - '// @ui {"widget":"group_start", "label":"Setup"}'
-    - // @input AssignableType breadboardAssistant
-    - // @input AssignableType_1 depthMapper
+    - // @input AssignableType marvinAssistant
+    - // @input AssignableType_1 breadboardAssistant
+    - // @input AssignableType_2 depthMapper
+    - // @input AssignableType_3 breadboardDepthMapper
     - // @input SceneObject cameraObject
     - '// @ui {"widget":"group_end"}'
     - '// @ui {"widget":"separator"}'

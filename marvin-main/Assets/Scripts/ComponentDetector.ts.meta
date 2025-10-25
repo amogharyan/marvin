@@ -60,7 +60,7 @@
       {}
   InputLines:
     - '// @ui {"widget":"separator"}'
-    - '// @ui {"widget":"label", "label":"Advanced Component Detection and Identification"}'
+    - '// @ui {"widget":"label", "label":"Marvin - Advanced Object Detection and Identification"}'
     - '// @ui {"widget":"separator"}'
     - '// @ui {"widget":"group_start", "label":"Detection Settings"}'
     - // @input string detectionMode

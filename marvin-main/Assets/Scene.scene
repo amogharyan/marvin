@@ -1064,7 +1064,7 @@
 - !<ScriptComponent/2c6ec376-7e3b-47c9-a4b3-9a4794b53592>
   PrefabRemaps:
     []
-  Name: BreadboardAROverlay
+  Name: AROverlay
   Enabled: true
   ScriptAsset: !<reference> ba3dcbd0-8157-4431-ae0d-27ba0dc2e26f
   ScriptInputsDefault:
@@ -1079,8 +1079,10 @@
     {}
   ScriptInputs:
     "":
-      breadboardAssistant: !<MappingBased.AssignableType> cfc7e98d-a72e-4dfb-b300-c86cc00bf654
-      depthMapper: !<MappingBased.AssignableType_1> 927919ee-aed7-4ec0-9dd9-55f5eb2d382c
+      marvinAssistant: !<MappingBased.AssignableType> cfc7e98d-a72e-4dfb-b300-c86cc00bf654
+      breadboardAssistant: !<MappingBased.AssignableType_1> cfc7e98d-a72e-4dfb-b300-c86cc00bf654
+      depthMapper: !<MappingBased.AssignableType_2> 927919ee-aed7-4ec0-9dd9-55f5eb2d382c
+      breadboardDepthMapper: !<MappingBased.AssignableType_3> 927919ee-aed7-4ec0-9dd9-55f5eb2d382c
       cameraObject: !<reference.SceneObject> 00000000-0000-0065-0000-000000000064
       highlightSize: 0.020000
       highlightPulseSpeed: !<float> 1.000000
@@ -4011,25 +4013,27 @@
 - !<ScriptComponent/8e75ebc7-17c2-46da-a4d0-27f2d207b8f8>
   PrefabRemaps:
     []
-  Name: BreadboardUIBridge
+  Name: MarvinUIBridge
   Enabled: true
   ScriptAsset: !<reference> 5afb453b-3d19-4d20-84b0-b350642bf6d0
   ScriptInputsDefault:
-    showComponentLabels: true
-    showConnectionLines: true
+    showObjectLabels: true
+    showRelationshipLines: true
   ScriptTypesDefault:
     {}
   ScriptInputs:
     "":
-      breadboardAssistant: !<MappingBased.AssignableType> cfc7e98d-a72e-4dfb-b300-c86cc00bf654
-      arOverlay: !<MappingBased.AssignableType_1> 2c6ec376-7e3b-47c9-a4b3-9a4794b53592
-      sphereController: !<MappingBased.AssignableType_2> 65c0f761-d132-4011-9db4-7793c56dfea0
-      startStopButton: !<MappingBased.AssignableType_3> f473ba0f-0bcc-44d4-964a-19bb6cccd34a
+      marvinAssistant: !<MappingBased.AssignableType> cfc7e98d-a72e-4dfb-b300-c86cc00bf654
+      breadboardAssistant: !<MappingBased.AssignableType_1> cfc7e98d-a72e-4dfb-b300-c86cc00bf654
+      arOverlay: !<MappingBased.AssignableType_2> 2c6ec376-7e3b-47c9-a4b3-9a4794b53592
+      breadboardAROverlay: !<MappingBased.AssignableType_3> 2c6ec376-7e3b-47c9-a4b3-9a4794b53592
+      sphereController: !<MappingBased.AssignableType_4> 65c0f761-d132-4011-9db4-7793c56dfea0
+      startStopButton: !<MappingBased.AssignableType_5> f473ba0f-0bcc-44d4-964a-19bb6cccd34a
       hintTitle: !<reference.Text> 679aa029-99e5-46ab-9d75-2f06437050fc
       hintText: !<reference.Text> ba710944-8232-4a06-b997-0837303f3da1
       statusText: !<reference.Text> 7591d592-0166-495f-a2c0-0baa10bca25b
-      showComponentLabels: true
-      showConnectionLines: true
+      showObjectLabels: true
+      showRelationshipLines: true
   ScriptTypes:
     "":
       {}
@@ -4057,7 +4061,7 @@
 - !<ScriptComponent/927919ee-aed7-4ec0-9dd9-55f5eb2d382c>
   PrefabRemaps:
     []
-  Name: BreadboardDepthMapper
+  Name: DepthMapper
   Enabled: true
   ScriptAsset: !<reference> 96d2c772-fd58-4ab3-a274-2ca12515e71a
   ScriptInputsDefault:
@@ -4628,7 +4632,7 @@
 - !<SceneObject/ad99ea71-2b03-479d-85f4-d77a6b399445>
   PrefabRemaps:
     []
-  Name: BreadboardUI
+  Name: MarvinUIBridge
   Enabled: true
   Layers: 1
   LocalTransform: !<TransformEntity>
@@ -5786,7 +5790,7 @@
 - !<ScriptComponent/cfc7e98d-a72e-4dfb-b300-c86cc00bf654>
   PrefabRemaps:
     []
-  Name: BreadboardAssistant
+  Name: MarvinAssistant
   Enabled: true
   ScriptAsset: !<reference> 90463a70-a2a4-4517-b5a8-a17f1120a88a
   ScriptInputsDefault:

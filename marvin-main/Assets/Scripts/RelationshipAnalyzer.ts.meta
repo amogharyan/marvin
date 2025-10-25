@@ -54,7 +54,7 @@
       {}
   InputLines:
     - '// @ui {"widget":"separator"}'
-    - '// @ui {"widget":"label", "label":"Circuit Topology Analysis Engine"}'
+    - '// @ui {"widget":"label", "label":"Object Relationship Analysis Engine"}'
     - '// @ui {"widget":"separator"}'
     - '// @ui {"widget":"group_start", "label":"Analysis Settings"}'
     - // @input bool enableRealTimeAnalysis = true

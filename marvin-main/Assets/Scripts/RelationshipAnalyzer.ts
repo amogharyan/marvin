@@ -1,4 +1,4 @@
-import { DetectedComponent, ComponentType, BreadboardHole } from "./BreadboardAssistant";
+import { DetectedComponent, ComponentType, BreadboardHole } from "./MarvinAssistant";
 import Event from "SpectaclesInteractionKit.lspkg/Utils/Event";
 
 // Circuit topology types
@@ -59,9 +59,9 @@ interface NonInvertingOpAmpAnalysis {
 }
 
 @component
-export class CircuitTopologyAnalyzer extends BaseScriptComponent {
+export class RelationshipAnalyzer extends BaseScriptComponent {
   @ui.separator
-  @ui.label("Circuit Topology Analysis Engine")
+  @ui.label("Object Relationship Analysis Engine")
   @ui.separator
   @ui.group_start("Analysis Settings")
   @input

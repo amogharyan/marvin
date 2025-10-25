@@ -46,10 +46,10 @@ export interface BreadboardHole {
 }
 
 @component
-export class BreadboardAssistant extends BaseScriptComponent {
+export class MarvinAssistant extends BaseScriptComponent {
   @ui.separator
   @ui.label(
-    "Breadboard Assistant - Ask: 'What is the resistor value?' or 'Where does the resistor go in the circuit?'"
+    "Marvin Object Recognition Assistant - Ask about objects in the scene and their relationships"
   )
   @ui.separator
   @ui.separator
@@ -64,7 +64,7 @@ export class BreadboardAssistant extends BaseScriptComponent {
   @input
   @widget(new TextAreaWidget())
   private instructions: string =
-    "You are a breadboard assistant. You help with two specific questions: 1) 'What is the resistor value?' - identify resistor values by reading color bands, and 2) 'Where does the resistor go in the circuit?' - show where resistors should be placed in non-inverting op amp circuits. When asked about placement, use the showResistorPlacement tool to highlight the correct location with a green marker.";
+    "You are Marvin, an advanced object recognition assistant. You can identify objects in the scene, analyze their properties, and understand their spatial relationships. Answer questions about what you see, provide detailed descriptions of objects, and help users understand the composition and layout of the scene.";
   @input private haveVideoInput: boolean = true;
   @ui.group_end
   @ui.separator
@@ -374,12 +374,12 @@ export class BreadboardAssistant extends BaseScriptComponent {
 
   public startAnalysis(): void {
     this.streamData(true);
-    print("Started breadboard analysis");
+    print("Started object recognition analysis");
   }
 
   public stopAnalysis(): void {
     this.streamData(false);
-    print("Stopped breadboard analysis");
+    print("Stopped object recognition analysis");
   }
 
   public getDetectedComponents(): any[] {

@@ -27,11 +27,13 @@
   PackagePolicy: CanBeUnpacked
   ScriptInputsHidden:
     arOverlay: false
+    breadboardAROverlay: false
     breadboardAssistant: false
     hintText: false
     hintTitle: false
-    showComponentLabels: false
-    showConnectionLines: false
+    marvinAssistant: false
+    showObjectLabels: false
+    showRelationshipLines: false
     sphereController: false
     startStopButton: false
     statusText: false
@@ -44,36 +46,40 @@
   Attachments:
     []
   DefaultScriptInputs:
-    - breadboardAssistant: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
-      arOverlay: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
-      sphereController: !<MappingBased.AssignableType_2> 00000000-0000-0000-0000-000000000000
-      startStopButton: !<MappingBased.AssignableType_3> 00000000-0000-0000-0000-000000000000
+    - marvinAssistant: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
+      breadboardAssistant: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+      arOverlay: !<MappingBased.AssignableType_2> 00000000-0000-0000-0000-000000000000
+      breadboardAROverlay: !<MappingBased.AssignableType_3> 00000000-0000-0000-0000-000000000000
+      sphereController: !<MappingBased.AssignableType_4> 00000000-0000-0000-0000-000000000000
+      startStopButton: !<MappingBased.AssignableType_5> 00000000-0000-0000-0000-000000000000
       hintTitle: !<reference.Text> 00000000-0000-0000-0000-000000000000
       hintText: !<reference.Text> 00000000-0000-0000-0000-000000000000
       statusText: !<reference.Text> 00000000-0000-0000-0000-000000000000
-      showComponentLabels: true
-      showConnectionLines: true
+      showObjectLabels: true
+      showRelationshipLines: true
   ScriptTypes:
     -
       {}
   InputLines:
     - '// @ui {"widget":"separator"}'
-    - '// @ui {"widget":"label", "label":"Breadboard Circuit Assistant - Main UI Controller"}'
+    - '// @ui {"widget":"label", "label":"Marvin Object Recognition - Main UI Controller"}'
     - '// @ui {"widget":"separator"}'
     - '// @ui {"widget":"group_start", "label":"Core Components"}'
-    - // @input AssignableType breadboardAssistant
-    - // @input AssignableType_1 arOverlay
-    - // @input AssignableType_2 sphereController
+    - // @input AssignableType marvinAssistant
+    - // @input AssignableType_1 breadboardAssistant
+    - // @input AssignableType_2 arOverlay
+    - // @input AssignableType_3 breadboardAROverlay
+    - // @input AssignableType_4 sphereController
     - '// @ui {"widget":"group_end"}'
     - '// @ui {"widget":"separator"}'
     - '// @ui {"widget":"group_start", "label":"UI Elements"}'
-    - // @input AssignableType_3 startStopButton
+    - // @input AssignableType_5 startStopButton
     - // @input Component.Text hintTitle
     - // @input Component.Text hintText
     - // @input Component.Text statusText
     - '// @ui {"widget":"group_end"}'
     - '// @ui {"widget":"separator"}'
-    - '// @ui {"widget":"group_start", "label":"Analysis Settings"}'
-    - // @input bool showComponentLabels = true
-    - // @input bool showConnectionLines = true
+    - '// @ui {"widget":"group_start", "label":"Recognition Settings"}'
+    - // @input bool showObjectLabels = true
+    - // @input bool showRelationshipLines = true
     - '// @ui {"widget":"group_end"}'

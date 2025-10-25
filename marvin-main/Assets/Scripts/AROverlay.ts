@@ -1,5 +1,5 @@
-import { BreadboardAssistant, DetectedComponent, BreadboardHole } from "./BreadboardAssistant";
-import { BreadboardDepthMapper } from "./BreadboardDepthMapper";
+import { MarvinAssistant, DetectedComponent, BreadboardHole } from "./MarvinAssistant";
+import { DepthMapper } from "./DepthMapper";
 import Event from "SpectaclesInteractionKit.lspkg/Utils/Event";
 import { LSTween } from "LSTween.lspkg/LSTween";
 import Easing from "LSTween.lspkg/TweenJS/Easing";
@@ -37,9 +37,9 @@ interface AROverlayElement {
 }
 
 @component
-export class BreadboardAROverlay extends BaseScriptComponent {
+export class AROverlay extends BaseScriptComponent {
   @ui.separator
-  @ui.label("AR Overlay System for Breadboard Circuit Guidance")
+  @ui.label("AR Overlay System for Object Recognition Guidance")
   @ui.label("🔧 Setup Guide:")
   @ui.label("1. Create a sphere mesh asset in Lens Studio")
   @ui.label("2. Assign it to 'Highlight Mesh' field")
@@ -48,9 +48,19 @@ export class BreadboardAROverlay extends BaseScriptComponent {
   @ui.separator
   @ui.group_start("Setup")
   @input
-  private breadboardAssistant: BreadboardAssistant;
+  private marvinAssistant: MarvinAssistant;
+
+  // Backward compatibility alias for scene configuration
   @input
-  private depthMapper?: BreadboardDepthMapper;
+  private breadboardAssistant: MarvinAssistant;
+
+  @input
+  private depthMapper?: DepthMapper;
+
+  // Backward compatibility alias for scene configuration
+  @input
+  private breadboardDepthMapper?: DepthMapper;
+
   @input
   private cameraObject: SceneObject;
   @ui.group_end
@@ -116,16 +126,24 @@ export class BreadboardAROverlay extends BaseScriptComponent {
   }
 
   private onStart() {
-    // Connect to breadboard assistant events
-    this.breadboardAssistant.placementGuidanceEvent.add((data) => {
+    // Handle backward compatibility - use old property names if new ones aren't set
+    if (!this.marvinAssistant && this.breadboardAssistant) {
+      this.marvinAssistant = this.breadboardAssistant;
+    }
+    if (!this.depthMapper && this.breadboardDepthMapper) {
+      this.depthMapper = this.breadboardDepthMapper;
+    }
+
+    // Connect to marvin assistant events
+    this.marvinAssistant.placementGuidanceEvent.add((data) => {
       this.showPlacementGuidance(data.component, data.targetHole);
     });
 
-    this.breadboardAssistant.componentDetectedEvent.add((component) => {
+    this.marvinAssistant.componentDetectedEvent.add((component) => {
       this.showComponentLabel(component);
     });
 
-    this.breadboardAssistant.circuitCompleteEvent.add((topology) => {
+    this.marvinAssistant.circuitCompleteEvent.add((topology) => {
       this.showCircuitTopology(topology);
     });
   }
@@ -138,7 +156,7 @@ export class BreadboardAROverlay extends BaseScriptComponent {
         this.depthMapper.depthAPIIitializedEvent.add((isEnabled) => {
           this.isDepthAPIEnabled = isEnabled;
           if (isEnabled) {
-            print("Depth API initialized successfully via BreadboardDepthMapper");
+            print("Depth API initialized successfully via DepthMapper");
           } else {
             print("Depth API not available, using fallback positioning");
             print("This is normal for non-Spectacles devices or when depth sensing is disabled");

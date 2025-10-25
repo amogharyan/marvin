@@ -1,4 +1,4 @@
-import { BreadboardHole } from "./BreadboardAssistant";
+import { BreadboardHole } from "./MarvinAssistant";
 import Event from "SpectaclesInteractionKit.lspkg/Utils/Event";
 
 // Depth information structure
@@ -26,7 +26,7 @@ interface BreadboardCalibration {
 }
 
 @component
-export class BreadboardDepthMapper extends BaseScriptComponent {
+export class DepthMapper extends BaseScriptComponent {
   @ui.separator
   @ui.label("Depth API Integration for Accurate 3D Positioning")
   @ui.separator
