@@ -94,10 +94,11 @@ export class MarvinAssistant extends BaseScriptComponent {
   private audioProcessor: AudioProcessor = new AudioProcessor();
   private videoController: VideoController = new VideoController(
     1500,
-    CompressionQuality.HighQuality,
+    CompressionQuality.LowQuality,
     EncodingType.Jpg
   );
   private GeminiLive: GeminiLiveWebsocket;
+  private isAISpeaking: boolean = false;
 
   public updateTextEvent: Event<{ text: string; completed: boolean }> =
     new Event<{ text: string; completed: boolean }>();
@@ -155,6 +156,19 @@ export class MarvinAssistant extends BaseScriptComponent {
 
       if (message?.serverContent) {
         message = message as GeminiTypes.Live.ServerContentEvent;
+        
+        // Detect when AI starts speaking - pause user audio/video input temporarily
+        if (message?.serverContent?.modelTurn && !this.isAISpeaking) {
+          this.isAISpeaking = true;
+          print("AI started speaking - temporarily pausing audio/video processing");
+          // Pause microphone to prevent echo/feedback during AI response
+          this.microphoneRecorder.stopRecording();
+          // Pause video to reduce context buildup during AI response
+          if (this.haveVideoInput) {
+            this.videoController.stopRecording();
+          }
+        }
+        
         // Playback the audio response
         if (
           message?.serverContent?.modelTurn?.parts?.[0]?.inlineData?.mimeType?.startsWith(
@@ -168,6 +182,13 @@ export class MarvinAssistant extends BaseScriptComponent {
         }
         if (message.serverContent.interrupted) {
           this.dynamicAudioOutput.interruptAudioOutput();
+          // Resume listening immediately when interrupted
+          this.isAISpeaking = false;
+          print("AI interrupted - resuming listening");
+          this.microphoneRecorder.startRecording();
+          if (this.haveVideoInput) {
+            this.videoController.startRecording();
+          }
         }
         // Show output transcription
         else if (message?.serverContent?.outputTranscription?.text) {
@@ -202,8 +223,15 @@ export class MarvinAssistant extends BaseScriptComponent {
         }
 
         // Determine if the response is complete
-        else if (message?.serverContent?.turnComplete) {
+        if (message?.serverContent?.turnComplete) {
           completedTextDisplay = true;
+          this.isAISpeaking = false;
+          print("Turn complete - resuming listening");
+          // Resume microphone and video recording after AI finishes speaking
+          this.microphoneRecorder.startRecording();
+          if (this.haveVideoInput) {
+            this.videoController.startRecording();
+          }
         }
       }
 
