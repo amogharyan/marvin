@@ -202,15 +202,15 @@ An AR-powered personal assistant that follows you through your morning routine, 
 **FR-048:** System MUST adapt UI brightness based on environmental lighting  
 **FR-049:** System MUST provide accessibility features for various user needs  
 
-### 4.8 Backend Services Architecture (Priority: Critical)
+### 4.8 Supabase Services Architecture (Priority: Critical)
 
-**FR-050:** System MUST expose RESTful API for AR client communication  
+**FR-050:** System MUST provide Supabase client SDK integration for AR client communication  
 **FR-051:** System MUST implement CI/CD pipeline for continuous integration  
-**FR-052:** System MUST support WebSocket connections for real-time updates  
-**FR-053:** System MUST validate all inputs with comprehensive error handling  
-**FR-054:** System MUST implement health check endpoints for monitoring  
-**FR-055:** System MUST rate limit API calls to prevent abuse  
-**FR-056:** System MUST log all operations with correlation IDs for debugging  
+**FR-052:** System MUST support Supabase Realtime subscriptions for real-time updates  
+**FR-053:** System MUST validate all inputs with Row Level Security and Edge Function validation  
+**FR-054:** System MUST implement health check Edge Functions for monitoring  
+**FR-055:** System MUST rate limit API calls through Supabase policies and Edge Functions  
+**FR-056:** System MUST log all operations with correlation IDs using Supabase logging  
 
 ### 4.9 Bluetooth & Device Integration (Priority: Medium)
 
@@ -315,7 +315,46 @@ graph LR
 
 ---
 
-## 7. Technical Considerations
+#### System Architecture
+```
+┌──────────────────────────────────────────────┐
+│              Snap Spectacles                 │
+│         Lens Studio + TypeScript              │
+│                  Dev 1                       │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐   │
+│  │ Object   │ │    AR    │ │ Gesture  │   │
+│  │Detection │ │ Overlays │ │ Handler  │   │
+│  └──────────┘ └──────────┘ └──────────┘   │
+└──────────────────────────────────────────────┘
+											│
+											▼
+┌──────────────────────────────────────────────┐
+│         AI & Voice Processing                │
+│     Gemini + ElevenLabs + Vapi               │
+│                  Dev 2                       │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐   │
+│  │  Visual  │ │  Voice   │ │ Context  │   │
+│  │    AI    │ │Synthesis │ │ Memory   │   │
+│  └──────────┘ └──────────┘ └──────────┘   │
+└──────────────────────────────────────────────┘
+											│
+											▼
+┌──────────────────────────────────────────────┐
+│              Supabase Services               │
+│    Database + Edge Functions + Realtime     │
+│                  Dev 3                       │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐   │
+│  │   Edge   │ │  Realtime│ │PostgreSQL│   │
+│  │Functions │ │  Subscr. │ │ Database │   │
+│  │          │ │          │ │          │   │
+│  └──────────┘ └──────────┘ └──────────┘   │
+└──────────────────────────────────────────────┘
+				 │              │              │
+┌──────────────────────────────────────────────┐
+│            CI/CD Pipeline                    │
+│     GitHub Actions + Testing + Deploy       │
+│                  Dev 4                       │
+└──────────────────────────────────────────────┘
 
 ### Team Structure and Responsibilities
 
@@ -323,7 +362,7 @@ graph LR
 |------|-----------|-------------------------|------------------|
 | **AR Core Developer** | Dev 1 | Snap Spectacles integration, object detection, spatial tracking | Lens Studio project, object recognition, AR overlays |
 | **AI & Voice Integration** | Dev 2 | Gemini API, ElevenLabs, Vapi integration, conversational logic | Voice processing, AI responses, multimodal understanding |
-| **Backend & Data Services** | Dev 3 | API services, Chroma integration, calendar/health data | REST endpoints, vector storage, external API integration |
+| **Supabase Integration** | Dev 3 | Database design, Edge Functions, Realtime subscriptions, external API coordination | Schema design, Edge Functions, real-time data sync |
 | **Frontend Dashboard & Integration** | Dev 4 | Web dashboard, system integration, testing, demo orchestration | Admin interface, integration testing, demo scripts, backup systems |
 
 ### Architecture Decisions (Continuous Integration Focus)

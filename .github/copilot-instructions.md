@@ -10,13 +10,13 @@ This file provides comprehensive guidance for developing the Marvin AR-powered m
 
 ```
 ┌──────────────────────┐    ┌──────────────────────┐    ┌──────────────────────┐
-│   Snap Spectacles    │    │   AI Processing      │    │   Backend Services   │
-│   (AR Frontend)      │◄──►│   (Gemini + Voice)   │◄──►│   (Node.js + APIs)   │
+│   Snap Spectacles    │    │   AI Processing      │    │   Supabase Services  │
+│   (AR Frontend)      │◄──►│   (Gemini + Voice)   │◄──►│   (BaaS + Edge Funcs)│
 │                      │    │                      │    │                      │
-│ • Object Detection   │    │ • Gemini API         │    │ • Express API        │
-│ • AR Overlays        │    │ • ElevenLabs Voice   │    │ • Chroma Vector DB   │
-│ • Spatial Tracking   │    │ • Vapi Conversation  │    │ • Calendar/Health    │
-│ • Gesture Recognition│    │ • Context Memory     │    │ • WebSocket/REST     │
+│ • Object Detection   │    │ • Gemini API         │    │ • PostgreSQL DB      │
+│ • AR Overlays        │    │ • ElevenLabs Voice   │    │ • Edge Functions     │
+│ • Spatial Tracking   │    │ • Vapi Conversation  │    │ • Realtime Subscr.   │
+│ • Gesture Recognition│    │ • Context Memory     │    │ • Storage & Auth     │
 └──────────────────────┘    └──────────────────────┘    └──────────────────────┘
 ```
 
@@ -70,21 +70,16 @@ marvin-ar-assistant/
 │       ├── embeddings.service.ts
 │       └── learning.service.ts
 │
-├── backend/                # Dev 3: Backend Services
-│   ├── src/
-│   │   ├── index.ts        # Express server entry
-│   │   ├── app.ts          # Express app configuration
-│   │   ├── config/         # Environment & database config
-│   │   ├── middleware/     # Auth, validation, error handling
-│   │   ├── routes/         # API endpoints
-│   │   │   ├── objects.routes.ts
-│   │   │   ├── ai.routes.ts
-│   │   │   ├── calendar.routes.ts
-│   │   │   └── health.routes.ts
-│   │   ├── services/       # Business logic
-│   │   ├── websocket/      # Real-time communication
-│   │   └── types/          # TypeScript definitions
-│   └── tests/              # Backend tests
+├── supabase/               # Dev 3: Supabase Integration
+│   ├── migrations/         # Database schema migrations
+│   ├── functions/          # Edge Functions (Deno runtime)
+│   │   ├── ai-processing/  # Gemini API integration
+│   │   ├── voice-synthesis/# ElevenLabs integration
+│   │   ├── calendar-sync/  # Google Calendar integration
+│   │   └── object-tracking/# Object interaction processing
+│   ├── seed.sql           # Demo data and mock interactions
+│   ├── config.toml        # Supabase project configuration
+│   └── types/             # Generated TypeScript types
 │
 └── devops/                 # Dev 4: Integration & DevOps
     ├── ci-cd/              # GitHub Actions pipeline
@@ -382,78 +377,70 @@ class ChromaLearningService {
 }
 ```
 
-### 5. Backend API Services
+### 5. Supabase Integration & Edge Functions
 
 ```typescript
-// backend/src/routes/objects.routes.ts
-import { Router } from 'express';
-import { asyncHandler } from '@middleware/asyncHandler';
-import { validate } from '@middleware/validation';
-import { objectInteractionSchema } from './schemas';
+// supabase/functions/ai-processing/index.ts
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const router = Router();
+interface GeminiRequest {
+  objectType: 'medicine' | 'bowl' | 'laptop' | 'keys' | 'phone'
+  imageData?: string
+  userContext: string
+  timestamp: string
+}
 
-// Object interaction endpoint
-router.post('/objects/:objectId/interact', 
-  validate(objectInteractionSchema),
-  asyncHandler(async (req: Request, res: Response) => {
-    const { objectId } = req.params;
-    const { interaction_type, context } = req.body;
-    
-    try {
-      // Process with AI services
-      const aiResponse = await aiService.processInteraction(objectId, context);
-      const voiceResponse = await voiceService.synthesize(aiResponse.text);
-      const learningUpdate = await learningService.updateFromInteraction({
-        objectId,
-        interaction_type,
-        response: aiResponse,
-        timestamp: new Date()
-      });
-      
-      res.json({ 
-        success: true, 
-        data: {
-          ai_response: aiResponse,
-          voice_url: voiceResponse.url,
-          learning_insights: learningUpdate
-        },
-        requestId: req.id 
-      });
-    } catch (error) {
-      res.status(500).json({ 
-        success: false, 
-        error: error.message, 
-        requestId: req.id 
-      });
-    }
-  })
-);
+const supabase = createClient(
+  Deno.env.get('SUPABASE_URL') ?? '',
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+)
 
-// WebSocket for real-time updates
-import { Server } from 'socket.io';
-
-class WebSocketService {
-  private io: Server;
+serve(async (req) => {
+  const { objectType, imageData, userContext } = await req.json()
   
-  initialize(httpServer: any) {
-    this.io = new Server(httpServer, {
-      cors: { origin: "*" } // Demo only - restrict in production
-    });
-    
-    this.io.on('connection', (socket) => {
-      console.log('AR client connected:', socket.id);
-      
-      socket.on('object-detected', async (data) => {
-        const response = await this.processObjectDetection(data);
-        socket.emit('ai-response', response);
-      });
-      
-      socket.on('gesture-performed', async (data) => {
-        const response = await this.processGesture(data);
-        socket.emit('action-result', response);
-      });
-    });
+  // Process with Gemini API
+  const geminiResponse = await processWithGemini(objectType, imageData, userContext)
+  
+  // Store interaction in database
+  await supabase.from('object_interactions').insert({
+    object_type: objectType,
+    user_context: userContext,
+    ai_response: geminiResponse,
+    created_at: new Date().toISOString()
+  })
+  
+  return new Response(JSON.stringify(geminiResponse), {
+    headers: { 'Content-Type': 'application/json' }
+  })
+})
+
+// Supabase Realtime for real-time updates
+import { createClient } from '@supabase/supabase-js'
+
+class SupabaseRealtimeService {
+  private supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!)
+  
+  subscribeToObjectInteractions(userId: string, callback: (payload: any) => void) {
+    return this.supabase
+      .channel('object-interactions')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'object_interactions',
+        filter: `user_id=eq.${userId}`
+      }, callback)
+      .subscribe()
+  }
+  
+  async broadcastGestureEvent(gestureData: any) {
+    await this.supabase
+      .channel('gestures')
+      .send({
+        type: 'broadcast',
+        event: 'gesture-performed',
+        payload: gestureData
+      })
   }
 }
 
@@ -574,8 +561,8 @@ describe('GeminiProcessor', () => {
 npm install
 
 # Core packages for each developer track
-npm install express socket.io @google/genai @elevenlabs/elevenlabs-js chromadb
-npm install --save-dev @types/node @types/express jest typescript nodemon
+npm install @supabase/supabase-js @google/genai @elevenlabs/elevenlabs-js chromadb
+npm install --save-dev @types/node jest typescript nodemon
 
 # AR Development (Dev 1)
 # Lens Studio handles TypeScript compilation internally
@@ -583,11 +570,12 @@ npm install --save-dev @types/node @types/express jest typescript nodemon
 # AI Development (Dev 2) 
 npm install dotenv axios form-data
 
-# Backend Development (Dev 3)
-npm install cors helmet express-rate-limit zod jsonwebtoken
+# Supabase Integration (Dev 3)
+npm install -g supabase
+# Supabase handles backend services - no Express dependencies needed
 
 # DevOps (Dev 4)
-npm install concurrently pm2 winston
+npm install concurrently winston
 ```
 
 ### Essential Scripts (package.json)
@@ -595,18 +583,22 @@ npm install concurrently pm2 winston
 ```json
 {
   "scripts": {
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:ai\"",
-    "dev:backend": "nodemon --exec ts-node backend/src/index.ts",
-    "dev:ai": "nodemon --exec ts-node ai-processing/index.ts",
+    "dev": "concurrently \"supabase start\" \"npm run dev:ai\"",
+    "dev:ai": "nodemon --exec ts-node ai-processing/index.ts", 
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:reset": "supabase db reset",
+    "supabase:migrate": "supabase db migrate",
+    "supabase:functions": "supabase functions serve",
     "build": "tsc --build",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:ar": "jest lens-studio/scripts/__tests__/",
     "test:ai": "jest ai-processing/__tests__/",
-    "test:backend": "jest backend/tests/",
+    "test:supabase": "jest supabase/__tests__/",
     "test:integration": "jest devops/integration/__tests__/",
     "demo:setup": "node devops/demo/setup.js",
-    "demo:reset": "node devops/demo/reset.js",
+    "demo:reset": "supabase db reset && node devops/demo/seed.js",
     "demo:monitor": "node devops/monitoring/health-check.js"
   }
 }
@@ -615,11 +607,37 @@ npm install concurrently pm2 winston
 ## 🔧 Environment Configuration
 
 ```typescript
-// backend/src/config/index.ts
-import dotenv from 'dotenv';
-import { z } from 'zod';
+// supabase/config.toml
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
 
-dotenv.config();
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+[inbucket]
+enabled = true
+port = 54324
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://localhost:3000"]
+
+[functions]
+verify_jwt = false
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
@@ -1067,34 +1085,46 @@ if (!envResult.success) {
 export const config = envResult.data;
 ```
 
-## 🗄️ Database & Redis Integration
+## 🗄️ Supabase Database Integration
 
-### PostgreSQL with node-postgres
+### Supabase Client Setup
 
 ```typescript
-// config/database.ts
-import { Pool } from 'pg';
-import { config } from './index';
+// lib/supabase.ts
+import { createClient } from '@supabase/supabase-js'
 
-export const pool = new Pool({
-  connectionString: config.DATABASE_URL,
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-});
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-// Query helper with logging
-export async function query<T>(text: string, params?: any[]): Promise<T[]> {
-  const start = Date.now();
-  try {
-    const result = await pool.query(text, params);
-    const duration = Date.now() - start;
-    console.log('Query executed', { text, duration, rows: result.rowCount });
-    return result.rows;
-  } catch (error) {
-    console.error('Database query error:', error);
-    throw error;
-  }
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+// Type-safe database operations
+export async function insertObjectInteraction(interaction: {
+  object_type: string
+  confidence_score: number
+  spatial_position: any
+  ai_response: any
+}) {
+  const { data, error } = await supabase
+    .from('object_interactions')
+    .insert(interaction)
+    .select()
+  
+  if (error) throw error
+  return data
+}
+
+// Real-time subscriptions
+export function subscribeToInteractions(userId: string, callback: (payload: any) => void) {
+  return supabase
+    .channel('user-interactions')
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public', 
+      table: 'object_interactions',
+      filter: `user_id=eq.${userId}`
+    }, callback)
+    .subscribe()
 }
 ```
 

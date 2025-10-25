@@ -4,7 +4,7 @@
 
 - **[Dev 1]** = AR Core (Lens Studio + Object Detection)
 - **[Dev 2]** = AI & Voice (Gemini + ElevenLabs + Chroma)
-- **[Dev 3]** = Backend Services (Express + APIs + WebSocket)
+- **[Dev 3]** = Supabase Integration (Database + Edge Functions + Realtime)
 - **[Dev 4]** = Integration & DevOps (Testing + Demo + CI/CD)
 
 ## Git Branch Structure
@@ -19,8 +19,8 @@ main → develop → feature/[ar-core|ai-voice|backend|integration]
 
 - [ ] **0.1** Install Node.js 20 LTS, Lens Studio 5.13+, Git, VS Code with TypeScript/ESLint/Prettier extensions
 - [ ] **0.2** Create GitHub repo "marvin-ar-assistant" with branch protection on main
-- [ ] **0.3** Initialize monorepo structure: lens-studio/, ai-processing/, backend/, devops/ folders
-- [ ] **0.4** Create feature branches: feature/ar-core, feature/ai-voice, feature/backend, feature/integration
+- [ ] **0.3** Initialize monorepo structure: lens-studio/, ai-processing/, supabase/, devops/ folders
+- [ ] **0.4** Create feature branches: feature/ar-core, feature/ai-voice, feature/supabase, feature/integration
 
 ### AR Development Setup [All]
 
@@ -30,17 +30,18 @@ main → develop → feature/[ar-core|ai-voice|backend|integration]
 
 ### Service Accounts [Dev 3]
 
-- [ ] **0.8** Create Google AI Studio account for Gemini API, generate API keys (free tier)
-- [ ] **0.9** Create ElevenLabs account for voice synthesis, generate API keys (free tier)
-- [ ] **0.10** Set up Chroma vector database hosting (local or cloud instance)
-- [ ] **0.11** Create shared .env file with all API keys and share via secure channel
+- [ ] **0.8** Create Supabase account and new project for Marvin AR assistant
+- [ ] **0.9** Create Google AI Studio account for Gemini API, generate API keys (free tier)
+- [ ] **0.10** Create ElevenLabs account for voice synthesis, generate API keys (free tier)
+- [ ] **0.11** Set up Chroma vector database hosting (local or cloud instance)
+- [ ] **0.12** Configure Supabase environment variables and share project URL/keys via secure channel
 
 ### Project Initialization [Split by role]
 
-- [ ] **0.12** [Dev 1] Initialize Lens Studio project with TypeScript object detection templates
-- [ ] **0.13** [Dev 2] Install AI dependencies: @google/genai, @elevenlabs/elevenlabs-js, chromadb, vapi-sdk
-- [ ] **0.14** [Dev 3] Initialize Express backend with TypeScript, install: express, socket.io, axios, dotenv, zod
-- [ ] **0.15** [Dev 4] Initialize testing framework with Jest, set up GitHub Actions CI/CD pipeline
+- [ ] **0.13** [Dev 1] Initialize Lens Studio project with TypeScript object detection templates
+- [ ] **0.14** [Dev 2] Install AI dependencies: @google/genai, @elevenlabs/elevenlabs-js, chromadb, vapi-sdk
+- [ ] **0.15** [Dev 3] Initialize Supabase project with CLI, install: @supabase/supabase-js, supabase CLI
+- [ ] **0.16** [Dev 4] Initialize testing framework with Jest, set up GitHub Actions CI/CD pipeline
 
 ## Phase 1: Foundation (Hours 0-8)
 
@@ -56,10 +57,11 @@ main → develop → feature/[ar-core|ai-voice|backend|integration]
   - Create multimodal service accepting image data and text prompts
   - Test basic image analysis with sample breakfast bowl image
 
-- [ ] **1.3** [Dev 3] **Set up Express server foundation**
-  - Configure middleware stack: helmet, cors, compression, rate-limit (100/min)
-  - Create health check endpoint returning uptime and environment
-  - Set up error handling middleware with custom error classes
+- [ ] **1.3** [Dev 3] **Set up Supabase foundation**
+  - Initialize Supabase project and configure local development environment
+  - Set up database schema for object interactions, user profiles, and learning data
+  - Configure Row Level Security policies for data access
+  - Create health check functions and test database connectivity
 
 - [ ] **1.4** [Dev 4] **Create CI/CD pipeline and testing framework**
   - Set up GitHub Actions workflow for automated testing
@@ -74,10 +76,11 @@ main → develop → feature/[ar-core|ai-voice|backend|integration]
   - Implement spatial anchor system for persistent object positioning
   - Test object recognition accuracy >95% in demo environment
 
-- [ ] **1.6** [Dev 3] **Create object interaction API**
-  - POST /api/objects/detect - process object detection events
-  - Store object interactions with timestamps and confidence scores
-  - Implement object state management and tracking history
+- [ ] **1.6** [Dev 3] **Create object interaction database schema**
+  - Design tables for object_interactions, user_preferences, and learning_data
+  - Implement Row Level Security for user data isolation
+  - Create database functions for interaction logging and pattern analysis
+  - Set up real-time subscriptions for object state changes
 
 - [ ] **1.7** [Dev 1] **Implement gesture detection**
   - Configure HandTracking API for reaching/touching gestures
@@ -96,10 +99,11 @@ main → develop → feature/[ar-core|ai-voice|backend|integration]
   - Create context-aware response generation
   - Build intelligent suggestion system based on time and patterns
 
-- [ ] **1.10** [Dev 3] **Create AI coordination API**
-  - POST /api/ai/process - coordinate visual and contextual analysis
-  - Implement request queuing with priority based on object type
-  - Create response caching for common scenarios
+- [ ] **1.10** [Dev 3] **Create AI coordination Edge Functions**
+  - Create Edge Function for processing Gemini API requests with visual context
+  - Implement request queuing and priority handling for different object types
+  - Set up response caching in Supabase storage for common scenarios
+  - Configure CORS and authentication for Edge Function access
 
 ### 1.3 Voice Integration Foundation (FR-015 to FR-021)
 
@@ -113,10 +117,11 @@ main → develop → feature/[ar-core|ai-voice|backend|integration]
   - Implement hands-free voice command processing
   - Create audio feedback system for Spectacles speakers
 
-- [ ] **1.13** [Dev 3] **Build voice API endpoints**
-  - POST /api/voice/synthesize - process text-to-speech requests
-  - WebSocket /voice/conversation - real-time voice interaction
-  - Implement audio response caching and fallback systems
+- [ ] **1.13** [Dev 3] **Build voice Edge Functions**
+  - Create Edge Function for ElevenLabs text-to-speech processing
+  - Implement Supabase Realtime for voice conversation state
+  - Set up audio response caching in Supabase Storage
+  - Create fallback system with pre-recorded audio files
 
 ### 1.4 AR User Interface Foundation (FR-043 to FR-049)
 
@@ -130,10 +135,11 @@ main → develop → feature/[ar-core|ai-voice|backend|integration]
   - Implement overlay positioning that doesn't obstruct real-world view
   - Test UI readability in various lighting conditions
 
-- [ ] **1.16** [Dev 4] **Implement AR-Backend communication**
-  - Create WebSocket client in Lens Studio for real-time updates
-  - Implement API request system for object interaction processing
-  - Set up error handling and retry logic for network issues
+- [ ] **1.16** [Dev 4] **Implement AR-Supabase communication**
+  - Create Supabase client in Lens Studio for real-time data access
+  - Implement Realtime subscriptions for object interaction updates
+  - Set up error handling and retry logic for network connectivity
+  - Configure authentication flow for AR client access
 
 **HOUR 8 GIT MERGE:** All developers merge to develop branch
 
@@ -153,11 +159,11 @@ main → develop → feature/[ar-core|ai-voice|backend|integration]
   - Build voice confirmations for critical health actions
   - Create emergency contact integration for missed medications
 
-- [ ] **2.3** [Dev 3] **Create health data API**
-  - POST /api/health/medication - store medication schedules
-  - GET /api/health/reminders - retrieve active reminders
-  - Implement medication tracking with timestamps
-  - Create health data encryption and secure storage
+- [ ] **2.3** [Dev 3] **Create health data schema and Edge Functions**
+  - Design medication_schedules and health_reminders tables
+  - Implement Edge Functions for medication timing and notifications
+  - Set up Row Level Security for sensitive health data
+  - Create real-time subscriptions for medication reminders
 
 ### 2.1 Nutrition & Breakfast Intelligence (FR-023)
 
@@ -173,11 +179,11 @@ main → develop → feature/[ar-core|ai-voice|backend|integration]
   - Implement healthy recipe suggestion system
   - Build dietary preference learning and adaptation
 
-- [ ] **2.6** [Dev 3] **Create nutrition tracking API**
-  - POST /api/nutrition/analyze - process food images
-  - GET /api/nutrition/history - retrieve eating patterns
-  - Store nutritional data with meal timing
-  - Implement daily/weekly nutrition summaries
+- [ ] **2.6** [Dev 3] **Create nutrition tracking schema**
+  - Design food_logs and nutrition_analysis tables
+  - Create Edge Functions for nutrition data processing
+  - Implement daily/weekly nutrition summary functions
+  - Set up real-time updates for nutrition tracking
 
 ### 2.2 Calendar & Productivity Integration (FR-024, FR-036-040)
 
@@ -193,11 +199,11 @@ main → develop → feature/[ar-core|ai-voice|backend|integration]
   - Implement conflict detection and optimization
   - Build daily schedule overview with priorities
 
-- [ ] **2.9** [Dev 3] **Create calendar integration API**
-  - GET /api/calendar/events - retrieve day's schedule
-  - POST /api/calendar/briefing - generate meeting prep
-  - Implement OAuth2 flow for Google Calendar
-  - Create calendar data caching and sync system
+- [ ] **2.9** [Dev 3] **Create calendar integration Edge Functions**
+  - Build Edge Function for Google Calendar API integration
+  - Design calendar_events and meeting_prep tables
+  - Implement calendar data caching and sync in Supabase
+  - Create real-time notifications for schedule updates
 
 ### 2.3 Key Location & Departure System (FR-025)
 
@@ -213,11 +219,11 @@ main → develop → feature/[ar-core|ai-voice|backend|integration]
   - Build weather-based departure suggestions
   - Create commute time estimation and alerts
 
-- [ ] **2.12** [Dev 3] **Create location tracking API**
-  - POST /api/location/update - store object locations
-  - GET /api/location/find - retrieve last known positions
-  - Implement spatial data storage and retrieval
-  - Create departure checklist management system
+- [ ] **2.12** [Dev 3] **Create location tracking schema**
+  - Design object_locations and spatial_memory tables
+  - Create Edge Functions for location updates and queries
+  - Implement departure checklist management with real-time updates
+  - Set up location history and pattern analysis
 
 ### 2.4 Contextual Memory & Learning (FR-029 to FR-035)
 
@@ -227,11 +233,11 @@ main → develop → feature/[ar-core|ai-voice|backend|integration]
   - Implement similarity search for contextual responses
   - Build learning progression simulation (Day 1 vs Day 30)
 
-- [ ] **2.14** [Dev 3] **Create learning coordination API**
-  - POST /api/learning/interaction - store user interactions
-  - GET /api/learning/suggestions - retrieve personalized suggestions
-  - Implement preference tracking and adaptation
-  - Create routine pattern analysis and optimization
+- [ ] **2.14** [Dev 3] **Create learning coordination schema**
+  - Design user_interactions and learning_patterns tables
+  - Create Edge Functions for interaction analysis and personalization
+  - Implement routine pattern analysis with Supabase functions
+  - Set up real-time learning updates and notifications
 
 **HOUR 16 GIT MERGE:** All developers merge to develop branch
 
@@ -244,22 +250,23 @@ main → develop → feature/[ar-core|ai-voice|backend|integration]
   - Implement real-time visual context processing
   - Handle AR-AI communication with <100ms latency
 
-- [ ] **3.2** [Dev 2 & Dev 3] **Connect AI services to backend**
-  - Wire Gemini responses to backend APIs
-  - Implement voice synthesis coordination
-  - Add Chroma learning integration with backend storage
+- [ ] **3.2** [Dev 2 & Dev 3] **Connect AI services to Supabase**
+  - Wire Gemini responses to Supabase Edge Functions
+  - Implement voice synthesis coordination through Supabase Realtime
+  - Add Chroma learning integration with Supabase storage
 
 ### 3.1 Real-time Features (FR-052)
 
-- [ ] **3.3** [Dev 3] **Implement WebSocket server**
-  - Initialize Socket.io with room-based communication
-  - Send real-time notifications for object interactions
-  - Implement conversation state synchronization
+- [ ] **3.3** [Dev 3] **Implement Supabase Realtime subscriptions**
+  - Configure Realtime for object interactions, health reminders, and calendar updates
+  - Set up real-time conversation state synchronization
+  - Implement presence tracking for demo environment
+  - Create real-time data sync across AR and web interfaces
 
-- [ ] **3.4** [Dev 1 & Dev 4] **Add WebSocket client to AR**
-  - Connect Lens Studio to WebSocket server
-  - Update AR overlays based on real-time events
-  - Implement offline mode with cached responses
+- [ ] **3.4** [Dev 1 & Dev 4] **Add Supabase Realtime to AR**
+  - Connect Lens Studio to Supabase Realtime subscriptions
+  - Update AR overlays based on real-time database events
+  - Implement offline mode with cached responses from Supabase Storage
 
 ### 3.2 Phone Integration & Backup (FR-026, FR-058-061)
 
@@ -268,10 +275,10 @@ main → develop → feature/[ar-core|ai-voice|backend|integration]
   - Implement same functionality as AR interface
   - Add Bluetooth connection for device coordination
 
-- [ ] **3.6** [Dev 3] **Create device sync API**
-  - POST /api/devices/sync - synchronize data across devices
-  - Implement device status monitoring
-  - Handle device disconnection gracefully
+- [ ] **3.6** [Dev 3] **Create device sync with Supabase**
+  - Implement user session management with Supabase Auth
+  - Create device synchronization using Supabase Realtime
+  - Handle device disconnection gracefully with offline-first approach
 
 ### 3.3 Demo Environment & Mock Data
 
@@ -310,9 +317,9 @@ main → develop → feature/[ar-core|ai-voice|backend|integration]
   - Manual demo controls for complete system failures
 
 - [ ] **4.4** [Dev 3] **Build monitoring and health checks**
-  - Real-time system health monitoring
-  - API endpoint health checks with alerting
-  - Demo environment status dashboard
+  - Set up Supabase health monitoring and Edge Function status checks
+  - Create demo environment status dashboard using Supabase database
+  - Implement real-time system health notifications
 
 ### 4.2 Critical Path Testing
 
@@ -372,10 +379,10 @@ main → develop → feature/[ar-core|ai-voice|backend|integration]
 
 ### 6.0 Production Deployment
 
-- [ ] **6.1** [Dev 3] **Deploy backend services**
-  - Deploy to Railway/Render with production configuration
-  - Verify WebSocket connectivity in production
-  - Test API performance under demo load
+- [ ] **6.1** [Dev 3] **Deploy Supabase configuration**
+  - Configure production Supabase environment with proper security settings
+  - Deploy Edge Functions to production Supabase instance
+  - Test real-time performance under demo load conditions
 
 - [ ] **6.2** [Dev 4] **Deploy monitoring and backup systems**
   - Deploy phone backup interface to Vercel
