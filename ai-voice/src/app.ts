@@ -1,10 +1,19 @@
 // Dev 2 AI & Voice Integration - Main Application Entry Point
+// Refactored with DRY endpoint factory for cleaner, more maintainable code
 
 import express from 'express';
 import cors from 'cors';
 import { AIVoiceIntegrationService } from './services/aiVoiceIntegrationService';
 import { DemoObject, ConversationContext, VoiceRequest } from './types';
 import { config } from './config';
+import { 
+  createEndpoint, 
+  createGetEndpoint, 
+  createHealthEndpoint, 
+  createDemoEndpoint,
+  createValidatedEndpoint,
+  validateRequestBody
+} from './utils/endpointFactory';
 
 const app = express();
 const aiVoiceService = new AIVoiceIntegrationService();
@@ -15,209 +24,96 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Health check endpoint
-app.get('/health', async (req, res) => {
-  try {
-    const healthStatus = await aiVoiceService.healthCheck();
-    res.json({
-      status: healthStatus.overall ? 'healthy' : 'degraded',
-      services: healthStatus,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      status: 'unhealthy',
-      error: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
-});
+app.get('/health', createHealthEndpoint(
+  () => aiVoiceService.getDetailedHealthStatus(),
+  'Health Check'
+));
 
 // Object detection processing endpoint
-app.post('/api/process-object', async (req, res) => {
-  try {
-    const { detectedObject, userMessage, conversationContext } = req.body;
-    
-    if (!detectedObject) {
-      return res.status(400).json({ error: 'detectedObject is required' });
-    }
-
-    const response = await aiVoiceService.processObjectDetection(
-      detectedObject,
-      userMessage,
-      conversationContext
-    );
-
-    res.json({
-      success: true,
-      data: response,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error: any) {
-    console.error('Object processing error:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
-});
+app.post('/api/process-object', createEndpoint(
+  (req) => aiVoiceService.processObjectDetection(
+    req.body.detectedObject,
+    req.body.userMessage,
+    req.body.conversationContext
+  ),
+  ['detectedObject'],
+  'Object Processing'
+));
 
 // Voice input processing endpoint
-app.post('/api/process-voice', async (req, res) => {
-  try {
-    const { voiceText, conversationContext, objectContext } = req.body;
-    
-    if (!voiceText) {
-      return res.status(400).json({ error: 'voiceText is required' });
-    }
-
-    const response = await aiVoiceService.processVoiceInput(
-      voiceText,
-      conversationContext,
-      objectContext
-    );
-
-    res.json({
-      success: true,
-      data: response,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error: any) {
-    console.error('Voice processing error:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
-});
+app.post('/api/process-voice', createEndpoint(
+  (req) => aiVoiceService.processVoiceInput(
+    req.body.voiceText,
+    req.body.conversationContext?.sessionId || 'default-session',
+    req.body.conversationContext?.userId || 'default-user',
+    req.body.objectContext
+  ),
+  ['voiceText'],
+  'Voice Processing'
+));
 
 // Advanced multimodal processing endpoint (Phase 2)
-app.post('/api/process-multimodal', async (req, res) => {
-  try {
-    const { imageData, voiceText, conversationContext, objectContext, mimeType } = req.body;
-    
-    if (!imageData || !voiceText) {
-      return res.status(400).json({ error: 'imageData and voiceText are required' });
-    }
-
-    const response = await aiVoiceService.processMultimodalInput(
-      imageData,
-      voiceText,
-      conversationContext,
-      objectContext,
-      mimeType
-    );
-
-    res.json({
-      success: true,
-      data: response,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error: any) {
-    console.error('Multimodal processing error:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
-});
+app.post('/api/process-multimodal', createEndpoint(
+  (req) => aiVoiceService.processMultimodalInput(
+    req.body.voiceText,
+    req.body.imageData,
+    req.body.conversationContext?.sessionId || 'default-session',
+    req.body.conversationContext?.userId || 'default-user',
+    req.body.objectContext,
+    req.body.conversationContext?.conversationHistory,
+    req.body.mimeType
+  ),
+  ['imageData', 'voiceText'],
+  'Multimodal Processing'
+));
 
 // Visual context processing endpoint
-app.post('/api/process-visual', async (req, res) => {
-  try {
-    const { imageData, detectedObjects, mimeType } = req.body;
-    
-    if (!imageData || !detectedObjects) {
-      return res.status(400).json({ error: 'imageData and detectedObjects are required' });
-    }
-
-    const response = await aiVoiceService.processVisualContext(
-      imageData,
-      detectedObjects,
-      mimeType
-    );
-
-    res.json({
-      success: true,
-      data: response,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error: any) {
-    console.error('Visual processing error:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
-});
+app.post('/api/process-visual', createEndpoint(
+  (req) => aiVoiceService.processVisualContext(
+    req.body.imageData,
+    req.body.conversationContext?.sessionId || 'default-session',
+    req.body.conversationContext?.userId || 'default-user',
+    req.body.objectContext,
+    req.body.mimeType
+  ),
+  ['imageData'],
+  'Visual Processing'
+));
 
 // Proactive assistance endpoint
-app.post('/api/proactive-assistance', async (req, res) => {
-  try {
-    const { conversationContext, timeOfDay } = req.body;
-    
-    const response = await aiVoiceService.generateProactiveAssistance(
-      conversationContext,
-      timeOfDay || 'morning'
-    );
-
-    res.json({
-      success: true,
-      data: response,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error: any) {
-    console.error('Proactive assistance error:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
-});
+app.post('/api/proactive-assistance', createEndpoint(
+  (req) => aiVoiceService.generateProactiveAssistance(
+    req.body.conversationContext,
+    req.body.timeOfDay || 'morning'
+  ),
+  [],
+  'Proactive Assistance'
+));
 
 // Voice synthesis endpoint (standalone)
-app.post('/api/synthesize-voice', async (req, res) => {
-  try {
-    const { text, voiceId, settings } = req.body;
-    
-    if (!text) {
-      return res.status(400).json({ error: 'text is required' });
-    }
-
+app.post('/api/synthesize-voice', createEndpoint(
+  (req) => {
     const voiceRequest: VoiceRequest = {
-      text,
-      voice_id: voiceId,
-      ...settings
+      text: req.body.text,
+      voice_id: req.body.voiceId,
+      ...req.body.settings
     };
 
     // This would use ElevenLabs service directly
     // For now, return a placeholder response
-    res.json({
-      success: true,
-      data: {
-        audio_url: 'placeholder_audio_url',
-        duration: Math.ceil(text.length / 10),
-        format: 'mp3'
-      },
-      timestamp: new Date().toISOString()
+    return Promise.resolve({
+      audio_url: 'placeholder_audio_url',
+      duration: Math.ceil(req.body.text.length / 10),
+      format: 'mp3'
     });
-  } catch (error: any) {
-    console.error('Voice synthesis error:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
-});
+  },
+  ['text'],
+  'Voice Synthesis'
+));
 
 // Demo endpoints for testing
-app.get('/api/demo/objects', (req, res) => {
-  const demoObjects: DemoObject[] = [
+app.get('/api/demo/objects', createDemoEndpoint(
+  () => [
     {
       id: 'bowl_001',
       name: 'breakfast_bowl',
@@ -242,145 +138,53 @@ app.get('/api/demo/objects', (req, res) => {
       last_interaction: new Date(),
       associated_actions: ['departure_checklist', 'location_tracking']
     }
-  ];
-
-  res.json({
-    success: true,
-    data: demoObjects,
-    timestamp: new Date().toISOString()
-  });
-});
+  ] as DemoObject[],
+  'Demo Objects'
+));
 
 // ==================== PHASE 3 ENDPOINTS ====================
 
 // Advanced conversational AI endpoint
-app.post('/api/conversational-ai', async (req, res) => {
-  try {
-    const { voiceText, sessionId, userId, objectContext, conversationHistory } = req.body;
-    
-    if (!voiceText || !sessionId || !userId) {
-      return res.status(400).json({ error: 'voiceText, sessionId, and userId are required' });
-    }
-
-    const response = await aiVoiceService.processAdvancedConversationalRequest(
-      voiceText,
-      sessionId,
-      userId,
-      objectContext,
-      conversationHistory
-    );
-
-    res.json({
-      success: true,
-      data: response,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error: any) {
-    console.error('Conversational AI error:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
-});
+app.post('/api/conversational-ai', createEndpoint(
+  (req) => aiVoiceService.processAdvancedConversationalRequest(
+    req.body.voiceText,
+    req.body.sessionId,
+    req.body.userId,
+    req.body.objectContext,
+    req.body.conversationHistory
+  ),
+  ['voiceText', 'sessionId', 'userId'],
+  'Conversational AI'
+));
 
 // Personalized suggestions endpoint
-app.post('/api/personalized-suggestions', async (req, res) => {
-  try {
-    const { userId, context, objectContext } = req.body;
-    
-    if (!userId || !context) {
-      return res.status(400).json({ error: 'userId and context are required' });
-    }
-
-    const response = await aiVoiceService.getPersonalizedSuggestions(
-      userId,
-      context,
-      objectContext
-    );
-
-    res.json({
-      success: true,
-      data: response,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error: any) {
-    console.error('Personalized suggestions error:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
-});
+app.post('/api/personalized-suggestions', createEndpoint(
+  (req) => aiVoiceService.getPersonalizedSuggestions(
+    req.body.userId,
+    req.body.objectContext
+  ),
+  ['userId'],
+  'Personalized Suggestions'
+));
 
 // Learning insights for demo endpoint
-app.get('/api/learning-insights/:userId', async (req, res) => {
-  try {
-    const { userId } = req.params;
-    
-    const insights = aiVoiceService.getLearningInsightsForDemo(userId);
-
-    res.json({
-      success: true,
-      data: insights,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error: any) {
-    console.error('Learning insights error:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
-});
+app.get('/api/learning-insights/:userId', createGetEndpoint(
+  (req) => aiVoiceService.getLearningInsightsForDemo(req.params.userId),
+  'Learning Insights'
+));
 
 // Simulate demo learning progression endpoint
-app.post('/api/simulate-demo-progression', async (req, res) => {
-  try {
-    const { userId } = req.body;
-    
-    if (!userId) {
-      return res.status(400).json({ error: 'userId is required' });
-    }
-
-    await aiVoiceService.simulateDemoLearningProgression(userId);
-
-    res.json({
-      success: true,
-      message: 'Demo learning progression simulated successfully',
-      timestamp: new Date().toISOString()
-    });
-  } catch (error: any) {
-    console.error('Demo progression simulation error:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
-});
+app.post('/api/simulate-demo-progression', createEndpoint(
+  (req) => aiVoiceService.simulateDemoLearningProgression(req.body.userId),
+  ['userId'],
+  'Demo Progression Simulation'
+));
 
 // Synthetic AR Data Management (Demo)
-app.get('/api/synthetic-data/summary', async (req, res) => {
-  try {
-    const summary = await aiVoiceService.getSyntheticDataSummary();
-    res.json({
-      success: true,
-      data: summary,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error: any) {
-    console.error('Synthetic data summary error:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
-});
+app.get('/api/synthetic-data/summary', createGetEndpoint(
+  () => aiVoiceService.getSyntheticDataSummary(),
+  'Synthetic Data Summary'
+));
 
 // Error handling middleware
 app.use((error: any, req: any, res: any, next: any) => {
