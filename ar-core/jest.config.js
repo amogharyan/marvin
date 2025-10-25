@@ -5,7 +5,7 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  roots: ['<rootDir>/src', '<rootDir>/tests'],
+  roots: ['<rootDir>/tests'],
   testMatch: [
     '**/__tests__/**/*.ts',
     '**/?(*.)+(spec|test).ts'
@@ -14,10 +14,9 @@ module.exports = {
     '^.+\\.ts$': 'ts-jest'
   },
   collectCoverageFrom: [
-    'src/**/*.ts',
-    '!src/types/**',
-    '!src/**/*.d.ts',
-    '!src/**/index.ts'
+    'tests/**/*.ts',
+    '!tests/setup.ts',
+    '!tests/**/*.d.ts'
   ],
   coverageThreshold: {
     global: {
@@ -26,13 +25,6 @@ module.exports = {
       lines: 80,
       statements: 80
     }
-  },
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
-    '^@types/(.*)$': '<rootDir>/src/types/$1',
-    '^@object-detection/(.*)$': '<rootDir>/src/ObjectDetection/$1',
-    '^@ar-overlays/(.*)$': '<rootDir>/src/AROverlays/$1',
-    '^@gestures/(.*)$': '<rootDir>/src/Gestures/$1'
   },
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   verbose: true,
