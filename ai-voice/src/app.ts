@@ -92,10 +92,42 @@ app.post('/api/process-voice', async (req, res) => {
   }
 });
 
+// Advanced multimodal processing endpoint (Phase 2)
+app.post('/api/process-multimodal', async (req, res) => {
+  try {
+    const { imageData, voiceText, conversationContext, objectContext, mimeType } = req.body;
+    
+    if (!imageData || !voiceText) {
+      return res.status(400).json({ error: 'imageData and voiceText are required' });
+    }
+
+    const response = await aiVoiceService.processMultimodalInput(
+      imageData,
+      voiceText,
+      conversationContext,
+      objectContext,
+      mimeType
+    );
+
+    res.json({
+      success: true,
+      data: response,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error: any) {
+    console.error('Multimodal processing error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // Visual context processing endpoint
 app.post('/api/process-visual', async (req, res) => {
   try {
-    const { imageData, detectedObjects } = req.body;
+    const { imageData, detectedObjects, mimeType } = req.body;
     
     if (!imageData || !detectedObjects) {
       return res.status(400).json({ error: 'imageData and detectedObjects are required' });
@@ -103,7 +135,8 @@ app.post('/api/process-visual', async (req, res) => {
 
     const response = await aiVoiceService.processVisualContext(
       imageData,
-      detectedObjects
+      detectedObjects,
+      mimeType
     );
 
     res.json({
@@ -232,7 +265,7 @@ app.use((error: any, req: any, res: any, next: any) => {
 const PORT = config.server.port;
 
 app.listen(PORT, () => {
-  console.log('🚀 Dev 2 AI & Voice Integration Service Started');
+  console.log('🚀 Dev 2 AI & Voice Integration Service Started - Phase 2');
   console.log(`   Port: ${PORT}`);
   console.log(`   Environment: ${config.server.environment}`);
   console.log(`   Gemini Model: ${config.gemini.model}`);
@@ -242,10 +275,19 @@ app.listen(PORT, () => {
   console.log(`   GET  /health - Health check`);
   console.log(`   POST /api/process-object - Process object detection`);
   console.log(`   POST /api/process-voice - Process voice input`);
+  console.log(`   POST /api/process-multimodal - Advanced multimodal processing (Phase 2)`);
   console.log(`   POST /api/process-visual - Process visual context`);
   console.log(`   POST /api/proactive-assistance - Generate proactive help`);
   console.log(`   POST /api/synthesize-voice - Voice synthesis`);
   console.log(`   GET  /api/demo/objects - Demo objects for testing`);
+  console.log('');
+  console.log('🎯 Phase 2 Features:');
+  console.log(`   ✅ Advanced multimodal processing (visual + voice + context)`);
+  console.log(`   ✅ Context-aware conversation management`);
+  console.log(`   ✅ Object-specific AI response generation`);
+  console.log(`   ✅ Voice command parsing and intent recognition`);
+  console.log(`   ✅ Personalized suggestion algorithms`);
+  console.log(`   ✅ Advanced conversation context management`);
   console.log('');
   console.log('🎯 Ready for AR client integration!');
 });
