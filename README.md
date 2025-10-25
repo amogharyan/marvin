@@ -1,23 +1,33 @@
-# Supabase CLI
+# Marvin AR Morning Assistant
 
-[![Coverage Status](https://coveralls.io/repos/github/supabase/cli/badge.svg?branch=main)](https://coveralls.io/github/supabase/cli?branch=main) [![Bitbucket Pipelines](https://img.shields.io/bitbucket/pipelines/supabase-cli/setup-cli/master?style=flat-square&label=Bitbucket%20Canary)](https://bitbucket.org/supabase-cli/setup-cli/pipelines) [![Gitlab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/sweatybridge%2Fsetup-cli?label=Gitlab%20Canary)
-](https://gitlab.com/sweatybridge/setup-cli/-/pipelines)
+A revolutionary AR-powered morning assistant built for Snap Spectacles that transforms your daily routine with intelligent, contextual guidance.
 
-[Supabase](https://supabase.io) is an open source Firebase alternative. We're building the features of Firebase using enterprise-grade open source tools.
+## 📋 Project Overview
 
-This repository contains all the functionality for Supabase CLI.
+**Timeline:** 36-Hour MLH Hackathon  
+**Team Size:** 4 Developers  
+**Target Platform:** Snap Spectacles  
 
-- [x] Running Supabase locally
-- [x] Managing database migrations
-- [x] Creating and deploying Supabase Functions
-- [x] Generating types directly from your database schema
-- [x] Making authenticated HTTP requests to [Management API](https://supabase.com/docs/reference/api/introduction)
+### Core Features
+- **Real-time Object Recognition** - Identifies 5 demo objects (bowl, laptop, keys, medicine, phone)
+- **Multimodal AI Processing** - Gemini API for visual understanding and natural language
+- **Voice Synthesis & Conversation** - ElevenLabs + Vapi for natural interactions
+- **Adaptive Learning** - Chroma vector embeddings for personalized assistance
+- **AR Overlays** - Contextual information displayed in real-world space
 
-## Getting started
+## 🏗️ Architecture
 
-### Install the CLI
+This is a monorepo with 4 main components, each owned by a different developer:
 
-Available via [NPM](https://www.npmjs.com) as dev dependency. To install:
+```
+marvin-ar-assistant/
+├── lens-studio/          # Dev 1: AR Core (Snap Spectacles + Object Detection)
+├── ai-processing/        # Dev 2: AI & Voice (Gemini + ElevenLabs + Vapi)
+├── supabase/            # Dev 3: Backend (Database + Edge Functions + Realtime)
+├── devops/              # Dev 4: Integration & DevOps (Testing + CI/CD + Demo)
+├── shared/              # Common types and utilities
+└── docs/                # Documentation
+```
 
 ```bash
 npm i supabase --save-dev

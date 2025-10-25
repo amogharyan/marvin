@@ -19,7 +19,7 @@ main → develop → feature/[ar-core|ai-voice|backend|integration]
 
 - [ ] **0.1** Install Node.js 20 LTS, Lens Studio 5.13+, Git, VS Code with TypeScript/ESLint/Prettier extensions
 - [ ] **0.2** Create GitHub repo "marvin-ar-assistant" with branch protection on main
-- [ ] **0.3** Initialize monorepo structure: lens-studio/, ai-processing/, supabase/, devops/ folders
+- [ ] **0.3** Initialize monorepo structure: ar-core/, ai-voice/, snap-cloud/, devops/ folders
 - [ ] **0.4** Create feature branches: feature/ar-core, feature/ai-voice, feature/supabase, feature/integration
 
 ### AR Development Setup [All]
