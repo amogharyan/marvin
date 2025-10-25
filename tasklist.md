@@ -20,7 +20,7 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
 - [ ] **0.1** Install **Lens Studio 5.15.0+**, Git with LFS, VS Code with TypeScript extension
 - [ ] **0.2** Install Git LFS: `brew install git-lfs && git lfs install` (required for assets)
 - [ ] **0.3** Create GitHub repo "marvin" and clone with `git clone` (not ZIP download)
-- [ ] **0.4** Create feature branches: feature/lens-studio, feature/ai-integration, feature/snap-cloud
+- [ ] **0.4** Create feature branches: feature/lens-studio, feature/ai-integration, feature/snap-cloud, feature/integration
 
 ### Lens Studio Project Setup [Dev 1]
 
@@ -48,6 +48,46 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
 - [ ] **0.15** Generate token: Window > Remote Service Gateway Token > Generate Token
 - [ ] **0.16** Create "RemoteServiceGatewayCredentials" object in scene hierarchy
 - [ ] **0.17** Paste token into credentials object in Inspector
+
+### Testing Infrastructure Setup [Dev 4]
+
+**Objective:** Set up TDD framework before other developers start coding  
+**Reference:** See `devops/TDD-STRATEGY.md` for complete details
+
+- [ ] **0.A** Install Jest and TypeScript testing dependencies:
+  - `npm install --save-dev jest ts-jest @types/jest @testing-library/jest-dom`
+  - Create `jest.config.js` with TypeScript support
+  - Create `__tests__/setup.ts` with global configuration
+
+- [ ] **0.B** Create Lens Studio API mocks in `__tests__/mocks/lens-studio.ts`:
+  - MockInternetModule (for Fetch API)
+  - MockRemoteServiceModule (for Gemini)
+  - MockMLComponent (for object detection)
+  - MockObjectTracking3D
+  - MockAudioComponent
+  - MockEvent<T>
+  - MockSupabaseClient
+  
+- [ ] **0.C** Write FAILING test templates for Phase 1 components:
+  - `__tests__/unit/ObjectDetection/DemoObjectTracker.test.ts`
+  - `__tests__/unit/Core/GeminiAssistant.test.ts`
+  - `__tests__/unit/Core/ElevenLabsVoice.test.ts`
+  - `__tests__/unit/Core/VoiceHandler.test.ts`
+  - `__tests__/unit/Storage/SupabaseClient.test.ts`
+  - `__tests__/unit/Storage/ChromaLearning.test.ts`
+  - `__tests__/unit/AROverlays/OverlayManager.test.ts`
+  - All tests should FAIL (RED phase) - no implementation yet
+
+- [ ] **0.D** Set up GitHub Actions CI/CD:
+  - Create `.github/workflows/test.yml` for automated testing on PR
+  - Create `.github/workflows/lint.yml` for linting and type checking
+  - Configure test coverage reporting with Codecov
+
+- [ ] **0.E** Configure GitHub branch protection rules:
+  - Require status checks to pass before merging
+  - Require test workflow to pass
+  - Require 1 approval from Dev 4
+  - Require branches to be up to date with base branch
 - [ ] **0.18** Test connection with sample API call
 
 ### Configure Snap Cloud (Supabase) [Dev 3]
@@ -227,6 +267,34 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
   - Set up real-time subscriptions for updates
   - Configure authentication with Snapchat ID
 
+### 1.X Testing & Integration (Dev 4)
+
+**Objective:** Monitor Phase 1 development and ensure all tests pass
+
+- [ ] **1.T1** [Dev 4] **Monitor test execution as code is committed**
+  - Watch GitHub Actions run on each PR
+  - Review test results and provide feedback
+  - Help debug failing tests
+  - Run tests locally: `npm test`
+
+- [ ] **1.T2** [Dev 4] **Review and approve PRs from Dev 1, 2, 3**
+  - Check test coverage (target: >80%)
+  - Verify TypeScript compiles without errors
+  - Ensure linting passes
+  - Provide code review comments
+  - Merge PRs in dependency order (utilities → storage → detection → AI → overlays)
+
+- [ ] **1.T3** [Dev 4] **Write integration tests for Phase 1 components**
+  - Create `__tests__/integration/object-detection-to-ai.test.ts`
+  - Create `__tests__/integration/ai-to-overlay.test.ts`
+  - Create `__tests__/integration/voice-synthesis-flow.test.ts`
+  - Test component interactions work correctly
+
+- [ ] **1.T4** [Dev 4] **Fix any integration issues discovered in testing**
+  - Debug component communication problems
+  - Fix event system wiring issues
+  - Resolve type mismatches between components
+
 **HOUR 8 GIT MERGE:** All developers merge to develop branch
 
 ## Phase 2: Core Features (Hours 8-16)
@@ -369,6 +437,32 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
   - Coordinate AR overlays with AI responses
   - Add learning feedback loop for continuous improvement
 
+### 2.X Testing & E2E Development (Dev 4)
+
+**Objective:** E2E testing and demo flow validation
+
+- [ ] **2.T1** [Dev 4] **Continue PR review and test monitoring**
+  - Review feature-specific PRs (Medicine, Nutrition, Calendar, Departure)
+  - Monitor test coverage remains >80%
+  - Merge approved PRs to develop branch
+
+- [ ] **2.T2** [Dev 4] **Create E2E demo flow tests**
+  - Create `__tests__/e2e/demo-flow.test.ts`
+  - Test complete 2-minute demo sequence
+  - Test each segment: medicine → bowl → laptop → keys → departure
+  - Verify timing targets (20-25s per segment)
+
+- [ ] **2.T3** [Dev 4] **Create test fixtures for demo objects**
+  - Create `__tests__/fixtures/demo-objects.json`
+  - Add realistic test data for all 5 demo objects
+  - Include metadata for overlays (dosage, nutrition, meetings, etc.)
+
+- [ ] **2.T4** [Dev 4] **Write integration tests for learning system**
+  - Create `__tests__/integration/learning-system.test.ts`
+  - Test ChromaLearning vector search functionality
+  - Test personalization based on past interactions
+  - Verify Day 1 vs Day 30 behavior differences
+
 **HOUR 16 GIT MERGE:** All developers merge to develop branch
 
 ## Phase 3: Integration & Real-time (Hours 16-24)
@@ -447,6 +541,35 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
   - Identify and fix timing issues
   - Practice transitions between objects
 
+### 3.X Real-time Testing & Performance (Dev 4)
+
+**Objective:** Test real-time features and backup systems
+
+- [ ] **3.T1** [Dev 4] **Test Supabase Realtime functionality**
+  - Create `__tests__/integration/realtime-sync.test.ts`
+  - Test real-time database subscriptions
+  - Test overlay updates on data changes
+  - Verify connection recovery after network loss
+
+- [ ] **3.T2** [Dev 4] **Build fallback system tests**
+  - Create `__tests__/e2e/fallback-systems.test.ts`
+  - Test cached responses when Gemini fails
+  - Test Gemini voice when ElevenLabs fails
+  - Test pre-recorded audio when both fail
+
+- [ ] **3.T3** [Dev 4] **Create demo environment and test data**
+  - Create `devops/demo/setup.ts` - demo data generator
+  - Create `devops/demo/reset.ts` - reset to clean state
+  - Populate database with Day 1 vs Day 30 scenarios
+  - Add DEMO_MODE configuration toggle
+
+- [ ] **3.T4** [Dev 4] **Build simple web backup interface**
+  - Create basic HTML/JS backup interface
+  - Connect to same Supabase project
+  - Implement manual object trigger buttons
+  - Display current interaction state
+  - Test device handoff between Spectacles and web
+
 **HOUR 24 GIT MERGE:** All developers merge to develop branch
 
 ## Phase 4: Demo Polish & Reliability (Hours 24-32)
@@ -519,6 +642,44 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
   - Create quick-reference troubleshooting card
   - Train team on troubleshooting steps
 
+### 4.X Performance Testing & Demo Reliability (Dev 4)
+
+**Objective:** Ensure production-ready demo reliability
+
+- [ ] **4.T1** [Dev 4] **Create performance test suite**
+  - Create `__tests__/e2e/performance.test.ts`
+  - Test AR overlay rendering <100ms
+  - Test Gemini response time <2s
+  - Test database query performance <50ms
+  - Test complete flow completes in <120s
+
+- [ ] **4.T2** [Dev 4] **Create system health monitor**
+  - Create `Assets/Scripts/Utils/HealthMonitor.ts`
+  - Monitor Gemini Live connection status
+  - Monitor Supabase connection status
+  - Monitor ElevenLabs API availability
+  - Display health indicators in debug mode
+
+- [ ] **4.T3** [Dev 4] **Test fallback systems thoroughly**
+  - Simulate Gemini API timeout
+  - Simulate ElevenLabs API failure
+  - Simulate Supabase connection loss
+  - Simulate object detection failures
+  - Verify all fallbacks activate correctly
+
+- [ ] **4.T4** [Dev 4] **Run complete test suite**
+  - Run all unit tests: `npm run test:unit`
+  - Run all integration tests: `npm run test:integration`
+  - Run all E2E tests: `npm run test:e2e`
+  - Generate coverage report: `npm run test:coverage`
+  - Target: All tests passing, coverage >85%
+
+- [ ] **4.T5** [Dev 4] **Create demo troubleshooting guide**
+  - Document common failure modes
+  - List recovery procedures for each failure
+  - Create quick-reference troubleshooting card
+  - Train team on troubleshooting steps
+
 **HOUR 32 GIT MERGE:** All developers merge to develop branch
 
 ## Phase 5: Demo Preparation (Hours 32-36)
@@ -586,6 +747,41 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
 
 **HOUR 36 FINAL MERGE:** All developers merge to develop, then to main
 
+### 5.X Final Testing & Demo Practice (Dev 4)
+
+**Objective:** Ensure 99%+ demo reliability
+
+- [ ] **5.T1** [Dev 4] **Run final test suite on production build**
+  - Test on actual Spectacles device (not just Lens Studio preview)
+  - Run E2E tests with physical demo objects
+  - Test complete 2-minute flow 10+ times
+  - Document success rate (target: 99%+)
+
+- [ ] **5.T2** [Dev 4] **Test edge cases and failure modes**
+  - Test with poor lighting conditions
+  - Test with network disconnection
+  - Test with API timeouts (Gemini, ElevenLabs)
+  - Test object detection failures
+  - Verify fallback systems activate correctly in all cases
+
+- [ ] **5.T3** [Dev 4] **Practice demo flow with team**
+  - Conduct 10+ complete rehearsals
+  - Time each segment (medicine: 20-25s, bowl: 20-25s, laptop: 20-25s, keys: 20-25s, departure: 20-25s)
+  - Identify and fix timing issues
+  - Practice transitions between segments
+
+- [ ] **5.T4** [Dev 4] **Verify all documentation up to date**
+  - Review README.md for completeness
+  - Review copilot-instructions.md for accuracy
+  - Review TDD-STRATEGY.md for completeness
+  - Create final architecture diagram
+
+- [ ] **5.T5** [Dev 4] **Prepare backup materials**
+  - Record backup video of working demo
+  - Take screenshots of each demo segment
+  - Create troubleshooting quick-reference card
+  - Prepare emergency manual trigger plan
+
 ## Phase 6: Final Deployment & Go-Live (Hours 36-40)
 
 ### 6.0 Production Deployment
@@ -626,8 +822,15 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
 - [ ] **6.6** [Dev 4] **Setup monitoring during demo**
   - Open Lens Studio console for logging
   - Monitor Supabase dashboard for errors
+  - Monitor GitHub Actions for any late issues
   - Have backup systems ready to activate
   - Prepare troubleshooting quick-reference
+
+- [ ] **6.6.1** [Dev 4] **Final pre-demo test**
+  - Run `npm test` one final time
+  - Verify all tests passing (unit + integration + E2E)
+  - Check test coverage report (target: >85%)
+  - Review CI/CD pipeline health
 
 ### 6.2 Submission & Documentation
 
