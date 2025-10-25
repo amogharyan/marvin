@@ -7,6 +7,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
 }
 
 interface UserProfileUpdateRequest {
@@ -71,10 +72,9 @@ serve(async (req) => {
 
     if (existingProfile) {
       // Update existing profile
-      const updatedPreferences = {
-        ...existingProfile.preferences,
-        ...updates.preferences
-      }
+      const existingPrefs = existingProfile.preferences || {};
+      const incomingPrefs = updates?.preferences || {};
+      const updatedPreferences = { ...existingPrefs, ...incomingPrefs };
 
       profileData = {
         name: updates.name || existingProfile.name,
@@ -98,13 +98,13 @@ serve(async (req) => {
     } else {
       // Create new profile
       profileData = {
-        user_id,
-        email: `user_${user_id}@example.com`, // This would come from auth in real implementation
-        name: updates.name || 'User',
-        preferences: updates.preferences || {},
-        timezone: updates.timezone || 'UTC',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+  user_id,
+  // email: (from auth context if available; omitted for now)
+  name: updates.name || 'User',
+  preferences: updates.preferences || {},
+  timezone: updates.timezone || 'UTC',
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString()
       }
 
       const { data: newProfile, error: insertError } = await supabase
@@ -147,15 +147,17 @@ serve(async (req) => {
 
     // Broadcast profile update
     const channel = supabase.channel('user_profiles')
-    await channel.send({
-      type: 'broadcast',
-      event: 'profile_updated',
-      payload: {
-        user_id,
-        updates: Object.keys(updates),
-        timestamp: new Date().toISOString()
-      }
-    })
+      await channel.subscribe();
+      await channel.send({
+        type: 'broadcast',
+        event: 'profile-updated',
+        payload: {
+          user_id,
+          updated_fields: Object.keys(updates),
+          timestamp: new Date().toISOString()
+        }
+      });
+      await supabase.removeChannel(channel);
 
     const response = {
       success: true,
@@ -176,12 +178,18 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('User profile update failed:', error)
+    let errorMsg = 'Unknown error';
+    if (error instanceof Error) {
+      errorMsg = error.message;
+    } else if (typeof error === 'string') {
+      errorMsg = error;
+    }
+    console.error('User profile update failed:', errorMsg);
 
     return new Response(
       JSON.stringify({
         error: 'Profile update failed',
-        details: error.message,
+        details: errorMsg,
         timestamp: new Date().toISOString()
       }),
       {

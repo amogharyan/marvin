@@ -7,6 +7,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
 }
 
 interface VoiceSynthesisRequest {
@@ -151,11 +152,15 @@ serve(async (req) => {
       .from('voice-cache')
       .upload(`${cacheKey}.mp3`, audioBuffer, {
         contentType: 'audio/mpeg',
-        cacheControl: '3600'
+        cacheControl: '3600',
+        upsert: true
       })
 
     if (uploadError) {
-      console.error('Failed to cache audio:', uploadError)
+      // Treat overwrite (upsert) as success; log only true failures
+      if (!uploadError.message?.includes('already exists')) {
+        console.error('Failed to cache audio:', uploadError)
+      }
     }
 
     // Get public URL for the uploaded audio
@@ -216,15 +221,36 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Voice synthesis failed:', error)
+    let errorMsg = 'Unknown error';
+    let requestText = '';
+    try {
+      // Try to parse the request again for fallback
+      const clone = req.clone ? req.clone() : req;
+      const body = await clone.json();
+      requestText = body?.text || '';
+    } catch (parseError) {
+      // If parsing fails, leave requestText as empty string
+    }
+    if (error instanceof Error) {
+      errorMsg = error.message;
+    } else if (typeof error === 'string') {
+      errorMsg = error;
+    }
+    console.error('Voice synthesis failed:', errorMsg);
 
-    // Fallback to pre-recorded audio files
-    const fallbackAudio = getFallbackAudio(body.text)
+    // Fallback to pre-recorded audio files, wrapped in its own try/catch
+    let fallbackAudio = null;
+    try {
+      fallbackAudio = getFallbackAudio(requestText);
+    } catch (fallbackError) {
+      console.error('Fallback audio error:', fallbackError);
+      fallbackAudio = null;
+    }
 
     return new Response(
       JSON.stringify({
         error: 'Voice synthesis failed',
-        details: error.message,
+        details: errorMsg,
         fallback_audio: fallbackAudio,
         timestamp: new Date().toISOString()
       }),

@@ -1,0 +1,52 @@
+{
+  "name": "marvin-ar-assistant",
+  "version": "1.0.0",
+  "description": "Marvin AR Assistant - Revolutionary AR-powered morning assistant built for Snap Spectacles",
+  "private": true,
+  "workspaces": [
+    "ai-voice",
+    "ar-core",
+    "snap-cloud"
+  ],
+  "scripts": {
+    "test": "npm run test:all",
+    "install:all": "npm install && npm run install:ai-voice && npm run install:ar-core && npm run install:snap-cloud",
+    "install:ai-voice": "cd ai-voice && npm install",
+    "install:ar-core": "cd ar-core && npm install", 
+    "install:snap-cloud": "cd snap-cloud && npm install",
+    "build:all": "npm run build:ai-voice && npm run build:ar-core",
+    "build:ai-voice": "cd ai-voice && npm run build",
+    "build:ar-core": "cd ar-core && npm run build",
+    "test:all": "npm run test:ai-voice && npm run test:ar-core",
+    "test:ai-voice": "cd ai-voice && npm test",
+    "test:ar-core": "cd ar-core && npm test",
+    "clean:all": "npm run clean:ai-voice && npm run clean:ar-core",
+    "clean:ai-voice": "cd ai-voice && npm run clean",
+    "clean:ar-core": "cd ar-core && npm run clean",
+    "dev:ai-voice": "cd ai-voice && npm run dev",
+    "start:ai-voice": "cd ai-voice && npm start"
+  },
+  "keywords": [
+    "ar",
+    "assistant",
+    "snap-spectacles",
+    "ai",
+    "voice",
+    "multimodal",
+    "hackathon"
+  ],
+  "author": "Marvin AR Assistant Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.17.0",
+    "npm": ">=6.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/amogharyan/marvin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/amogharyan/marvin/issues"
+  },
+  "homepage": "https://github.com/amogharyan/marvin#readme"
+}

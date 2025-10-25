@@ -51,15 +51,15 @@ BEGIN
     -- Analyze morning routine patterns (6-10 AM)
     SELECT jsonb_build_object(
         'pattern_type', 'morning_routine',
-        'object_sequence', jsonb_agg(object_type ORDER BY avg_time),
-        'avg_timing', jsonb_object_agg(object_type, avg_time),
-        'confidence', CASE WHEN count(*) > 10 THEN 0.9 ELSE count(*) * 0.09 END
+        'object_sequence', jsonb_agg(object_type ORDER BY avg_avg_time),
+        'avg_timing', jsonb_object_agg(object_type, avg_avg_time),
+        'confidence', LEAST(0.9, SUM(total_frequency) * 0.03)
     ) INTO v_morning_routine
     FROM (
         SELECT
             object_type,
-            EXTRACT(HOUR FROM timestamp) + EXTRACT(MINUTE FROM timestamp)/60.0 as avg_time,
-            count(*) as frequency
+            avg(EXTRACT(HOUR FROM timestamp) + EXTRACT(MINUTE FROM timestamp)/60.0) as avg_avg_time,
+            SUM(count(*)) as total_frequency
         FROM object_interactions
         WHERE user_id = p_user_id
           AND EXTRACT(HOUR FROM timestamp) BETWEEN 6 AND 10
@@ -76,7 +76,7 @@ BEGIN
     SELECT jsonb_build_object(
         'pattern_type', 'location_preferences',
         'object_locations', jsonb_object_agg(object_type, most_common_location),
-        'confidence', 0.8
+        'confidence', LEAST(0.9, SUM(frequency) * 0.03)
     ) INTO v_pattern
     FROM (
         SELECT
@@ -201,10 +201,18 @@ DECLARE
     v_total_calories INTEGER;
     v_nutritional_breakdown JSONB;
 BEGIN
-    -- Calculate total calories and nutritional breakdown
-    SELECT
-        COALESCE(SUM(calories), 0),
-        jsonb_object_agg(
+    -- Calculate total calories
+    SELECT COALESCE(SUM(calories), 0)
+    INTO v_total_calories
+    FROM food_logs
+    WHERE user_id = p_user_id
+      AND DATE(logged_at) = p_date;
+
+    -- Calculate nutritional breakdown by meal_type
+    SELECT COALESCE(jsonb_object_agg(meal_type, meal_json), '{}'::JSONB)
+    INTO v_nutritional_breakdown
+    FROM (
+        SELECT
             meal_type,
             jsonb_build_object(
                 'calories', COALESCE(SUM(calories), 0),
@@ -215,13 +223,12 @@ BEGIN
                         'calories', calories
                     )
                 )
-            )
-        )
-    INTO v_total_calories, v_nutritional_breakdown
-    FROM food_logs
-    WHERE user_id = p_user_id
-      AND DATE(logged_at) = p_date
-    GROUP BY meal_type;
+            ) AS meal_json
+        FROM food_logs
+        WHERE user_id = p_user_id
+          AND DATE(logged_at) = p_date
+        GROUP BY meal_type
+    ) sub;
 
     -- Build summary object
     v_summary := jsonb_build_object(

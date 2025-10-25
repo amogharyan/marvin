@@ -76,7 +76,7 @@ An AR-powered personal assistant that follows you through your morning routine, 
 
 2. **Implement Advanced Multimodal AI**
 	 - Deploy Gemini API for visual understanding and natural language processing
-	 - Voice-first interactions through ElevenLabs and advanced conversational AI
+	 - Voice-first interactions through ElevenLabs Conversational AI Platform
 	 - Real-time conversation with contextual memory through Chroma
 
 3. **Create Seamless AR Experience**
@@ -155,7 +155,7 @@ An AR-powered personal assistant that follows you through your morning routine, 
 ### 4.3 Voice Integration (Priority: Critical)
 
 **FR-015:** System MUST integrate ElevenLabs for natural voice synthesis  
-**FR-016:** System MUST integrate ElevenLabs for advanced conversational AI capabilities  
+**FR-016:** System MUST integrate ElevenLabs Conversational AI Platform for advanced conversational AI capabilities  
 **FR-017:** System MUST support hands-free voice commands while using Spectacles  
 **FR-018:** System MUST provide audio feedback through Spectacles speakers  
 **FR-019:** System MUST handle ambient noise in demo hall environment  
@@ -330,7 +330,7 @@ graph LR
 											▼
 ┌──────────────────────────────────────────────┐
 │         AI & Voice Processing                │
-│     Gemini + ElevenLabs + Advanced Conversational AI               │
+│     Gemini + ElevenLabs Conversational AI Platform               │
 │                  Dev 2                       │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐   │
 │  │  Visual  │ │  Voice   │ │ Context  │   │
@@ -361,7 +361,7 @@ graph LR
 | Role | Developer | Primary Responsibilities | Key Deliverables |
 |------|-----------|-------------------------|------------------|
 | **AR Core Developer** | Dev 1 | Snap Spectacles integration, object detection, spatial tracking | Lens Studio project, object recognition, AR overlays |
-| **AI & Voice Integration** | Dev 2 | Gemini API, ElevenLabs, advanced conversational AI integration, conversational logic | Voice processing, AI responses, multimodal understanding |
+| **AI & Voice Integration** | Dev 2 | Gemini API, ElevenLabs Conversational AI Platform, conversational logic | Voice processing, AI responses, multimodal understanding |
 | **Supabase Integration** | Dev 3 | Database design, Edge Functions, Realtime subscriptions, external API coordination | Schema design, Edge Functions, real-time data sync |
 | **Frontend Dashboard & Integration** | Dev 4 | Web dashboard, system integration, testing, demo orchestration | Admin interface, integration testing, demo scripts, backup systems |
 
@@ -382,7 +382,7 @@ graph LR
 											▼
 ┌──────────────────────────────────────────────┐
 │         AI & Voice Processing                │
-│     Gemini + ElevenLabs + Advanced Conversational AI               │
+│     Gemini + ElevenLabs Conversational AI Platform               │
 │                  Dev 2                       │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐   │
 │  │  Visual  │ │  Voice   │ │ Context  │   │
@@ -469,7 +469,7 @@ Hour 30-36: Demo Preparation
 {
 	"multimodal": "Gemini API",
 	"voice_synthesis": "ElevenLabs API",
-	"conversational_ai": "ElevenLabs advanced conversational AI", 
+	"conversational_ai": "ElevenLabs Conversational AI Platform", 
 	"processing": "Real-time streaming",
 	"context": "Conversation history + visual analysis"
 }
@@ -540,7 +540,7 @@ Based on Lens Studio API documentation, key capabilities include:
 4. **Chroma** - Vector embeddings for contextual memory
 
 #### Secondary APIs (High Priority)
-5. **ElevenLabs** - Advanced conversational AI integration
+5. **ElevenLabs Conversational AI Platform** - Advanced conversational AI integration
 6. **Google Calendar** - Schedule integration
 7. **Health APIs** - Basic health data integration
 
@@ -589,7 +589,7 @@ const learning_stages = {
 #### Technology Implementation (25% weight)
 - ✅ Real AR object detection using Snap Spectacles native capabilities
 - ✅ Working Gemini API integration for multimodal AI understanding
-- ✅ Seamless voice synthesis and conversation through ElevenLabs + advanced conversational AI
+- ✅ Seamless voice synthesis and conversation through ElevenLabs Conversational AI Platform
 - ✅ Functional adaptive learning through Chroma vector embeddings
 - ✅ Clean CI/CD pipeline with continuous integration
 - **Target Score: 24/25**
@@ -650,7 +650,7 @@ const learning_stages = {
 | **Gemini API** | Multimodal AI processing | High impact usage |
 | **ElevenLabs** | Voice synthesis | Complete integration |
 | **Chroma** | Vector embeddings | Advanced implementation |
-| **ElevenLabs** | Advanced Conversational AI | Full integration |
+| **ElevenLabs Conversational AI Platform** | Advanced Conversational AI | Full integration |
 | **Google Calendar** | Data integration | Functional usage |
 | **Promise API** | Health/wellness focus | Potential bonus track |
 
@@ -782,7 +782,7 @@ class IPFSService {
 
 **Dev 2 (AI & Voice):**
 - Multimodal processing (visual + text context)
-- Context-aware conversation management with ElevenLabs
+- Context-aware conversation management with ElevenLabs Voice Agents
 - Object-specific AI response generation
 - Voice command parsing and intent recognition
 
@@ -817,7 +817,7 @@ class IPFSService {
 - Chroma integration for contextual memory
 - Learning simulation system ("Day 1 vs Day 30")
 - Personalized suggestion algorithms
-- Advanced conversation context management with ElevenLabs
+- Advanced conversation context management with ElevenLabs Voice Agents
 
 **Dev 3 (Backend):**
 - User preference learning and storage
@@ -1300,10 +1300,13 @@ chroma:
   integration_level: "Vector embeddings for personalization"
   backup_plan: "Simulated learning with static data"
 
-elevenlabs_conversational:
-  status: "Advanced Conversational AI"
-  integration_level: "Full conversational AI integration"
+elevenlabs_conversational_ai:
+  status: "Advanced Conversational AI Platform"
+  integration_level: "Full conversational AI platform integration"
   backup_plan: "Basic voice commands only"
+
+# Privacy & Compliance Note for Health Data (FR-035/FR-041)
+**IMPORTANT:** Any health-related data used in demos is synthetic or anonymized, retained only for a 24-hour window, encrypted at rest and in transit, and explicitly marked as "demo-only" with no PHI processing or HIPAA scope. Production HIPAA compliance is out of scope for this demo system.
 
 google_calendar:
   status: "Schedule integration"
