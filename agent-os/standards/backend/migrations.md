@@ -7,3 +7,10 @@
 - **Index Management**: Create indexes on large tables carefully, using concurrent options when available to avoid locks
 - **Naming Conventions**: Use clear, descriptive names that indicate what the migration does
 - **Version Control**: Always commit migrations to version control and never modify existing migrations after deployment
+
+## Supabase Migration Setup (Dev 3)
+
+1. Use Supabase CLI for all schema migrations
+2. Store migration files in snap-cloud/supabase/migrations/
+3. Apply migrations to Supabase project
+4. For hackathon demo, ensure schema matches direct AR client integration (Spectacles Lens accesses Supabase directly with hardcoded token/URL)

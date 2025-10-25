@@ -31,7 +31,9 @@
 Marvin PRD is a revolutionary AR-powered morning assistant built for Snap Spectacles that transforms your daily routine with intelligent, contextual guidance. Using advanced object recognition, multimodal AI, and adaptive learning, the system provides personalized assistance as you move through your morning - from medicine reminders to nutrition tracking, calendar briefings, and departure checklists.
 
 ### Core Problem
+
 Modern mornings are chaotic and inefficient:
+
 - Forgotten medications and health routines
 - Poor nutrition decisions due to time constraints
 - Lost items causing delays and stress
@@ -41,6 +43,7 @@ Modern mornings are chaotic and inefficient:
 However, existing smart assistants fail to provide contextual, visual assistance in the moment of need.
 
 ### Our Solution
+
 An AR-powered personal assistant that follows you through your morning routine, providing intelligent, contextual guidance through Snap Spectacles. The system recognizes objects in your environment and delivers timely, personalized assistance exactly when and where you need it.
 
 ### Demo Environment Setup
@@ -48,15 +51,17 @@ An AR-powered personal assistant that follows you through your morning routine, 
 **IMPORTANT**: This system is optimized for controlled demo environment.
 
 **Demo Objects** (on desk):
+
 - ✅ Breakfast bowl (nutrition tracking & recipe suggestions)
-- ✅ Laptop (calendar integration & work briefing)  
+- ✅ Laptop (calendar integration & work briefing)
 - ✅ Keys (location tracking & departure checklist)
 - ✅ Medicine bottle (health reminders & timing)
 - ✅ Phone (connectivity & backup interface)
 
 **Demo Flow** (2-minute live demo):
+
 1. **Medicine Reminder** → AR overlay shows medication schedule
-2. **Breakfast Assistance** → Nutrition info + healthy recipe suggestions  
+2. **Breakfast Assistance** → Nutrition info + healthy recipe suggestions
 3. **Calendar Briefing** → Day overview + meeting preparation
 4. **Key Location** → AR arrow guides to keys when needed
 5. **Departure Checklist** → Final items verification before leaving
@@ -70,29 +75,33 @@ An AR-powered personal assistant that follows you through your morning routine, 
 ### Primary Objectives
 
 1. **Enable Contextual AR Assistance**
-	 - Real-time object recognition for demo items (bowl, laptop, keys, medicine, phone)
-	 - Contextual information overlays based on object interaction
-	 - Intelligent timing for proactive vs reactive assistance
+
+   - Real-time object recognition for demo items (bowl, laptop, keys, medicine, phone)
+   - Contextual information overlays based on object interaction
+   - Intelligent timing for proactive vs reactive assistance
 
 2. **Implement Advanced Multimodal AI**
-	 - Deploy Gemini API for visual understanding and natural language processing
-	 - Voice-first interactions through ElevenLabs and advanced conversational AI
-	 - Real-time conversation with contextual memory through Chroma
+
+   - Deploy Gemini API for visual understanding and natural language processing
+   - Voice-first interactions through ElevenLabs and advanced conversational AI
+   - Real-time conversation with contextual memory through Chroma
 
 3. **Create Seamless AR Experience**
-	 - Native Snap Spectacles object detection and spatial tracking
-	 - Smooth hand gesture recognition for object interaction
-	 - Professional AR overlays with clear visual hierarchy
+
+   - Native Snap Spectacles object detection and spatial tracking
+   - Smooth hand gesture recognition for object interaction
+   - Professional AR overlays with clear visual hierarchy
 
 4. **Demonstrate Adaptive Learning**
-	 - Personal preference tracking through Chroma vector embeddings
-	 - Habit pattern recognition and optimization suggestions
-	 - Simulated "learning over time" progression for demo
+
+   - Personal preference tracking through Chroma vector embeddings
+   - Habit pattern recognition and optimization suggestions
+   - Simulated "learning over time" progression for demo
 
 5. **Achieve Production-Ready Architecture**
-	 - CI/CD pipeline with continuous integration
-	 - Separated AR frontend, backend services, and AI processing
-	 - Comprehensive error handling and fallback systems
+   - CI/CD pipeline with continuous integration
+   - Separated AR frontend, backend services, and AI processing
+   - Comprehensive error handling and fallback systems
 
 ---
 
@@ -101,31 +110,39 @@ An AR-powered personal assistant that follows you through your morning routine, 
 ### Morning Assistant User Stories
 
 **U1: Health-Conscious Professional**
+
 > As a busy professional with multiple medications, I want my AR assistant to remind me about my morning pills and vitamins with visual cues when I'm near my medicine cabinet, so that I never miss a dose even during hectic mornings.
 
 **U2: Nutrition-Focused Individual**
+
 > As someone tracking my health goals, I want my assistant to recognize my breakfast and provide instant nutrition information plus healthy recipe suggestions, so that I can make informed eating decisions without manually logging food.
 
 **U3: Calendar-Driven Worker**
+
 > As someone with a packed schedule, I want my assistant to brief me on my day when I sit down with my laptop, including meeting prep and priority tasks, so that I start each day organized and prepared.
 
 **U4: Forgetful Commuter**
+
 > As someone who frequently misplaces keys and essentials, I want my AR assistant to guide me to my items when I'm ready to leave, so that I can avoid delays and reduce morning stress.
 
 ### Advanced User Scenarios
 
 **U5: Adaptive Learning Beneficiary**
+
 > As a regular user, I want my assistant to learn my morning patterns and preferences over time, proactively suggesting optimizations to my routine, so that my mornings become increasingly efficient and personalized.
 
 **U6: Multi-Device Integrator**
+
 > As someone with connected devices, I want my AR assistant to coordinate with my calendar, health apps, and smart home systems, so that I get comprehensive assistance without switching between applications.
 
 ### Demo Audience Stories
 
 **D1: Hackathon Judge**
+
 > As a hackathon judge, I want to see a compelling 2-minute demo that showcases multiple advanced technologies working seamlessly together, so that I can evaluate the technical achievement and practical value.
 
 **D2: Technology Investor**
+
 > As a potential investor, I want to understand how this AR assistant could scale beyond morning routines to become a comprehensive daily companion, so that I can assess the market opportunity and business potential.
 
 ---
@@ -140,7 +157,7 @@ An AR-powered personal assistant that follows you through your morning routine, 
 **FR-004:** System MUST detect hand gestures when reaching for or touching objects  
 **FR-005:** System MUST render AR overlays with <100ms latency from object recognition  
 **FR-006:** System MUST maintain stable AR tracking in demo environment lighting conditions  
-**FR-007:** System MUST handle object occlusion and re-detection seamlessly  
+**FR-007:** System MUST handle object occlusion and re-detection seamlessly
 
 ### 4.2 Multimodal AI Integration (Priority: Critical)
 
@@ -150,7 +167,7 @@ An AR-powered personal assistant that follows you through your morning routine, 
 **FR-011:** System MUST maintain conversation context across multiple object interactions  
 **FR-012:** System MUST support both voice input and visual analysis simultaneously  
 **FR-013:** System MUST provide intelligent suggestions based on time of day and user patterns  
-**FR-014:** System MUST process requests in <2 seconds for real-time interaction  
+**FR-014:** System MUST process requests in <2 seconds for real-time interaction
 
 ### 4.3 Voice Integration (Priority: Critical)
 
@@ -160,7 +177,7 @@ An AR-powered personal assistant that follows you through your morning routine, 
 **FR-018:** System MUST provide audio feedback through Spectacles speakers  
 **FR-019:** System MUST handle ambient noise in demo hall environment  
 **FR-020:** System MUST support both English voice input and output  
-**FR-021:** System MUST provide voice confirmation for critical actions (medicine reminders)  
+**FR-021:** System MUST provide voice confirmation for critical actions (medicine reminders)
 
 ### 4.4 Object-Specific Intelligence (Priority: High)
 
@@ -170,7 +187,7 @@ An AR-powered personal assistant that follows you through your morning routine, 
 **FR-025:** System MUST guide to key location when departure preparation is initiated  
 **FR-026:** System MUST provide phone integration context when device is recognized  
 **FR-027:** System MUST adapt responses based on time of day and routine patterns  
-**FR-028:** System MUST track object usage patterns for learning optimization  
+**FR-028:** System MUST track object usage patterns for learning optimization
 
 ### 4.5 Contextual Memory & Learning (Priority: High)
 
@@ -180,7 +197,7 @@ An AR-powered personal assistant that follows you through your morning routine, 
 **FR-032:** System MUST provide increasingly personalized suggestions over time  
 **FR-033:** System MUST maintain conversation history for context continuity  
 **FR-034:** System MUST simulate "Day 1 vs Day 30" learning progression for demo  
-**FR-035:** System MUST store health data, calendar patterns, and food preferences  
+**FR-035:** System MUST store health data, calendar patterns, and food preferences
 
 ### 4.6 Calendar & Health Integration (Priority: High)
 
@@ -190,7 +207,7 @@ An AR-powered personal assistant that follows you through your morning routine, 
 **FR-039:** System MUST provide nutrition analysis and healthy recipe suggestions  
 **FR-040:** System MUST identify scheduling conflicts and suggest optimizations  
 **FR-041:** System MUST maintain privacy of personal data with encryption  
-**FR-042:** System MUST work with internet connectivity for data synchronization  
+**FR-042:** System MUST work with internet connectivity for data synchronization
 
 ### 4.7 AR User Interface (Priority: High)
 
@@ -200,17 +217,34 @@ An AR-powered personal assistant that follows you through your morning routine, 
 **FR-046:** System MUST render information panels that don't obstruct real-world view  
 **FR-047:** System MUST support different overlay types (text, arrows, icons, progress bars)  
 **FR-048:** System MUST adapt UI brightness based on environmental lighting  
-**FR-049:** System MUST provide accessibility features for various user needs  
+**FR-049:** System MUST provide accessibility features for various user needs
 
 ### 4.8 Supabase Services Architecture (Priority: Critical)
 
-**FR-050:** System MUST provide Supabase client SDK integration for AR client communication  
+**FR-050:** System MUST provide direct Supabase client SDK integration for AR client communication. Snap Cloud is fully bypassed. Spectacles Lens must hardcode Supabase token and URL and use the experimental API for direct AR client integration, as per hackathon guidance.  
 **FR-051:** System MUST implement CI/CD pipeline for continuous integration  
-**FR-052:** System MUST support Supabase Realtime subscriptions for real-time updates  
-**FR-053:** System MUST validate all inputs with Row Level Security and Edge Function validation  
-**FR-054:** System MUST implement health check Edge Functions for monitoring  
-**FR-055:** System MUST rate limit API calls through Supabase policies and Edge Functions  
-**FR-056:** System MUST log all operations with correlation IDs using Supabase logging  
+**FR-052:** System MUST support Supabase Realtime subscriptions for real-time updates, including device presence, object interactions, health reminders, and calendar updates.  
+**FR-053:** System MUST validate all inputs with Row Level Security and Edge Function validation. Edge Functions must support direct calls from Spectacles Lens with hardcoded Supabase token and experimental API.  
+**FR-054:** System MUST implement health check Edge Functions for monitoring, using direct AR/Supabase integration.  
+**FR-055:** System MUST rate limit API calls through Supabase policies and Edge Functions.  
+**FR-056:** System MUST log all operations with correlation IDs using Supabase logging.
+
+**FR-056A:** System MUST implement the following Supabase table schemas for direct AR integration:
+
+- `test_messages` (id, message, sender, timestamp, lens_session_id, created_at)
+- `realtime_messages` (id, channel, event, payload, sent_at, created_at)
+- `user_interactions` (id, action, data, user_id, timestamp, created_at)
+- `object_locations` (id, object_type, position, updated_at)
+- `device_presence` (id, device_id, status, last_seen, created_at)
+
+**FR-056B:** System MUST implement Edge Functions for direct AR/Supabase communication:
+
+- CRUD operations for all tables above
+- Real-time presence and object interaction sync
+- Device sync and disconnection handling
+- Health, nutrition, calendar, and learning coordination
+
+**FR-056C:** System MUST achieve demo reliability by supporting fallback modes, offline-first logic, and pre-recorded responses for all real-time and Edge Function features.
 
 ### 4.9 Bluetooth & Device Integration (Priority: Medium)
 
@@ -218,7 +252,7 @@ An AR-powered personal assistant that follows you through your morning routine, 
 **FR-058:** System MUST connect with smartphone for backup interface access  
 **FR-059:** System MUST sync data across connected devices  
 **FR-060:** System MUST handle device disconnection gracefully  
-**FR-061:** System MUST provide device status indicators in AR interface  
+**FR-061:** System MUST provide device status indicators in AR interface
 
 ### 4.10 Demo Reliability & Performance (Priority: Critical)
 
@@ -228,7 +262,7 @@ An AR-powered personal assistant that follows you through your morning routine, 
 **FR-065:** System MUST handle demo environment variables (lighting, noise, space)  
 **FR-066:** System MUST provide consistent object recognition across multiple demo runs  
 **FR-067:** System MUST include demo reset capability for back-to-back presentations  
-**FR-068:** System MUST work reliably in large hall environment with multiple people  
+**FR-068:** System MUST work reliably in large hall environment with multiple people
 
 ---
 
@@ -237,7 +271,7 @@ An AR-powered personal assistant that follows you through your morning routine, 
 To maintain focus and deliver a polished demo within 36 hours, the following are explicitly OUT of scope:
 
 1. **Complex Computer Vision**: No training custom ML models - use Snap's built-in object detection only
-2. **Multi-Room Navigation**: Demo limited to single desk environment only  
+2. **Multi-Room Navigation**: Demo limited to single desk environment only
 3. **Complex Health Integrations**: No FDA-compliant medical device features or real prescription management
 4. **Production Security**: No enterprise-grade encryption or HIPAA compliance
 5. **Multi-User Support**: Single user demo - no household sharing or user switching
@@ -259,36 +293,40 @@ To maintain focus and deliver a polished demo within 36 hours, the following are
 ### Visual Design System
 
 #### Color Palette
+
 ```css
 :root {
-	--primary-dark: #1a1a2e;
-	--primary-light: #6ee7b7;
-	--glass-white: rgba(255,255,255,0.06);
-	--glass-dark: rgba(3,7,18,0.6);
-	--accent: linear-gradient(90deg,#8b5cf6,#06b6d4);
-	--success: #10b981;
-	--error: #f87171;
+  --primary-dark: #1a1a2e;
+  --primary-light: #6ee7b7;
+  --glass-white: rgba(255, 255, 255, 0.06);
+  --glass-dark: rgba(3, 7, 18, 0.6);
+  --accent: linear-gradient(90deg, #8b5cf6, #06b6d4);
+  --success: #10b981;
+  --error: #f87171;
 }
 ```
 
 #### Typography
+
 - **Headers**: Space Grotesk, 600 weight
-- **Body**: Inter, 400 weight  
+- **Body**: Inter, 400 weight
 - **Data/Code**: JetBrains Mono
 - **Sizes**: 14px base, 1.5rem scale
 
 #### Component Library
+
 ```javascript
 // Glass morphism card component
 const GlassCard = styled.div`
-	background: var(--glass-white);
-	border-radius: 16px;
-	backdrop-filter: blur(10px) saturate(120%);
-	box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+  background: var(--glass-white);
+  border-radius: 16px;
+  backdrop-filter: blur(10px) saturate(120%);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
 `;
 ```
 
 #### Animation Patterns
+
 - Page transitions: 300ms ease-out
 - Micro-interactions: 150ms ease
 - Loading states: Infinite pulse at 2s intervals
@@ -316,6 +354,7 @@ graph LR
 ---
 
 #### System Architecture
+
 ```
 ┌──────────────────────────────────────────────┐
 │              Snap Spectacles                 │
@@ -369,57 +408,60 @@ graph LR
 
 #### System Architecture
 ```
+
 ┌──────────────────────────────────────────────┐
-│              Snap Spectacles                 │
-│         Lens Studio + TypeScript              │
-│                  Dev 1                       │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐   │
-│  │ Object   │ │    AR    │ │ Gesture  │   │
-│  │Detection │ │ Overlays │ │ Handler  │   │
-│  └──────────┘ └──────────┘ └──────────┘   │
+│ Snap Spectacles │
+│ Lens Studio + TypeScript │
+│ Dev 1 │
+│ ┌──────────┐ ┌──────────┐ ┌──────────┐ │
+│ │ Object │ │ AR │ │ Gesture │ │
+│ │Detection │ │ Overlays │ │ Handler │ │
+│ └──────────┘ └──────────┘ └──────────┘ │
 └──────────────────────────────────────────────┘
-											│
-											▼
+│
+▼
 ┌──────────────────────────────────────────────┐
-│         AI & Voice Processing                │
-│     Gemini + ElevenLabs + Advanced Conversational AI               │
-│                  Dev 2                       │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐   │
-│  │  Visual  │ │  Voice   │ │ Context  │   │
-│  │    AI    │ │Synthesis │ │ Memory   │   │
-│  └──────────┘ └──────────┘ └──────────┘   │
+│ AI & Voice Processing │
+│ Gemini + ElevenLabs + Advanced Conversational AI │
+│ Dev 2 │
+│ ┌──────────┐ ┌──────────┐ ┌──────────┐ │
+│ │ Visual │ │ Voice │ │ Context │ │
+│ │ AI │ │Synthesis │ │ Memory │ │
+│ └──────────┘ └──────────┘ └──────────┘ │
 └──────────────────────────────────────────────┘
-											│
-											▼
+│
+▼
 ┌──────────────────────────────────────────────┐
-│              Backend Services                │
-│         Node.js + Express + TypeScript       │
-│                  Dev 3                       │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐   │
-│  │ Calendar │ │  Chroma  │ │  Health  │   │
-│  │    API   │ │ Vector   │ │   Data   │   │
-│  │          │ │   DB     │ │          │   │
-│  └──────────┘ └──────────┘ └──────────┘   │
+│ Backend Services │
+│ Node.js + Express + TypeScript │
+│ Dev 3 │
+│ ┌──────────┐ ┌──────────┐ ┌──────────┐ │
+│ │ Calendar │ │ Chroma │ │ Health │ │
+│ │ API │ │ Vector │ │ Data │ │
+│ │ │ │ DB │ │ │ │
+│ └──────────┘ └──────────┘ └──────────┘ │
 └──────────────────────────────────────────────┘
-				 │              │              │
+│ │ │
 ┌──────────────────────────────────────────────┐
-│            CI/CD Pipeline                    │
-│     GitHub Actions + Testing + Deploy       │
-│                  Dev 4                       │
+│ CI/CD Pipeline │
+│ GitHub Actions + Testing + Deploy │
+│ Dev 4 │
 └──────────────────────────────────────────────┘
+
 ```
 
 ### Continuous Integration Timeline
 
 #### Merge Schedule (Tight Integration)
 ```
-Hour 0-6:   Core Foundation
+
+Hour 0-6: Core Foundation
 ├── Dev 1: Basic Lens Studio setup + object detection
 ├── Dev 2: Gemini API integration + basic voice
 ├── Dev 3: Backend API structure + Chroma setup
 └── Dev 4: CI/CD pipeline + testing framework
 
-Hour 6-12:  Feature Integration  
+Hour 6-12: Feature Integration  
 ├── Merge #1: Object detection + basic AR overlays
 ├── Dev 2: Voice synthesis + conversational logic
 ├── Dev 3: Calendar integration + health data
@@ -448,7 +490,8 @@ Hour 30-36: Demo Preparation
 ├── Backup systems + contingency plans
 ├── Demo presentation preparation
 └── Final deployment + go-live
-```
+
+````
 
 ### Technology Stack
 
@@ -462,20 +505,22 @@ Hour 30-36: Demo Preparation
 	"apis": ["Object Detection", "Spatial Anchors", "Hand Tracking"],
 	"rendering": "ARCore + Spectacles Display"
 }
-```
+````
 
-#### AI & Voice (Dev 2)  
+#### AI & Voice (Dev 2)
+
 ```typescript
 {
 	"multimodal": "Gemini API",
 	"voice_synthesis": "ElevenLabs API",
-	"conversational_ai": "ElevenLabs advanced conversational AI", 
+	"conversational_ai": "ElevenLabs advanced conversational AI",
 	"processing": "Real-time streaming",
 	"context": "Conversation history + visual analysis"
 }
 ```
 
 #### Backend (Dev 3)
+
 ```typescript
 {
 	"runtime": "Node.js 20 LTS",
@@ -488,6 +533,7 @@ Hour 30-36: Demo Preparation
 ```
 
 #### DevOps (Dev 4)
+
 ```typescript
 {
 	"ci_cd": "GitHub Actions",
@@ -503,16 +549,18 @@ Hour 30-36: Demo Preparation
 Based on Lens Studio API documentation, key capabilities include:
 
 #### Object Detection & Recognition
+
 ```typescript
 // Available object detection APIs
 - ObjectTracking: Real-time object recognition
-- MLComponent: Machine learning model integration  
+- MLComponent: Machine learning model integration
 - DeviceTracking: Spatial positioning
 - HandTracking: Gesture recognition
 - SceneUnderstanding: Environment mapping
 ```
 
 #### AR Rendering & Interaction
+
 ```typescript
 // AR overlay capabilities
 - RenderMeshVisual: 3D object rendering
@@ -523,6 +571,7 @@ Based on Lens Studio API documentation, key capabilities include:
 ```
 
 #### Real-time Processing
+
 ```typescript
 // Performance considerations
 - UpdateEvent: 60fps update loop
@@ -534,17 +583,20 @@ Based on Lens Studio API documentation, key capabilities include:
 ### API Integration Strategy
 
 #### Primary APIs (Critical)
+
 1. **Snap Spectacles SDK** - AR foundation + object detection
-2. **Gemini API** - Multimodal AI for visual + text understanding  
+2. **Gemini API** - Multimodal AI for visual + text understanding
 3. **ElevenLabs** - Natural voice synthesis
 4. **Chroma** - Vector embeddings for contextual memory
 
 #### Secondary APIs (High Priority)
+
 5. **ElevenLabs** - Advanced conversational AI integration
 6. **Google Calendar** - Schedule integration
 7. **Health APIs** - Basic health data integration
 
 #### Bonus APIs (If Time Permits)
+
 8. **Bluetooth APIs** - Speaker integration
 9. **Fetch.ai** - Autonomous task agents
 10. **Promise API** - Social good integration
@@ -552,6 +604,7 @@ Based on Lens Studio API documentation, key capabilities include:
 ### Learning System Architecture
 
 #### Chroma Integration for Adaptive Learning
+
 ```typescript
 interface UserContext {
   routine_patterns: {
@@ -576,7 +629,7 @@ interface UserContext {
 const learning_stages = {
   day_1: "Basic object recognition + generic suggestions",
   day_7: "Pattern recognition + personalized timing",
-  day_30: "Predictive assistance + optimized routine"
+  day_30: "Predictive assistance + optimized routine",
 };
 ```
 
@@ -587,6 +640,7 @@ const learning_stages = {
 ### Hackathon Judging Criteria
 
 #### Technology Implementation (25% weight)
+
 - ✅ Real AR object detection using Snap Spectacles native capabilities
 - ✅ Working Gemini API integration for multimodal AI understanding
 - ✅ Seamless voice synthesis and conversation through ElevenLabs + advanced conversational AI
@@ -595,6 +649,7 @@ const learning_stages = {
 - **Target Score: 24/25**
 
 #### Originality & Innovation (20% weight)
+
 - ✅ Novel application of AR to personal productivity and health
 - ✅ Creative contextual intelligence based on object interaction
 - ✅ Innovative demonstration of "learning over time" in constrained demo
@@ -602,6 +657,7 @@ const learning_stages = {
 - **Target Score: 19/20**
 
 #### Execution & Polish (20% weight)
+
 - ✅ Flawless 2-minute live demo execution
 - ✅ Professional AR interface with smooth interactions
 - ✅ Reliable object recognition and spatial tracking
@@ -609,6 +665,7 @@ const learning_stages = {
 - **Target Score: 20/20**
 
 #### Completion & Functionality (15% weight)
+
 - ✅ All core features working end-to-end
 - ✅ Complete demo flow from medicine to departure
 - ✅ Integration of 6+ major APIs and services
@@ -616,6 +673,7 @@ const learning_stages = {
 - **Target Score: 15/15**
 
 #### Documentation & Presentation (10% weight)
+
 - ✅ Comprehensive PRD and technical documentation
 - ✅ Clear demonstration of architectural decisions
 - ✅ Professional code organization and comments
@@ -623,6 +681,7 @@ const learning_stages = {
 - **Target Score: 10/10**
 
 #### Business Potential & Impact (10% weight)
+
 - ✅ Clear market need and user value proposition
 - ✅ Scalable architecture beyond morning routines
 - ✅ Demonstration of practical AI assistant applications
@@ -633,37 +692,39 @@ const learning_stages = {
 
 ### Technical Performance Metrics
 
-| Metric | Target | Measurement Method |
-|--------|--------|-------------------|
-| Object Recognition Accuracy | >95% for demo objects | Testing in demo environment |
-| AR Overlay Latency | <100ms from detection | Performance monitoring |
-| Voice Response Time | <2s end-to-end | Timer from voice input to synthesis |
-| Demo Reliability | 100% success rate | 10+ consecutive demo runs |
-| API Integration Uptime | 99%+ during demo | Health check monitoring |
-| CI/CD Pipeline Efficiency | <5min build+deploy | GitHub Actions metrics |
+| Metric                      | Target                | Measurement Method                  |
+| --------------------------- | --------------------- | ----------------------------------- |
+| Object Recognition Accuracy | >95% for demo objects | Testing in demo environment         |
+| AR Overlay Latency          | <100ms from detection | Performance monitoring              |
+| Voice Response Time         | <2s end-to-end        | Timer from voice input to synthesis |
+| Demo Reliability            | 100% success rate     | 10+ consecutive demo runs           |
+| API Integration Uptime      | 99%+ during demo      | Health check monitoring             |
+| CI/CD Pipeline Efficiency   | <5min build+deploy    | GitHub Actions metrics              |
 
 ### Sponsor Track Coverage Metrics
 
-| API/Technology | Integration Level | Expected Track Score |
-|----------------|-------------------|---------------------|
-| **Snap Spectacles** | Core AR platform | Primary track winner |
-| **Gemini API** | Multimodal AI processing | High impact usage |
-| **ElevenLabs** | Voice synthesis | Complete integration |
-| **Chroma** | Vector embeddings | Advanced implementation |
-| **ElevenLabs** | Advanced Conversational AI | Full integration |
-| **Google Calendar** | Data integration | Functional usage |
-| **Promise API** | Health/wellness focus | Potential bonus track |
+| API/Technology      | Integration Level          | Expected Track Score    |
+| ------------------- | -------------------------- | ----------------------- |
+| **Snap Spectacles** | Core AR platform           | Primary track winner    |
+| **Gemini API**      | Multimodal AI processing   | High impact usage       |
+| **ElevenLabs**      | Voice synthesis            | Complete integration    |
+| **Chroma**          | Vector embeddings          | Advanced implementation |
+| **ElevenLabs**      | Advanced Conversational AI | Full integration        |
+| **Google Calendar** | Data integration           | Functional usage        |
+| **Promise API**     | Health/wellness focus      | Potential bonus track   |
 
 ### Demo Environment Success Criteria
 
 #### Controlled Demo Setup
+
 - **Object Recognition**: 100% success rate for 5 demo objects
-- **Spatial Tracking**: Stable AR overlays throughout 2-minute demo  
+- **Spatial Tracking**: Stable AR overlays throughout 2-minute demo
 - **Voice Clarity**: Clear audio in large hall environment
 - **Internet Connectivity**: Reliable API calls with <1s latency
 - **Backup Systems**: Immediate fallback if primary systems fail
 
 #### Audience Engagement Metrics
+
 - **Judge Attention**: Maintain engagement throughout full demo
 - **Question Quality**: Technical questions indicating understanding
 - **Demo Flow**: Complete all 5 demo stages within 2 minutes
@@ -672,6 +733,7 @@ const learning_stages = {
 ### Learning System Demonstration
 
 #### Simulated Adaptation Showcase
+
 - **Day 1 vs Day 30**: Clear progression in personalization
 - **Pattern Recognition**: Demonstrated understanding of user habits
 - **Contextual Intelligence**: Increasingly relevant suggestions
@@ -688,29 +750,43 @@ The demo flow MUST work flawlessly. All error handling focuses on this path:
 ```typescript
 // Demo flow with comprehensive error handling
 class DemoFlowProtection {
-	private readonly criticalPath = [
-		'upload', 'encrypt', 'pin', 'commit', 'generateProof', 'verify'
-	];
-	// Implementation omitted for brevity
+  private readonly criticalPath = [
+    "upload",
+    "encrypt",
+    "pin",
+    "commit",
+    "generateProof",
+    "verify",
+  ];
+  // Implementation omitted for brevity
 }
 ```
 
 ### Network & Wallet Failures
 
 #### Wallet Connection Issues
+
 ```typescript
 enum WalletError {
-	NOT_INSTALLED = 'WALLET_NOT_INSTALLED',
-	CONNECT_FAILED = 'WALLET_CONNECT_FAILED',
-	TIMEOUT = 'WALLET_TIMEOUT',
-	INSUFFICIENT_FUNDS = 'INSUFFICIENT_FUNDS'
+  NOT_INSTALLED = "WALLET_NOT_INSTALLED",
+  CONNECT_FAILED = "WALLET_CONNECT_FAILED",
+  TIMEOUT = "WALLET_TIMEOUT",
+  INSUFFICIENT_FUNDS = "INSUFFICIENT_FUNDS",
 }
 
 const walletErrorHandlers: Record<WalletError, () => void> = {
-	[WalletError.NOT_INSTALLED]: () => { /* show install instructions */ },
-	[WalletError.CONNECT_FAILED]: () => { /* show retry modal */ },
-	[WalletError.TIMEOUT]: () => { /* fallback to polling */ },
-	[WalletError.INSUFFICIENT_FUNDS]: () => { /* show funding instructions */ }
+  [WalletError.NOT_INSTALLED]: () => {
+    /* show install instructions */
+  },
+  [WalletError.CONNECT_FAILED]: () => {
+    /* show retry modal */
+  },
+  [WalletError.TIMEOUT]: () => {
+    /* fallback to polling */
+  },
+  [WalletError.INSUFFICIENT_FUNDS]: () => {
+    /* show funding instructions */
+  },
 };
 ```
 
@@ -718,19 +794,19 @@ const walletErrorHandlers: Record<WalletError, () => void> = {
 
 ```typescript
 class IPFSService {
-	async upload(data: Buffer): Promise<string> {
-		// Retry strategy with exponential backoff
-		for (let attempt = 1; attempt <= 3; attempt++) {
-			try {
-				const cid = await this.client.add(data);
-				return cid.toString();
-			} catch (err) {
-				if (attempt === 3) throw err;
-				await sleep(attempt * 500);
-			}
-		}
-		throw new Error('IPFS upload failed');
-	}
+  async upload(data: Buffer): Promise<string> {
+    // Retry strategy with exponential backoff
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const cid = await this.client.add(data);
+        return cid.toString();
+      } catch (err) {
+        if (attempt === 3) throw err;
+        await sleep(attempt * 500);
+      }
+    }
+    throw new Error("IPFS upload failed");
+  }
 }
 ```
 
@@ -741,31 +817,37 @@ class IPFSService {
 ### 36-Hour Development Sprint
 
 #### Phase 1: Foundation (Hours 0-6)
+
 **Dev 1 (AR Core):**
+
 - Setup Lens Studio project with TypeScript
 - Implement basic object detection for 5 demo objects
 - Create spatial anchor system for stable tracking
 - Basic AR overlay rendering system
 
 **Dev 2 (AI & Voice):**
+
 - Gemini API integration and authentication
 - ElevenLabs voice synthesis setup
 - Basic voice input processing and conversational logic
 - Simple conversational response logic
 
 **Dev 3 (Backend):**
+
 - Express API server with TypeScript
 - Chroma vector database setup and configuration
 - Google Calendar API integration
 - Basic health data structure and storage
 
 **Dev 4 (Frontend Dashboard & Integration):**
+
 - Web-based admin dashboard for demo control
 - System integration testing and validation
 - Demo script automation and backup systems
 - Real-time monitoring and health checks
 
 **All Developers (Shared CI/CD Responsibility):**
+
 - Each dev owns their own deployment pipeline
 - Automated testing for their respective components
 - Self-service merge and deployment capabilities
@@ -774,31 +856,37 @@ class IPFSService {
 **Merge #1 (Hour 6):** Basic foundation integration test
 
 #### Phase 2: Core Features (Hours 6-12)
+
 **Dev 1 (AR Core):**
+
 - Hand gesture recognition for object interaction
 - Advanced AR UI components (text, arrows, panels)
 - Object-specific overlay templates
 - Spatial audio integration for voice feedback
 
 **Dev 2 (AI & Voice):**
+
 - Multimodal processing (visual + text context)
 - Context-aware conversation management with ElevenLabs
 - Object-specific AI response generation
 - Voice command parsing and intent recognition
 
 **Dev 3 (Backend):**
+
 - Real-time WebSocket connections
 - Calendar data processing and briefing generation
 - Medicine scheduling and reminder system
 - Nutrition analysis and recipe suggestions
 
 **Dev 4 (Frontend Dashboard & Integration):**
+
 - Web dashboard for demo control and monitoring
-- Cross-system integration testing and validation  
+- Cross-system integration testing and validation
 - Demo automation scripts and backup interfaces
 - Real-time system health monitoring
 
 **Shared CI/CD Approach:**
+
 - Each developer maintains their own deployment pipeline
 - Automated testing integrated into individual workflows
 - Self-service merge capabilities with automated validation
@@ -807,31 +895,37 @@ class IPFSService {
 **Merge #2 (Hour 12):** Core feature integration + testing
 
 #### Phase 3: Intelligence & Learning (Hours 12-18)
+
 **Dev 1 (AR Core):**
+
 - Contextual AR interface adaptations
 - Improved gesture recognition accuracy
 - Environmental lighting adjustments
 - Demo-specific optimizations
 
 **Dev 2 (AI & Voice):**
+
 - Chroma integration for contextual memory
 - Learning simulation system ("Day 1 vs Day 30")
 - Personalized suggestion algorithms
 - Advanced conversation context management with ElevenLabs
 
 **Dev 3 (Backend):**
+
 - User preference learning and storage
 - Object location tracking and prediction
 - Calendar pattern analysis
 - Health data trend processing
 
 **Dev 4 (Frontend Dashboard & Integration):**
+
 - Demo control dashboard and admin interface
 - System integration coordination and testing
 - Backup demonstration systems and fallback interfaces
 - Real-time monitoring and demo orchestration tools
 
 **Distributed CI/CD Model:**
+
 - Each developer owns their component's pipeline and deployment
 - Automated testing and validation at component level
 - Self-service integration with shared testing environments
@@ -840,13 +934,16 @@ class IPFSService {
 **Merge #3 (Hour 18):** Full AI integration + learning systems
 
 #### Phase 4: Demo Polish (Hours 18-24)
+
 **All Developers:**
+
 - Demo script optimization and timing
 - Edge case handling and error recovery
 - Performance tuning for demo environment
 - User experience refinement
 
 **Demo Flow Rehearsal:**
+
 1. Medicine reminder demonstration
 2. Breakfast assistance showcase
 3. Calendar briefing presentation
@@ -856,13 +953,16 @@ class IPFSService {
 **Merge #4 (Hour 24):** Demo-ready release candidate
 
 #### Phase 5: Testing & Reliability (Hours 24-30)
+
 **Testing Focus:**
+
 - End-to-end demo flow validation
 - Fallback system verification
 - Performance under demo conditions
 - Integration reliability testing
 
 **Demo Environment Setup:**
+
 - Controlled lighting configuration
 - Object placement standardization
 - Audio system testing in large hall
@@ -871,13 +971,16 @@ class IPFSService {
 **Merge #5 (Hour 30):** Production-ready demo version
 
 #### Phase 6: Final Preparation (Hours 30-36)
+
 **Final Activities:**
+
 - Demo environment calibration
 - Presenter training and script finalization
 - Backup demonstration preparation
 - Last-minute bug fixes and optimizations
 
 **Go-Live Checklist:**
+
 - [ ] All 5 objects reliably detected
 - [ ] Voice synthesis working in hall acoustics
 - [ ] Internet connectivity stable
@@ -888,12 +991,14 @@ class IPFSService {
 ### Daily Standup Schedule
 
 #### Every 6 Hours (Tight Feedback Loop)
+
 - **Status Review**: Current progress vs timeline
 - **Blocker Resolution**: Immediate issue addressing
 - **Integration Planning**: Next merge preparation
 - **Risk Assessment**: Potential demo issues
 
 #### Integration Points
+
 - **Hour 6**: Foundation + basic object detection
 - **Hour 12**: Core features + AI integration
 - **Hour 18**: Learning systems + advanced features
@@ -938,12 +1043,14 @@ gantt
 ### Risk Mitigation Timeline
 
 #### High-Risk Items (Address First)
+
 - **Object Detection Reliability** (Hours 0-12)
 - **Voice Synthesis in Hall** (Hours 6-18)
 - **API Integration Stability** (Hours 12-24)
 - **Demo Environment Setup** (Hours 24-36)
 
 #### Backup Plan Activation Points
+
 - **Hour 18**: If core features not working, activate simplified demo
 - **Hour 30**: If AI features unstable, use pre-recorded responses
 - **Hour 35**: If live demo risky, prepare recorded demonstration
@@ -963,6 +1070,7 @@ gantt
 ## 12. Development Resources
 
 ### Useful Links
+
 - Midnight docs: https://docs.midnight.network
 - Compact language reference: /compact docs/
 - IPFS docs: https://docs.ipfs.tech
@@ -971,6 +1079,7 @@ gantt
 ### Demo Data
 
 Provide small JSON files with variant markers for:
+
 - BRCA1 (positive/negative)
 - BRCA2 (positive/negative)
 - CYP2D6 metabolizer statuses
@@ -989,29 +1098,34 @@ Provide small JSON files with variant markers for:
 ## 14. Development Setup Instructions
 
 1. Install compact compiler and add to PATH
+
 ```bash
 export PATH="$PWD/compactc_v0.25.0_aarch64-darwin:$PATH"
 compactc --version
 ```
 
 2. Install Node.js dependencies
+
 ```bash
 npm install
 ```
 
 3. Frontend: run dev server
+
 ```bash
 cd frontend
 npm run dev
 ```
 
 4. Backend: run server
+
 ```bash
 cd backend
 npm run dev
 ```
 
 5. Contracts: compile and test
+
 ```bash
 cd contracts
 npm run build
@@ -1039,28 +1153,44 @@ const DEMO_OBJECTS = {
   breakfast_bowl: {
     triggers: ["nutrition_analysis", "recipe_suggestions", "calorie_tracking"],
     ai_context: "Breakfast and nutrition guidance",
-    voice_prompts: ["What's for breakfast?", "Show nutrition info", "Suggest healthy options"]
+    voice_prompts: [
+      "What's for breakfast?",
+      "Show nutrition info",
+      "Suggest healthy options",
+    ],
   },
   laptop: {
     triggers: ["calendar_briefing", "meeting_prep", "day_overview"],
-    ai_context: "Work and scheduling assistance", 
-    voice_prompts: ["What's on my schedule?", "Brief me on today", "Show my meetings"]
+    ai_context: "Work and scheduling assistance",
+    voice_prompts: [
+      "What's on my schedule?",
+      "Brief me on today",
+      "Show my meetings",
+    ],
   },
   keys: {
     triggers: ["departure_checklist", "location_tracking", "reminder_alerts"],
     ai_context: "Departure preparation and location memory",
-    voice_prompts: ["Where are my keys?", "Ready to leave", "Show departure checklist"]
+    voice_prompts: [
+      "Where are my keys?",
+      "Ready to leave",
+      "Show departure checklist",
+    ],
   },
   medicine_bottle: {
     triggers: ["medication_reminders", "health_tracking", "schedule_alerts"],
     ai_context: "Health and medication management",
-    voice_prompts: ["Medicine reminder", "Show health schedule", "Track medication"]
+    voice_prompts: [
+      "Medicine reminder",
+      "Show health schedule",
+      "Track medication",
+    ],
   },
   phone: {
     triggers: ["connectivity_check", "backup_interface", "device_sync"],
     ai_context: "Device integration and backup systems",
-    voice_prompts: ["Check connectivity", "Sync devices", "Backup mode"]
-  }
+    voice_prompts: ["Check connectivity", "Sync devices", "Backup mode"],
+  },
 };
 ```
 
@@ -1070,26 +1200,26 @@ const DEMO_OBJECTS = {
 // Core Lens Studio Components
 import {
   ObjectTracking,
-  MLComponent, 
+  MLComponent,
   DeviceTracking,
   HandTracking,
   SceneUnderstanding,
-  RemoteServiceModule
-} from 'LensStudio';
+  RemoteServiceModule,
+} from "LensStudio";
 
 // Object Detection Implementation
 class SnapObjectDetector {
   private objectTracker: ObjectTracking;
   private mlComponent: MLComponent;
-  
+
   async detectDemoObjects(): Promise<DemoObject[]> {
     // Leverage Snap's built-in object detection
     const detectedObjects = await this.objectTracker.getAllTrackedObjects();
     return this.filterDemoObjects(detectedObjects);
   }
-  
+
   private filterDemoObjects(objects: TrackedObject[]): DemoObject[] {
-    return objects.filter(obj => 
+    return objects.filter((obj) =>
       DEMO_OBJECTS.hasOwnProperty(obj.classification)
     );
   }
@@ -1101,9 +1231,9 @@ class AROverlayManager {
     const overlay = this.createOverlay({
       position: object.spatial_position,
       content: aiResponse,
-      style: this.getObjectSpecificStyle(object.name)
+      style: this.getObjectSpecificStyle(object.name),
     });
-    
+
     this.scene.addChild(overlay);
   }
 }
@@ -1126,7 +1256,7 @@ interface GeminiRequest {
   };
   task_context: {
     current_action: string;
-    expected_response_type: 'informational' | 'actionable' | 'confirmational';
+    expected_response_type: "informational" | "actionable" | "confirmational";
   };
 }
 
@@ -1136,22 +1266,21 @@ class GeminiProcessor {
     objectContext: DemoObject,
     conversationHistory: ChatHistory[]
   ): Promise<AIResponse> {
-    
     const prompt = this.buildContextualPrompt(
       objectContext,
       visualData,
       conversationHistory
     );
-    
+
     const response = await this.geminiAPI.generateContent({
       model: "gemini-pro-vision",
       prompt: prompt,
-      context: this.buildSystemContext()
+      context: this.buildSystemContext(),
     });
-    
+
     return this.parseResponse(response);
   }
-  
+
   private buildSystemContext(): string {
     return `
     You are SnapJarvis, an AR morning assistant. You help users with:
@@ -1192,14 +1321,13 @@ interface UserLearningProfile {
 
 class AdaptiveLearningEngine {
   private chroma: ChromaClient;
-  
+
   async updateUserProfile(
     interaction: UserInteraction,
     outcome: InteractionOutcome
   ): Promise<void> {
-    
     const embedding = await this.generateEmbedding(interaction);
-    
+
     await this.chroma.upsert({
       collection_name: "user_interactions",
       embeddings: [embedding],
@@ -1207,27 +1335,23 @@ class AdaptiveLearningEngine {
         timestamp: interaction.timestamp,
         object_type: interaction.object,
         success: outcome.success,
-        user_feedback: outcome.feedback
-      }
+        user_feedback: outcome.feedback,
+      },
     });
-    
+
     await this.updatePersonalizationModel(interaction, outcome);
   }
-  
+
   async generatePersonalizedSuggestion(
     context: InteractionContext
   ): Promise<PersonalizedSuggestion> {
-    
     const similarInteractions = await this.chroma.query({
       collection_name: "user_interactions",
       query_embeddings: [context.embedding],
-      n_results: 10
+      n_results: 10,
     });
-    
-    return this.synthesizePersonalizedResponse(
-      context,
-      similarInteractions
-    );
+
+    return this.synthesizePersonalizedResponse(context, similarInteractions);
   }
 }
 ```
@@ -1241,9 +1365,9 @@ demo_environment:
     desk_dimensions: "6ft x 3ft"
     lighting: "Controlled LED panels, 5000K, 800 lux"
     background: "Neutral backdrop, minimal distractions"
-    
+
   object_placement:
-    breakfast_bowl: 
+    breakfast_bowl:
       position: "Center-left, 12 inches from edge"
       contents: "Colorful cereal or fruit for visual recognition"
     laptop:
@@ -1258,19 +1382,19 @@ demo_environment:
     phone:
       position: "Right side, face-up, screen visible"
       state: "Powered on, showing home screen"
-      
+
   technical_setup:
     internet: "Dedicated 100Mbps connection with backup 5G hotspot"
     audio: "Wireless microphone system for presenter"
     spectacles: "Fully charged, firmware updated, paired devices"
     backup_systems: "Secondary Spectacles unit, offline demo mode"
-    
+
 demo_script:
   total_duration: "2 minutes"
   segments:
     medicine_reminder: "20 seconds - Show proactive health assistance"
     breakfast_analysis: "30 seconds - Nutrition tracking and suggestions"
-    calendar_briefing: "25 seconds - Day overview and meeting prep" 
+    calendar_briefing: "25 seconds - Day overview and meeting prep"
     key_location: "20 seconds - Object finding and spatial memory"
     departure_checklist: "15 seconds - Final preparation assistance"
     conclusion: "10 seconds - Summary and Q&A transition"
@@ -1292,7 +1416,7 @@ gemini_api:
 
 elevenlabs:
   status: "Voice synthesis"
-  integration_level: "Real-time speech generation" 
+  integration_level: "Real-time speech generation"
   backup_plan: "Pre-recorded audio files"
 
 chroma:
@@ -1312,8 +1436,9 @@ google_calendar:
 ```
 
 **Demo Checklist:**
+
 - [ ] All 5 demo objects pre-trained and reliably detected
-- [ ] Voice synthesis working in large hall acoustics  
+- [ ] Voice synthesis working in large hall acoustics
 - [ ] Internet connectivity stable with backup connection
 - [ ] CI/CD pipeline deployed and monitoring active
 - [ ] Learning system demonstrating personalization

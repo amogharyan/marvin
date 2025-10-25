@@ -1,0 +1,18 @@
+{
+  "name": "marvin-ar-assistant",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "agent-os/standards/backend"
+  ],
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@jest/globals": "^30.2.0",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.5",
+    "tslib": "^2.8.1"
+  }
+}

@@ -8,3 +8,11 @@
 - **Validation at Multiple Layers**: Implement validation at both model and database levels for defense in depth
 - **Relationship Clarity**: Define relationships clearly with appropriate cascade behaviors and naming conventions
 - **Avoid Over-Normalization**: Balance normalization with practical query performance needs
+
+## Supabase Environment Variables (Dev 3)
+
+```env
+# For hackathon demo, these values are hardcoded in Spectacles Lens AR client
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
+```
