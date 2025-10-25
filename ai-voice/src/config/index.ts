@@ -44,6 +44,35 @@ function validateConfig(): Config {
 
   const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
   
+  // In test environment, provide mock values instead of throwing error
+  if (missingVars.length > 0 && process.env.NODE_ENV === 'test') {
+    console.log('🧪 Test environment detected - using mock API keys');
+    return {
+      gemini: {
+        apiKey: 'test-gemini-key',
+        model: process.env.GEMINI_MODEL || 'gemini-pro-vision',
+        maxTokens: parseInt(process.env.GEMINI_MAX_TOKENS || '1000')
+      },
+      
+      elevenlabs: {
+        apiKey: 'test-elevenlabs-key',
+        voiceId: 'test-voice-id',
+        voiceAgentId: 'test-voice-agent-id',
+        baseUrl: process.env.ELEVENLABS_BASE_URL || 'https://api.elevenlabs.io/v1'
+      },
+      
+      server: {
+        port: parseInt(process.env.PORT || '3001'),
+        environment: process.env.NODE_ENV || 'test'
+      },
+      
+      external: {
+        arClientUrl: process.env.AR_CLIENT_URL || 'http://localhost:3000',
+        backendUrl: process.env.BACKEND_URL || 'http://localhost:3002'
+      }
+    };
+  }
+  
   if (missingVars.length > 0) {
     throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
   }
