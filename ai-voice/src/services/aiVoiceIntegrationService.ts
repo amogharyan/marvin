@@ -167,23 +167,25 @@ export class AIVoiceIntegrationService extends AsyncService {
    */
   public async simulateDemoLearningProgression(userId: string): Promise<AIResponse> {
     try {
-      await this.serviceOrchestrator.enhancedElevenLabsService.simulateDemoLearningProgression(userId);
+      await this.serviceOrchestrator.learningService.simulateDemoProgression(userId);
       
       return {
+        content: 'Demo learning progression simulated successfully',
         response: 'Demo learning progression simulated successfully',
         confidence: 0.9,
+        context: 'demo_progression',
         suggested_actions: ['View progression', 'Get insights', 'Continue demo'],
-        intent: 'demo_progression',
-        entities: { user_id: userId }
+        voice_enabled: true
       };
     } catch (error) {
       errorLog('Demo learning progression error:', error);
       return {
+        content: 'Failed to simulate demo learning progression',
         response: 'Failed to simulate demo learning progression',
         confidence: 0.3,
+        context: 'error',
         suggested_actions: ['Try again', 'Get help'],
-        intent: 'error',
-        entities: {}
+        voice_enabled: true
       };
     }
   }
@@ -210,7 +212,7 @@ export class AIVoiceIntegrationService extends AsyncService {
       const healthStatus = await this.serviceOrchestrator.getServiceHealthStatus();
       const allHealthy = await this.serviceOrchestrator.areAllServicesHealthy();
       
-      secureLog('Service health status:', healthStatus);
+      secureLog('Service health status:', JSON.stringify(healthStatus));
       return allHealthy;
     } catch (error) {
       errorLog('Health check failed:', error);
