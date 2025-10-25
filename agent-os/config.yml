@@ -1,0 +1,15 @@
+version: 2.2.0
+last_compiled: 2025-10-24 23:30:00
+
+# ================================================
+# GitHub Copilot Integration Settings
+#
+# Configured for GitHub Copilot workflow with agent-os standards
+# ================================================
+profile: github_copilot
+copilot_instructions_enabled: true
+github_copilot_agents: true
+use_copilot_chat: true
+agent_os_commands: true
+standards_as_copilot_knowledge: true
+workspace_context_enabled: true
