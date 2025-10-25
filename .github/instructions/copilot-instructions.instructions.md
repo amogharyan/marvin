@@ -1,3 +1,8 @@
+---
+applyTo: '**'
+---
+Provide project context and coding guidelines that AI should follow when generating code, answering questions, or reviewing changes.
+
 # Marvin AR Morning Assistant - Developer Instructions
 
 This file provides comprehensive guidance for developing the Marvin AR-powered morning assistant built for Snap Spectacles that transforms daily routines with intelligent, contextual guidance.
@@ -1493,13 +1498,6 @@ Use this framework for all development tasks:
 - Bull Queue: https://github.com/OptimalBits/bull
 - node-postgres: https://node-postgres.com/
 - JWT: https://jwt.io/
-
-### Midnight Blockchain
-- Midnight Docs: https://docs.midnight.network
-- Compact Language: https://docs.midnight.network/develop/tutorial
-- SDK Integration: Check with Dev 4 for ProofSDK
-- Exclusively do Dev 3 tasks. Always refer to @genomic-privacy-task-list.md and @merged-genomic-prd.md as context for what to do and the requirements necessary. Also always use @"process-task-list (1).md" as the strategy for how to implement these tasks
-- no longer focus on just dev 3. you are all devs
 - add this as our framework for coding: Ask Claude to write tests based on expected input/output pairs. Be explicit about the fact that you’re doing test-driven development so that it avoids creating mock implementations, even for functionality that doesn’t exist yet in the codebase.
 Tell Claude to run the tests and confirm they fail. Explicitly telling it not to write any implementation code at this stage is often helpful.
 Ask Claude to commit the tests when you’re satisfied with them.
