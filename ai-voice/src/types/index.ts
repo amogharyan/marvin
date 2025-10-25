@@ -71,7 +71,7 @@ export interface ConversationContext {
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
-  timestamp: Date;
+  timestamp: Date | string | number; // Allow flexible timestamp types
   object_context?: string;
 }
 

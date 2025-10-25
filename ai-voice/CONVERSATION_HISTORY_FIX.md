@@ -216,7 +216,7 @@ npm run test:services
 - **Empty Histories**: Graceful handling without errors
 - **Single Messages**: Proper deduplication logic
 - **Large Histories**: Efficient trimming without performance impact
-- **Concurrent Access**: Thread-safe operations
+- **Event Loop Safe**: Operations are atomic within a single Node.js process; cross-process or distributed access requires external synchronization (locks, database transactions, etc.)
 
 ---
 

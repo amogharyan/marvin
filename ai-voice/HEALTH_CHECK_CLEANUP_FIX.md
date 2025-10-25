@@ -81,10 +81,13 @@ removeUserPreferences(userId: string): void {
 ### **2. Enhanced Health Check with Proper Cleanup**
 **Safe test data management with try/finally:**
 ```typescript
+// Note: crypto.randomUUID() is available in Node.js 14.17.0+ and modern browsers
+// For older Node.js versions, use: import { randomUUID } from 'crypto';
+
 async healthCheck(): Promise<boolean> {
   // Use namespaced test IDs to avoid collisions
-  const testSessionId = `health_check_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  const testUserId = `health_check_user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const testSessionId = `health_check_test_${crypto.randomUUID()}`;
+  const testUserId = `health_check_user_${crypto.randomUUID()}`;
   
   try {
     // Test basic functionality
@@ -127,15 +130,15 @@ user_id: 'test_user'
 session_id: 'test_session'
 
 // After: Unique, namespaced IDs
-const testSessionId = `health_check_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-const testUserId = `health_check_user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+const testSessionId = `health_check_test_${crypto.randomUUID()}`;
+const testUserId = `health_check_user_${crypto.randomUUID()}`;
 ```
 
 **Benefits:**
-- **Timestamp-based**: `Date.now()` ensures uniqueness across time
-- **Random suffix**: `Math.random().toString(36).substr(2, 9)` adds randomness
+- **Cryptographically secure**: `crypto.randomUUID()` provides cryptographically secure randomness
+- **Collision-resistant**: UUIDs are designed to be globally unique
 - **Namespaced**: `health_check_` prefix prevents collision with real data
-- **Collision-resistant**: Virtually impossible to collide with real user data
+- **Standards-compliant**: Uses RFC 4122 UUID v4 format
 
 ---
 
@@ -245,14 +248,16 @@ npm run test:services
 
 ### **Unique ID Generation Strategy**
 ```typescript
-// Timestamp ensures uniqueness across time
-const timestamp = Date.now();
+// Note: crypto.randomUUID() is available in Node.js 14.17.0+ and modern browsers
+// For older Node.js versions, use: import { randomUUID } from 'crypto';
 
-// Random string ensures uniqueness within same millisecond
-const randomSuffix = Math.random().toString(36).substr(2, 9);
+// Cryptographically secure UUID ensures global uniqueness
+const sessionId = crypto.randomUUID();
+const userId = crypto.randomUUID();
 
 // Namespaced prefix prevents collision with real data
-const testSessionId = `health_check_test_${timestamp}_${randomSuffix}`;
+const testSessionId = `health_check_test_${sessionId}`;
+const testUserId = `health_check_user_${userId}`;
 ```
 
 ### **Cleanup Error Handling Pattern**

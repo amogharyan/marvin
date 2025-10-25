@@ -1,6 +1,7 @@
 // Context Memory Service for Advanced Conversation Management - Dev 2 Phase 2
 
 import { ConversationContext, DemoObject, ChatMessage, UserPreferences } from '../types';
+import { errorLog } from '../utils/secureLogger';
 
 export interface MemoryEntry {
   id: string;
@@ -42,11 +43,47 @@ export class ContextMemoryService {
    * Check if two messages are duplicates based on content and timestamp
    */
   private areMessagesDuplicate(msg1: ChatMessage, msg2: ChatMessage): boolean {
+    // Normalize timestamps to Date objects
+    const timestamp1 = this.normalizeTimestamp(msg1.timestamp);
+    const timestamp2 = this.normalizeTimestamp(msg2.timestamp);
+    
+    // If either timestamp is invalid, treat as non-duplicates
+    if (!timestamp1 || !timestamp2) {
+      return false;
+    }
+    
     // Check if messages have the same content and are within 1 second of each other
-    const timeDiff = Math.abs(msg1.timestamp.getTime() - msg2.timestamp.getTime());
+    const timeDiff = Math.abs(timestamp1.getTime() - timestamp2.getTime());
     return msg1.content === msg2.content && 
            msg1.role === msg2.role && 
            timeDiff < 1000; // Within 1 second
+  }
+
+  /**
+   * Normalize timestamp to Date object and validate
+   */
+  private normalizeTimestamp(timestamp: Date | string | number | undefined): Date | null {
+    if (!timestamp) {
+      return null;
+    }
+    
+    let date: Date;
+    
+    // Handle different timestamp types
+    if (timestamp instanceof Date) {
+      date = timestamp;
+    } else if (typeof timestamp === 'string' || typeof timestamp === 'number') {
+      date = new Date(timestamp);
+    } else {
+      return null;
+    }
+    
+    // Validate the date
+    if (isNaN(date.getTime())) {
+      return null;
+    }
+    
+    return date;
   }
 
   /**
@@ -134,14 +171,14 @@ export class ContextMemoryService {
       // Extract and store learning patterns
       await this.extractLearningPatterns(sessionId, context);
     } catch (error) {
-      console.error('Error storing conversation context:', error);
+      errorLog('Error storing conversation context', error);
     }
   }
 
   /**
    * Store individual message with context analysis
    */
-  private async storeMessage(sessionId: string, message: ChatMessage): Promise<void> {
+  public async storeMessage(sessionId: string, message: ChatMessage): Promise<void> {
     const memoryEntry: MemoryEntry = {
       id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       type: 'conversation',
@@ -202,7 +239,7 @@ export class ContextMemoryService {
         this.learningPatterns.set(userId, updatedPatterns);
       }
     } catch (error) {
-      console.error('Error extracting learning patterns:', error);
+      errorLog('Error extracting learning patterns', error);
     }
   }
 
@@ -361,7 +398,7 @@ export class ContextMemoryService {
         })
         .slice(0, 5); // Return top 5 suggestions
     } catch (error) {
-      console.error('Error generating personalized suggestions:', error);
+      errorLog('Error generating personalized suggestions', error);
       return [];
     }
   }
@@ -630,11 +667,16 @@ export class ContextMemoryService {
    */
   removeConversationContext(sessionId: string): void {
     try {
+      // First, get the context to extract userId for learning patterns cleanup
+      const context = this.conversationMemory.get(sessionId);
+      
       // Remove from conversation memory
       this.conversationMemory.delete(sessionId);
       
-      // Remove from learning patterns
-      this.learningPatterns.delete(sessionId);
+      // Remove learning patterns by userId (not sessionId)
+      if (context?.user_id) {
+        this.learningPatterns.delete(context.user_id);
+      }
       
       // Remove from object interaction history
       this.objectInteractionHistory.delete(sessionId);
@@ -642,7 +684,7 @@ export class ContextMemoryService {
       // Note: We don't remove from userPreferences Map as it's keyed by userId, not sessionId
       // and might be shared across multiple sessions
     } catch (error) {
-      console.error(`Error removing conversation context for session ${sessionId}:`, error);
+      errorLog(`Error removing conversation context for session ${sessionId}`, error);
     }
   }
 
@@ -653,7 +695,7 @@ export class ContextMemoryService {
     try {
       this.userPreferences.delete(userId);
     } catch (error) {
-      console.error(`Error removing user preferences for user ${userId}:`, error);
+      errorLog(`Error removing user preferences for user ${userId}`, error);
     }
   }
 
@@ -715,7 +757,7 @@ export class ContextMemoryService {
       
       return retrieved !== null;
     } catch (error) {
-      console.error('Context memory health check failed:', error);
+      errorLog('Context memory health check failed', error);
       return false;
     } finally {
       // Always clean up test data, even if health check fails
@@ -724,7 +766,7 @@ export class ContextMemoryService {
         this.removeUserPreferences(testUserId);
       } catch (cleanupError) {
         // Log cleanup errors but don't let them mask the health check result
-        console.error(`Health check cleanup failed for session ${testSessionId}:`, cleanupError);
+        errorLog(`Health check cleanup failed for session ${testSessionId}`, cleanupError);
       }
     }
   }

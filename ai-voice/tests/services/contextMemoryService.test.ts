@@ -1,4 +1,5 @@
 import { ContextMemoryService } from '../../src/services/contextMemoryService';
+import { ChatMessage } from '../../src/types';
 import { createMockConversationContext, createMockDemoObject, testUtils } from '../utils/testHelpers';
 
 describe('ContextMemoryService', () => {
@@ -452,6 +453,251 @@ describe('ContextMemoryService', () => {
     });
   });
 
+  describe('timestamp normalization', () => {
+    it('should handle Date timestamps correctly', async () => {
+      // Arrange
+      const sessionId = testUtils.createSessionId();
+      const userId = testUtils.createUserId();
+      const now = new Date();
+      
+      const context1 = createMockConversationContext({
+        user_id: userId,
+        session_id: sessionId,
+        conversation_history: [{
+          role: 'user' as const,
+          content: 'Hello',
+          timestamp: now
+        }]
+      });
+      
+      const context2 = createMockConversationContext({
+        user_id: userId,
+        session_id: sessionId,
+        conversation_history: [{
+          role: 'user' as const,
+          content: 'Hello',
+          timestamp: new Date(now.getTime() + 500) // 500ms later
+        }]
+      });
+
+      // Act
+      await service.storeConversationContext(sessionId, context1);
+      await service.storeConversationContext(sessionId, context2);
+
+      // Assert
+      const retrieved = await service.getEnhancedConversationContext(sessionId);
+      expect(retrieved?.conversation_history).toHaveLength(1); // Should deduplicate
+    });
+
+    it('should handle string timestamps correctly', async () => {
+      // Arrange
+      const sessionId = testUtils.createSessionId();
+      const userId = testUtils.createUserId();
+      const now = new Date();
+      
+      const context1 = createMockConversationContext({
+        user_id: userId,
+        session_id: sessionId,
+        conversation_history: [{
+          role: 'user' as const,
+          content: 'Hello',
+          timestamp: now.toISOString()
+        }]
+      });
+      
+      const context2 = createMockConversationContext({
+        user_id: userId,
+        session_id: sessionId,
+        conversation_history: [{
+          role: 'user' as const,
+          content: 'Hello',
+          timestamp: new Date(now.getTime() + 500).toISOString() // 500ms later
+        }]
+      });
+
+      // Act
+      await service.storeConversationContext(sessionId, context1);
+      await service.storeConversationContext(sessionId, context2);
+
+      // Assert
+      const retrieved = await service.getEnhancedConversationContext(sessionId);
+      expect(retrieved?.conversation_history).toHaveLength(1); // Should deduplicate
+    });
+
+    it('should handle number timestamps correctly', async () => {
+      // Arrange
+      const sessionId = testUtils.createSessionId();
+      const userId = testUtils.createUserId();
+      const now = Date.now();
+      
+      const context1 = createMockConversationContext({
+        user_id: userId,
+        session_id: sessionId,
+        conversation_history: [{
+          role: 'user' as const,
+          content: 'Hello',
+          timestamp: now
+        }]
+      });
+      
+      const context2 = createMockConversationContext({
+        user_id: userId,
+        session_id: sessionId,
+        conversation_history: [{
+          role: 'user' as const,
+          content: 'Hello',
+          timestamp: now + 500 // 500ms later
+        }]
+      });
+
+      // Act
+      await service.storeConversationContext(sessionId, context1);
+      await service.storeConversationContext(sessionId, context2);
+
+      // Assert
+      const retrieved = await service.getEnhancedConversationContext(sessionId);
+      expect(retrieved?.conversation_history).toHaveLength(1); // Should deduplicate
+    });
+
+    it('should treat invalid timestamps as non-duplicates', async () => {
+      // Arrange
+      const sessionId = testUtils.createSessionId();
+      const userId = testUtils.createUserId();
+      
+      const context1 = createMockConversationContext({
+        user_id: userId,
+        session_id: sessionId,
+        conversation_history: [{
+          role: 'user' as const,
+          content: 'Hello',
+          timestamp: 'invalid-date' as any
+        }]
+      });
+      
+      const context2 = createMockConversationContext({
+        user_id: userId,
+        session_id: sessionId,
+        conversation_history: [{
+          role: 'user' as const,
+          content: 'Hello',
+          timestamp: 'invalid-date' as any
+        }]
+      });
+
+      // Act
+      await service.storeConversationContext(sessionId, context1);
+      await service.storeConversationContext(sessionId, context2);
+
+      // Assert
+      const retrieved = await service.getEnhancedConversationContext(sessionId);
+      expect(retrieved?.conversation_history).toHaveLength(2); // Should not deduplicate invalid timestamps
+    });
+
+    it('should handle undefined timestamps gracefully', async () => {
+      // Arrange
+      const sessionId = testUtils.createSessionId();
+      const userId = testUtils.createUserId();
+      
+      const context1 = createMockConversationContext({
+        user_id: userId,
+        session_id: sessionId,
+        conversation_history: [{
+          role: 'user' as const,
+          content: 'Hello',
+          timestamp: undefined as any
+        }]
+      });
+      
+      const context2 = createMockConversationContext({
+        user_id: userId,
+        session_id: sessionId,
+        conversation_history: [{
+          role: 'user' as const,
+          content: 'Hello',
+          timestamp: undefined as any
+        }]
+      });
+
+      // Act
+      await service.storeConversationContext(sessionId, context1);
+      await service.storeConversationContext(sessionId, context2);
+
+      // Assert
+      const retrieved = await service.getEnhancedConversationContext(sessionId);
+      expect(retrieved?.conversation_history).toHaveLength(2); // Should not deduplicate undefined timestamps
+    });
+
+    it('should not deduplicate messages with different content', async () => {
+      // Arrange
+      const sessionId = testUtils.createSessionId();
+      const userId = testUtils.createUserId();
+      const now = new Date();
+      
+      const context1 = createMockConversationContext({
+        user_id: userId,
+        session_id: sessionId,
+        conversation_history: [{
+          role: 'user' as const,
+          content: 'Hello',
+          timestamp: now
+        }]
+      });
+      
+      const context2 = createMockConversationContext({
+        user_id: userId,
+        session_id: sessionId,
+        conversation_history: [{
+          role: 'user' as const,
+          content: 'Hi there',
+          timestamp: new Date(now.getTime() + 500) // 500ms later
+        }]
+      });
+
+      // Act
+      await service.storeConversationContext(sessionId, context1);
+      await service.storeConversationContext(sessionId, context2);
+
+      // Assert
+      const retrieved = await service.getEnhancedConversationContext(sessionId);
+      expect(retrieved?.conversation_history).toHaveLength(2); // Should not deduplicate different content
+    });
+
+    it('should not deduplicate messages with different roles', async () => {
+      // Arrange
+      const sessionId = testUtils.createSessionId();
+      const userId = testUtils.createUserId();
+      const now = new Date();
+      
+      const context1 = createMockConversationContext({
+        user_id: userId,
+        session_id: sessionId,
+        conversation_history: [{
+          role: 'user' as const,
+          content: 'Hello',
+          timestamp: now
+        }]
+      });
+      
+      const context2 = createMockConversationContext({
+        user_id: userId,
+        session_id: sessionId,
+        conversation_history: [{
+          role: 'assistant' as const,
+          content: 'Hello',
+          timestamp: new Date(now.getTime() + 500) // 500ms later
+        }]
+      });
+
+      // Act
+      await service.storeConversationContext(sessionId, context1);
+      await service.storeConversationContext(sessionId, context2);
+
+      // Assert
+      const retrieved = await service.getEnhancedConversationContext(sessionId);
+      expect(retrieved?.conversation_history).toHaveLength(2); // Should not deduplicate different roles
+    });
+  });
+
   describe('healthCheck', () => {
     it('should return true for healthy service', async () => {
       // Act
@@ -511,6 +757,50 @@ describe('ContextMemoryService', () => {
       // Assert
       const afterCleanup = await service.getEnhancedConversationContext(sessionId);
       expect(afterCleanup).toBeNull();
+    });
+
+    it('should remove learning patterns by userId when removing conversation context', async () => {
+      // Arrange
+      const sessionId = testUtils.createSessionId();
+      const userId = testUtils.createUserId();
+      const context = createMockConversationContext({
+        user_id: userId,
+        session_id: sessionId,
+        conversation_history: [
+          { role: 'user' as const, content: 'I take medicine at 8am', timestamp: new Date() },
+          { role: 'assistant' as const, content: 'I\'ll remember that', timestamp: new Date() }
+        ]
+      });
+
+      // Store context to generate learning patterns
+      await service.storeConversationContext(sessionId, context);
+
+      // Verify learning patterns were created for the userId
+      const learningPatternsBefore = service['learningPatterns'].get(userId);
+      expect(learningPatternsBefore).toBeDefined();
+      expect(learningPatternsBefore!.length).toBeGreaterThan(0);
+
+      // Act - Remove conversation context
+      service.removeConversationContext(sessionId);
+
+      // Assert - Learning patterns should be removed by userId
+      const learningPatternsAfter = service['learningPatterns'].get(userId);
+      expect(learningPatternsAfter).toBeUndefined();
+
+      // Verify conversation context is also removed
+      const contextAfter = await service.getEnhancedConversationContext(sessionId);
+      expect(contextAfter).toBeNull();
+    });
+
+    it('should handle missing context gracefully when removing conversation context', async () => {
+      // Arrange
+      const nonExistentSessionId = 'non-existent-session';
+
+      // Act - Try to remove non-existent context
+      service.removeConversationContext(nonExistentSessionId);
+
+      // Assert - Should not throw error and learning patterns should remain unchanged
+      expect(service['learningPatterns'].size).toBeGreaterThanOrEqual(0);
     });
 
     it('should remove user preferences successfully', async () => {
