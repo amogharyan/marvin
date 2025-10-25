@@ -10,8 +10,8 @@ import {MobileInteractor} from "SpectaclesInteractionKit.lspkg/Core/MobileIntera
 import WorldCameraFinderProvider from "SpectaclesInteractionKit.lspkg/Providers/CameraProvider/WorldCameraFinderProvider"
 import NativeLogger from "SpectaclesInteractionKit.lspkg/Utils/NativeLogger"
 import {validate} from "SpectaclesInteractionKit.lspkg/Utils/validate"
-import {MapComponent} from "../MapComponent/Scripts/MapComponent"
-import {customGetEuler} from "../MapComponent/Scripts/MapUtils"
+import {MapComponent} from "./Scripts/MapComponent"
+import {customGetEuler} from "./Scripts/MapUtils"
 
 export type TranslateEventArg = {
   interactable: Interactable

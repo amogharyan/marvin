@@ -1,4 +1,4 @@
-import { PingMenuReferences } from "../PingMenu/PingMenuReferences";
+import { PingMenuReferences } from "./PingMenuReferences";
 import { PingMenu } from "./PingMenu";
 
 /**

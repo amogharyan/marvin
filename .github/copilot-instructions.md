@@ -846,6 +846,24 @@ Ask Claude to commit the code once you're satisfied with the changes.
   }
 }
 ```
+---
+
+## ⚠️ ADVANCED / OPTIONAL: Backend Service Examples
+
+**IMPORTANT:** The following sections show **Node.js backend implementations** for reference only.
+
+**When to use these:**
+- Only if deploying Supabase Edge Functions or separate backend services
+- For advanced use cases requiring server-side processing
+- Not needed for the main Lens Studio-only demo architecture
+
+**The main guide uses Lens Studio components (above) that run directly on Spectacles.**
+
+For the 36-hour hackathon demo, **skip these backend sections** unless you're specifically implementing Edge Functions.
+
+---
+
+```
 
 ### 3. ElevenLabs Voice Synthesis
 

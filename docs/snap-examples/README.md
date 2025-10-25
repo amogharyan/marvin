@@ -4,6 +4,17 @@ A comprehensive collection of templates and examples for building Lens experienc
 
 <img src="./_README-ref/spectacles-2024-hero.png" alt="spectacles-2024-hero" width="900" />
 
+## 📚 Quick Navigation
+
+**For Marvin Development:**
+- **[EXAMPLES-INDEX.md](./EXAMPLES-INDEX.md)** - Complete guide to all examples with use cases
+- **[.agent-context.md](./.agent-context.md)** - Quick reference for AI agents and developers
+
+**For External Documentation:**
+- See original repository README below
+
+---
+
 ## What you'll find here
 
 This repository contains multiple template projects showcasing different features and capabilities available when building for Spectacles. Each template is a complete, working example that you can use as a starting point for your own projects.
