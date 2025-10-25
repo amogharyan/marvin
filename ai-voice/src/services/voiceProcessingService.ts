@@ -1,7 +1,9 @@
 // Voice Processing Service for Basic Conversational Logic
 
-import { ConversationContext, DemoObject, ChatMessage, DEMO_OBJECTS } from '../types';
+import { ConversationContext, DemoObject, DEMO_OBJECTS } from '../types';
 import { secureLog, safeLog } from '../utils/secureLogger';
+import { LEARNING_CONSTANTS } from '../constants/learningConstants';
+import { ConversationRole } from '../types/enums';
 
 export class VoiceProcessingService {
   private conversationMemory: Map<string, ConversationContext> = new Map();
@@ -34,14 +36,14 @@ export class VoiceProcessingService {
       // Add to conversation history
       this.addToConversationHistory(
         conversationContext.session_id,
-        'assistant',
+        ConversationRole.ASSISTANT,
         response,
         objectContext?.name
       );
 
       return {
         response: response,
-        confidence: 0.8,
+        confidence: LEARNING_CONSTANTS.CONFIDENCE.VOICE_SUCCESS,
         suggested_actions: this.extractSuggestedActions(response, objectContext)
       };
     } catch (error) {
@@ -49,7 +51,7 @@ export class VoiceProcessingService {
       
       return {
         response: 'I heard you, but I\'m having trouble processing that right now. Can you try again?',
-        confidence: 0.3,
+        confidence: LEARNING_CONSTANTS.CONFIDENCE.VOICE_FALLBACK,
         suggested_actions: ['Try again', 'Speak clearly', 'Use text']
       };
     }
@@ -61,7 +63,7 @@ export class VoiceProcessingService {
   private generateContextualResponse(
     voiceText: string,
     objectContext?: DemoObject,
-    conversationContext?: ConversationContext
+    _conversationContext?: ConversationContext
   ): string {
     const lowerText = voiceText.toLowerCase();
     
@@ -112,7 +114,7 @@ export class VoiceProcessingService {
   private generateObjectSpecificResponse(
     voiceText: string,
     objectContext: DemoObject,
-    objectConfig: any
+    _objectConfig: any
   ): string {
     const objectName = objectContext.name;
     
@@ -155,7 +157,7 @@ export class VoiceProcessingService {
   /**
    * Extract suggested actions from response
    */
-  private extractSuggestedActions(response: string, objectContext?: DemoObject): string[] {
+  private extractSuggestedActions(response: string, _objectContext?: DemoObject): string[] {
     const actions: string[] = [];
     
     if (response.includes('schedule') || response.includes('calendar')) {
@@ -198,7 +200,7 @@ export class VoiceProcessingService {
    */
   private addToConversationHistory(
     sessionId: string,
-    role: 'user' | 'assistant' | 'system',
+    role: ConversationRole,
     content: string,
     objectContext?: string
   ): void {
@@ -245,7 +247,7 @@ export class VoiceProcessingService {
 
       return {
         response: response,
-        confidence: 0.9,
+        confidence: LEARNING_CONSTANTS.CONFIDENCE.VOICE_OBJECT_SPECIFIC,
         suggested_actions: suggested_actions
       };
     } catch (error) {
@@ -253,7 +255,7 @@ export class VoiceProcessingService {
       
       return {
         response: 'Good morning! Ready to start your day?',
-        confidence: 0.6,
+        confidence: LEARNING_CONSTANTS.CONFIDENCE.VOICE_GENERAL,
         suggested_actions: ['Check schedule', 'Take medicine', 'Have breakfast']
       };
     }

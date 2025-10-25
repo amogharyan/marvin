@@ -12,7 +12,7 @@
     "test": "npm run test:all",
     "install:all": "npm install && npm run install:ai-voice && npm run install:ar-core && npm run install:snap-cloud",
     "install:ai-voice": "cd ai-voice && npm install",
-    "install:ar-core": "cd ar-core && npm install", 
+    "install:ar-core": "cd ar-core && npm install",
     "install:snap-cloud": "cd snap-cloud && npm install",
     "build:all": "npm run build:ai-voice && npm run build:ar-core",
     "build:ai-voice": "cd ai-voice && npm run build",
@@ -48,5 +48,9 @@
   "bugs": {
     "url": "https://github.com/amogharyan/marvin/issues"
   },
-  "homepage": "https://github.com/amogharyan/marvin#readme"
+  "homepage": "https://github.com/amogharyan/marvin#readme",
+  "dependencies": {
+    "@chroma-core/default-embed": "^0.1.8",
+    "chromadb": "^3.0.17"
+  }
 }

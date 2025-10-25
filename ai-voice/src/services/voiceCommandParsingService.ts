@@ -1,7 +1,8 @@
 // Voice Command Parsing and Intent Recognition Service - Dev 2 Phase 2
 
-import { ConversationContext, DemoObject, ChatMessage } from '../types';
+import { ConversationContext, DemoObject } from '../types';
 import { secureLog, debugLog, errorLog } from '../utils/secureLogger';
+import { LEARNING_CONSTANTS } from '../constants/learningConstants';
 
 export interface VoiceIntent {
   intent: string;
@@ -23,6 +24,22 @@ export class VoiceCommandParsingService {
   private entityPatterns: Map<string, RegExp[]> = new Map();
 
   constructor() {
+    // Only sync initialization in constructor
+  }
+
+  /**
+   * Factory method to create and initialize the voice command parsing service
+   */
+  public static async create(): Promise<VoiceCommandParsingService> {
+    const service = new VoiceCommandParsingService();
+    await service.initialize();
+    return service;
+  }
+
+  /**
+   * Initialize the service
+   */
+  public async initialize(): Promise<void> {
     this.initializeIntentPatterns();
     this.initializeEntityPatterns();
     debugLog('🎯 Voice Command Parsing Service initialized');
@@ -112,7 +129,7 @@ export class VoiceCommandParsingService {
       return {
         intent: {
           intent: 'unknown',
-          confidence: 0.1,
+          confidence: LEARNING_CONSTANTS.CONFIDENCE.COMMAND_UNKNOWN,
           entities: {},
           action: 'clarify',
           parameters: {}
@@ -236,7 +253,7 @@ export class VoiceCommandParsingService {
 
     // Boost confidence if object context matches
     if (objectContext && this.isObjectContextRelevant(bestMatch.intent, objectContext)) {
-      bestMatch.confidence = Math.min(1.0, bestMatch.confidence + 0.2);
+      bestMatch.confidence = Math.min(LEARNING_CONSTANTS.CONFIDENCE.MAX_CONFIDENCE, bestMatch.confidence + LEARNING_CONSTANTS.CONFIDENCE.COMMAND_OBJECT_CONTEXT_BOOST);
     }
 
     return bestMatch;
@@ -245,7 +262,7 @@ export class VoiceCommandParsingService {
   /**
    * Extract entities from voice text
    */
-  private extractEntities(text: string, intent: string): Record<string, any> {
+  private extractEntities(text: string, _intent: string): Record<string, any> {
     const entities: Record<string, any> = {};
     
     for (const [entityType, patterns] of this.entityPatterns) {
@@ -263,7 +280,7 @@ export class VoiceCommandParsingService {
   /**
    * Determine action based on intent and entities
    */
-  private determineAction(intent: { intent: string; confidence: number }, entities: Record<string, any>, objectContext?: DemoObject): string {
+  private determineAction(intent: { intent: string; confidence: number }, _entities: Record<string, any>, _objectContext?: DemoObject): string {
     switch (intent.intent) {
       case 'medicine_reminder':
         return 'show_medicine_schedule';
@@ -354,7 +371,7 @@ export class VoiceCommandParsingService {
   /**
    * Generate follow-up actions based on parsed command
    */
-  private generateFollowUpActions(intent: { intent: string; confidence: number }, entities: Record<string, any>, objectContext?: DemoObject): string[] {
+  private generateFollowUpActions(intent: { intent: string; confidence: number }, _entities: Record<string, any>, _objectContext?: DemoObject): string[] {
     switch (intent.intent) {
       case 'medicine_reminder':
         return ['Show medicine schedule', 'Set reminder', 'Track medication'];
@@ -380,21 +397,21 @@ export class VoiceCommandParsingService {
   /**
    * Calculate confidence score for intent matching
    */
-  private calculateConfidence(text: string, pattern: RegExp, objectContext?: DemoObject): number {
+  private calculateConfidence(text: string, pattern: RegExp, _objectContext?: DemoObject): number {
     const match = text.match(pattern);
     if (!match) return 0;
 
-    let confidence = 0.5; // Base confidence
+    let confidence = LEARNING_CONSTANTS.CONFIDENCE.COMMAND_BASE; // Base confidence
 
     // Boost confidence for exact matches
     if (match[0].length === text.length) {
-      confidence += 0.3;
+      confidence += LEARNING_CONSTANTS.CONFIDENCE.COMMAND_EXACT_MATCH_BOOST;
     }
 
     // Boost confidence for longer matches
-    confidence += Math.min(0.2, match[0].length / text.length);
+    confidence += Math.min(LEARNING_CONSTANTS.CONFIDENCE.COMMAND_LENGTH_BOOST_MAX, match[0].length / text.length);
 
-    return Math.min(1.0, confidence);
+    return Math.min(LEARNING_CONSTANTS.CONFIDENCE.MAX_CONFIDENCE, confidence);
   }
 
   /**
