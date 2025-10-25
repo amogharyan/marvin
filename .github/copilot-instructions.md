@@ -1065,14 +1065,25 @@ dotenv.config();
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.string().transform(Number).default('3000'),
-  DATABASE_URL: z.string().url(),
-  REDIS_URL: z.string().url(),
-  JWT_SECRET: z.string().min(32),
-  JWT_REFRESH_SECRET: z.string().min(32),
-  IPFS_PROJECT_ID: z.string(),
-  IPFS_PROJECT_SECRET: z.string(),
-  MIDNIGHT_RPC_URL: z.string().url(),
-  CORS_ORIGIN: z.string().url()
+  
+  // AI Service APIs
+  GEMINI_API_KEY: z.string().min(1),
+  ELEVENLABS_API_KEY: z.string().min(1),
+  OPENAI_API_KEY: z.string().min(1), // For Chroma embeddings
+  
+  // Supabase Configuration
+  SUPABASE_URL: z.string().url(),
+  SUPABASE_ANON_KEY: z.string().min(1),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+  
+  // External Integrations
+  GOOGLE_CALENDAR_API_KEY: z.string().optional(),
+  HEALTH_API_KEY: z.string().optional(),
+  
+  // Demo Configuration
+  DEMO_MODE: z.boolean().default(true),
+  DEMO_OBJECTS_COUNT: z.number().default(5),
+  CORS_ORIGIN: z.string().default('*')
 });
 
 const envResult = envSchema.safeParse(process.env);
@@ -1128,75 +1139,38 @@ export function subscribeToInteractions(userId: string, callback: (payload: any)
 }
 ```
 
-### Redis with Bull Queue
-
-```typescript
-// config/redis.ts
-import Redis from 'ioredis';
-import Bull from 'bull';
-import { config } from './index';
-
-export const redis = new Redis(config.REDIS_URL);
-
-// Proof generation queue
-export const proofQueue = new Bull('proof-generation', config.REDIS_URL, {
-  defaultJobOptions: {
-    removeOnComplete: true,
-    removeOnFail: false,
-    attempts: 3,
-    backoff: {
-      type: 'exponential',
-      delay: 2000
-    }
-  }
-});
-
-// Queue event handlers
-proofQueue.on('completed', (job, result) => {
-  console.log(`Job ${job.id} completed with result:`, result);
-});
-
-proofQueue.on('failed', (job, err) => {
-  console.error(`Job ${job.id} failed:`, err);
-});
-```
-
 ## 🔐 Authentication & Security
 
-### JWT Implementation
+### Supabase Auth Integration
 
 ```typescript
-// auth/auth.service.ts
-import jwt from 'jsonwebtoken';
-import { config } from '@config/index';
+// auth/supabase-auth.service.ts
+import { createClient } from '@supabase/supabase-js'
 
-export class AuthService {
-  generateTokens(userId: string): { accessToken: string; refreshToken: string } {
-    const accessToken = jwt.sign(
-      { userId, type: 'access' },
-      config.JWT_SECRET,
-      { expiresIn: '1h' }
-    );
+export class SupabaseAuthService {
+  private supabase = createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_ANON_KEY!
+  )
 
-    const refreshToken = jwt.sign(
-      { userId, type: 'refresh' },
-      config.JWT_REFRESH_SECRET,
-      { expiresIn: '24h' }
-    );
-
-    return { accessToken, refreshToken };
+  async signInWithEmail(email: string, password: string) {
+    const { data, error } = await this.supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+    
+    if (error) throw error
+    return data
   }
 
-  verifyAccessToken(token: string): { userId: string } {
-    try {
-      const decoded = jwt.verify(token, config.JWT_SECRET) as any;
-      if (decoded.type !== 'access') {
-        throw new Error('Invalid token type');
-      }
-      return { userId: decoded.userId };
-    } catch (error) {
-      throw new AuthenticationError('Invalid access token');
-    }
+  async getSession() {
+    const { data: { session } } = await this.supabase.auth.getSession()
+    return session
+  }
+
+  async signOut() {
+    const { error } = await this.supabase.auth.signOut()
+    if (error) throw error
   }
 }
 ```
@@ -1207,10 +1181,10 @@ export class AuthService {
 // middleware/rateLimiter.ts
 import rateLimit from 'express-rate-limit';
 
-export const proofGenerationLimiter = rateLimit({
+export const aiProcessingLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 10,
-  message: 'Too many proof requests, please try again later'
+  message: 'Too many AI requests, please try again later'
 });
 
 export const generalLimiter = rateLimit({
@@ -1221,87 +1195,93 @@ export const generalLimiter = rateLimit({
 });
 ```
 
-## 🚀 WebSocket Integration
+## 🚀 Supabase Realtime Integration
 
-### Socket.io Setup
+### Realtime Setup
 
 ```typescript
-// websocket/socket.service.ts
-import { Server } from 'socket.io';
-import { Server as HTTPServer } from 'http';
-import jwt from 'jsonwebtoken';
-import { config } from '@config/index';
+// realtime/supabase-realtime.service.ts
+import { createClient } from '@supabase/supabase-js'
 
-export class SocketService {
-  private io: Server;
+export class SupabaseRealtimeService {
+  private supabase = createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_ANON_KEY!
+  )
 
-  initialize(httpServer: HTTPServer) {
-    this.io = new Server(httpServer, {
-      cors: {
-        origin: config.CORS_ORIGIN,
-        credentials: true
-      }
-    });
-
-    // Authentication middleware
-    this.io.use((socket, next) => {
-      const token = socket.handshake.auth.token;
-      try {
-        const decoded = jwt.verify(token, config.JWT_SECRET) as any;
-        socket.data.userId = decoded.userId;
-        next();
-      } catch (err) {
-        next(new Error('Authentication failed'));
-      }
-    });
-
-    this.setupHandlers();
+  subscribeToObjectInteractions(userId: string, callback: (payload: any) => void) {
+    return this.supabase
+      .channel('object-interactions')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'object_interactions',
+        filter: `user_id=eq.${userId}`
+      }, callback)
+      .subscribe()
   }
 
-  private setupHandlers() {
-    this.io.on('connection', (socket) => {
-      console.log(`User ${socket.data.userId} connected`);
-
-      socket.on('join:patient-room', (patientId: string) => {
-        socket.join(`patient:${patientId}`);
-      });
-
-      socket.on('disconnect', () => {
-        console.log(`User ${socket.data.userId} disconnected`);
-      });
-    });
+  subscribeToHealthReminders(userId: string, callback: (payload: any) => void) {
+    return this.supabase
+      .channel('health-reminders')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'medication_schedules',
+        filter: `user_id=eq.${userId}`
+      }, callback)
+      .subscribe()
   }
 
-  emitProofProgress(patientId: string, progress: number) {
-    this.io.to(`patient:${patientId}`).emit('proof:progress', { progress });
+  async broadcastGestureEvent(gestureData: any) {
+    await this.supabase
+      .channel('gestures')
+      .send({
+        type: 'broadcast',
+        event: 'gesture-performed',
+        payload: gestureData
+      })
   }
 }
 ```
 
-## 📦 API Route Standards
+## 📦 Supabase Edge Functions
 
 ```typescript
-// Standard RESTful routes structure
-import { Router } from 'express';
-import { authenticate } from '@middleware/auth';
-import { validate } from '@middleware/validation';
-import { proofSchema } from './proof.schemas';
+// Standard Edge Function structure
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const router = Router();
+const supabase = createClient(
+  Deno.env.get('SUPABASE_URL') ?? '',
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+)
 
-// RESTful endpoints
-router.post('/generate', 
-  authenticate,
-  validate(proofSchema),
-  asyncHandler(proofController.generate)
-);
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
 
-router.get('/status/:jobId',
-  authenticate,
-  asyncHandler(proofController.getStatus)
-);
-
-export default router;
+  try {
+    const { objectType, imageData, userContext } = await req.json()
+    
+    // Process AR object interaction
+    const response = await processObjectInteraction({
+      objectType,
+      imageData,
+      userContext
+    })
+    
+    return new Response(JSON.stringify(response), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+})
 ```
 
 ## 🔧 Validation with Zod
@@ -1310,11 +1290,24 @@ export default router;
 // validation schemas
 import { z } from 'zod';
 
-export const proofGenerationSchema = z.object({
+export const objectInteractionSchema = z.object({
   body: z.object({
-    traitType: z.enum(['BRCA1', 'BRCA2', 'CYP2D6']),
-    genomeHash: z.string().length(66),
-    threshold: z.number().min(0).max(1).optional()
+    objectType: z.enum(['breakfast_bowl', 'laptop', 'keys', 'medicine', 'phone']),
+    confidence: z.number().min(0).max(1),
+    position: z.object({
+      x: z.number(),
+      y: z.number(), 
+      z: z.number()
+    }),
+    imageData: z.string().optional()
+  })
+});
+
+export const healthReminderSchema = z.object({
+  body: z.object({
+    medicationName: z.string().min(1),
+    scheduledTime: z.string(),
+    dosage: z.string().optional()
   })
 });
 
@@ -1356,7 +1349,7 @@ export const logger = winston.createLogger({
     winston.format.errors({ stack: true }),
     winston.format.json()
   ),
-  defaultMeta: { service: 'genomic-privacy-backend' },
+  defaultMeta: { service: 'marvin-ar-assistant' },
   transports: [
     new winston.transports.Console({
       format: winston.format.simple()
@@ -1369,11 +1362,12 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
   const start = Date.now();
   res.on('finish', () => {
     const duration = Date.now() - start;
-    logger.info('Request processed', {
+    logger.info('AR interaction processed', {
       method: req.method,
       url: req.url,
       status: res.statusCode,
-      duration
+      duration,
+      objectType: req.body?.objectType
     });
   });
   next();
@@ -1386,10 +1380,10 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
 
 - `main` - Production-ready code
 - `develop` - Integration branch
-- `feature/backend` - Your main working branch
-- `feature/backend-auth` - Authentication implementation
-- `feature/backend-proof` - Proof generation
-- `feature/backend-ipfs` - IPFS integration
+- `feature/ar-core` - AR and Lens Studio development
+- `feature/ai-voice` - AI and voice integration
+- `feature/supabase` - Supabase integration and Edge Functions
+- `feature/integration` - Testing and demo preparation
 
 ### Commit Message Format
 
@@ -1399,62 +1393,96 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
 Types: feat, fix, docs, style, refactor, test, chore
 
 Example:
-feat(auth): implement JWT authentication
+feat(ar): implement object detection for demo objects
 
-- Add JWT token generation
-- Implement refresh token rotation
-- Add authentication middleware
+- Add medicine bottle recognition
+- Implement spatial tracking for keys
+- Add gesture detection for object interaction
 
-Hour 6 checkpoint
+Hour 12 checkpoint
 ```
 
 ## ⚠️ Important Notes for Hackathon
 
 ### Critical Path Focus
-- **Hours 0-8**: Foundation - auth, database, basic API
-- **Hours 8-16**: Core features - proof queue, IPFS, websocket
-- **Hours 16-24**: Integration with frontend and blockchain
-- **Hours 24-32**: Polish and error handling
-- **Hours 32-48**: Testing and deployment
+- **Hours 0-8**: Foundation - AR setup, AI integration, Supabase database
+- **Hours 8-16**: Core features - object detection, voice synthesis, realtime
+- **Hours 16-24**: Integration with all systems and demo optimization
+- **Hours 24-32**: Polish and error handling for demo reliability
+- **Hours 32-36**: Demo preparation and final testing
 
 ### Emergency Fallbacks
-- If IPFS fails: Use PostgreSQL with mock CIDs
-- If Redis fails: Use in-memory queue (development only)
-- If proof generation slow: Pre-generate common proofs
+- If Snap Spectacles fail: Use phone backup interface with manual object triggers
+- If Gemini API down: Use cached responses for demo scenarios
+- If ElevenLabs fails: Use pre-recorded audio files
+- If Supabase fails: Use offline mode with local data
+- If object detection fails: Use manual triggers with simulated detection
 
 ### Testing Priorities
-1. Authentication flow
-2. Proof generation queue
-3. IPFS upload/retrieval
-4. WebSocket real-time updates
-5. Error handling
+1. AR object detection accuracy
+2. AI response generation speed
+3. Voice synthesis quality
+4. Supabase Realtime updates
+5. Demo environment reliability
 
 ### Deployment Checklist
-- [ ] Environment variables set in Railway
-- [ ] PostgreSQL addon configured
-- [ ] Redis addon configured
-- [ ] WebSocket support enabled
-- [ ] CORS properly configured
-- [ ] Rate limiting active
+- [ ] Supabase project configured with production settings
+- [ ] Edge Functions deployed and tested
+- [ ] Database migrations applied
+- [ ] Row Level Security policies active
+- [ ] Realtime subscriptions configured
+- [ ] Demo environment variables set
+- [ ] AR client authentication working
 - [ ] Error logging configured
 
 ## 🔍 Search Command Requirements
 
-**CRITICAL**: Use appropriate search tools for TypeScript/Node.js projects:
+**CRITICAL**: Use appropriate search tools for AR/TypeScript projects:
 
 ```bash
 # Search for text in files
 grep -r "pattern" src/
 
-# Find TypeScript files
-find src -name "*.ts"
+# Find TypeScript files in AR project
+find lens-studio -name "*.ts"
+find ai-processing -name "*.ts"
 
-# Search with context
-grep -B 2 -A 2 "pattern" src/**/*.ts
+# Search with context for AR components
+grep -B 2 -A 2 "ObjectDetection\|AROverlay" src/**/*.ts
 
-# Find TODOs
-grep -r "TODO\|FIXME" src/
+# Find TODOs and demo issues
+grep -r "TODO\|FIXME\|DEMO" src/
 ```
+
+## 📚 Essential Resources
+
+### Documentation
+- Supabase: https://supabase.com/docs
+- Snap Lens Studio: https://docs.snap.com/lens-studio
+- Gemini API: https://ai.google.dev/gemini-api/docs
+- ElevenLabs: https://elevenlabs.io/docs
+- Chroma: https://docs.trychroma.com/
+
+### Test-Driven Development Framework
+Use this framework for all development tasks:
+
+1. **Write Tests First**: Write tests based on expected input/output pairs. Be explicit about doing test-driven development to avoid creating mock implementations.
+
+2. **Run and Confirm Failures**: Run the tests and confirm they fail. Don't write implementation code at this stage.
+
+3. **Commit Tests**: Commit the tests when satisfied with them.
+
+4. **Write Implementation**: Write code that passes the tests without modifying the tests. Iterate until all tests pass.
+
+5. **Verify Implementation**: Ensure the implementation isn't overfitting to the tests.
+
+6. **Commit Code**: Commit the final implementation once satisfied with the changes.
+
+### Project Context
+- Focus on Marvin AR Morning Assistant development
+- Follow the task list and PRD requirements for 36-hour hackathon
+- Prioritize demo reliability and 2-minute presentation flow
+- Use Supabase for all backend services and real-time features
 
 ## 📚 Essential Resources
 
