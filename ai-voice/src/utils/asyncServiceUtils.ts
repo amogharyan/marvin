@@ -128,7 +128,7 @@ export class ServiceRegistry {
 export function requiresInitialization(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
   const originalMethod = descriptor.value;
 
-  descriptor.value = function(...args: any[]) {
+  descriptor.value = function(this: AsyncService, ...args: any[]) {
     if (!this.isInitialized) {
       throw new Error(`${this.constructor.name}.${propertyKey} requires the service to be initialized first`);
     }

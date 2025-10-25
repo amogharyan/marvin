@@ -4,8 +4,8 @@ import { createMockConversationContext, createMockDemoObject } from '../utils/te
 describe('VoiceCommandParsingService', () => {
   let service: VoiceCommandParsingService;
 
-  beforeEach(() => {
-    service = new VoiceCommandParsingService();
+  beforeEach(async () => {
+    service = await VoiceCommandParsingService.create();
   });
 
   describe('parseVoiceCommand', () => {

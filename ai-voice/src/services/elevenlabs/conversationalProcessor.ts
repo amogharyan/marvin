@@ -4,6 +4,7 @@
 import { ElevenLabs } from '@elevenlabs/elevenlabs-js';
 import { secureLog, errorLog, debugLog } from '../../utils/secureLogger';
 import { ConversationContext, DemoObject, ChatMessage } from '../../types';
+import { ConversationRole, ReminderFrequency } from '../../types/enums';
 import { ChromaService } from '../chromaService';
 import { LearningSimulationService } from '../learningSimulationService';
 import { LEARNING_CONSTANTS } from '../../constants/learningConstants';
@@ -280,12 +281,12 @@ export class ConversationalProcessor {
         session_id: request.sessionId,
         conversation_history: [
           {
-            role: 'user',
+            role: ConversationRole.USER,
             content: request.voiceText,
             timestamp: new Date()
           },
           {
-            role: 'assistant',
+            role: ConversationRole.ASSISTANT,
             content: response.text,
             timestamp: new Date()
           }
@@ -299,7 +300,7 @@ export class ConversationalProcessor {
           interaction_preferences: {
             proactive_assistance: true,
             detailed_explanations: true,
-            reminder_frequency: 'medium'
+            reminder_frequency: ReminderFrequency.MEDIUM
           },
           routine_patterns: {
             typical_wake_time: '7:00 AM',

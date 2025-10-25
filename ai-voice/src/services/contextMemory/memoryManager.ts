@@ -95,6 +95,18 @@ export class MemoryManager {
   }
 
   /**
+   * Remove user preferences
+   */
+  public removeUserPreferences(userId: string): void {
+    try {
+      this.userPreferences.delete(userId);
+      console.log(`Removed user preferences for user: ${userId}`);
+    } catch (error) {
+      errorLog('Failed to remove user preferences:', error);
+    }
+  }
+
+  /**
    * Get user preferences
    */
   public getUserPreferences(userId: string): UserPreferences | undefined {

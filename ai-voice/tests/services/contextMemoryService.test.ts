@@ -1,5 +1,7 @@
 import { ContextMemoryService } from '../../src/services/contextMemoryService';
 import { createMockConversationContext, createMockDemoObject, testUtils } from '../utils/testHelpers';
+import { ConversationRole, ReminderFrequency } from '../../src/types/enums';
+import { UserPreferences } from '../../src/types';
 
 describe('ContextMemoryService', () => {
   let service: ContextMemoryService;
@@ -11,29 +13,27 @@ describe('ContextMemoryService', () => {
   describe('storeConversationContext', () => {
     it('should store conversation context successfully', async () => {
       // Arrange
-      const sessionId = testUtils.createSessionId();
       const context = createMockConversationContext();
 
       // Act
-      await service.storeConversationContext(sessionId, context);
+      service.storeConversationContext(context);
 
       // Assert
-      const retrieved = await service.getEnhancedConversationContext(sessionId);
+      const retrieved = service.getEnhancedConversationContext(context.session_id);
       expect(retrieved).toHaveProperty('user_id', 'test_user');
       expect(retrieved).toHaveProperty('session_id');
       expect(retrieved).toHaveProperty('conversation_history');
-      expect(retrieved).toHaveProperty('learned_patterns');
+      expect(retrieved).toHaveProperty('user_preferences');
     });
 
     it('should update existing conversation context', async () => {
       // Arrange
-      const sessionId = testUtils.createSessionId();
       const initialContext = createMockConversationContext();
       const updatedContext = createMockConversationContext({
         conversation_history: [
           ...initialContext.conversation_history,
           {
-            role: 'user' as const,
+            role: ConversationRole.USER,
             content: 'Updated message',
             timestamp: new Date()
           }
@@ -41,11 +41,11 @@ describe('ContextMemoryService', () => {
       });
 
       // Act
-      await service.storeConversationContext(sessionId, initialContext);
-      await service.storeConversationContext(sessionId, updatedContext);
+      service.storeConversationContext(initialContext);
+      service.storeConversationContext(updatedContext);
 
       // Assert
-      const retrieved = await service.getEnhancedConversationContext(sessionId);
+      const retrieved = service.getEnhancedConversationContext(initialContext.session_id);
       expect(retrieved?.conversation_history).toHaveLength(3); // Original 2 + updated 1 (no duplicates)
       expect(retrieved?.conversation_history[2].content).toBe('Updated message');
     });
@@ -59,7 +59,7 @@ describe('ContextMemoryService', () => {
       const objectContext = createMockDemoObject();
 
       // Act
-      const suggestions = await service.generatePersonalizedSuggestions(userId, context, objectContext);
+      const suggestions = service.generatePersonalizedSuggestions(context);
 
       // Assert
       expect(suggestions).toBeInstanceOf(Array);
@@ -77,7 +77,7 @@ describe('ContextMemoryService', () => {
       const context = createMockConversationContext();
 
       // Act
-      const suggestions = await service.generatePersonalizedSuggestions(userId, context);
+      const suggestions = service.generatePersonalizedSuggestions(context);
 
       // Assert
       expect(suggestions).toBeInstanceOf(Array);
@@ -93,7 +93,7 @@ describe('ContextMemoryService', () => {
       });
 
       // Act
-      const suggestions = await service.generatePersonalizedSuggestions(userId, context, objectContext);
+      const suggestions = service.generatePersonalizedSuggestions(context);
 
       // Assert
       expect(suggestions).toBeInstanceOf(Array);
@@ -104,7 +104,6 @@ describe('ContextMemoryService', () => {
   describe('userPreferences persistence', () => {
     it('should persist user preferences to Map when storing conversation context', async () => {
       // Arrange
-      const sessionId = testUtils.createSessionId();
       const userId = testUtils.createUserId();
       const context = createMockConversationContext({
         user_id: userId,
@@ -117,7 +116,7 @@ describe('ContextMemoryService', () => {
           interaction_preferences: {
             proactive_assistance: false,
             detailed_explanations: true,
-            reminder_frequency: 'high'
+            reminder_frequency: ReminderFrequency.HIGH
           },
           routine_patterns: {
             typical_wake_time: '6:00 AM',
@@ -128,7 +127,7 @@ describe('ContextMemoryService', () => {
       });
 
       // Act
-      await service.storeConversationContext(sessionId, context);
+      service.storeConversationContext(context);
 
       // Assert
       const storedPrefs = service.getUserPreferences(userId);
@@ -155,7 +154,7 @@ describe('ContextMemoryService', () => {
           interaction_preferences: {
             proactive_assistance: true,
             detailed_explanations: true,
-            reminder_frequency: 'medium'
+            reminder_frequency: ReminderFrequency.MEDIUM
           },
           routine_patterns: {
             typical_wake_time: '7:00 AM',
@@ -176,7 +175,7 @@ describe('ContextMemoryService', () => {
           interaction_preferences: {
             proactive_assistance: false,
             detailed_explanations: true,
-            reminder_frequency: 'medium'
+            reminder_frequency: ReminderFrequency.MEDIUM
           },
           routine_patterns: {
             typical_wake_time: '7:00 AM',
@@ -187,8 +186,8 @@ describe('ContextMemoryService', () => {
       });
 
       // Act
-      await service.storeConversationContext(sessionId, initialContext);
-      await service.storeConversationContext(sessionId, updatedContext);
+      await service.storeConversationContext(initialContext);
+      await service.storeConversationContext(updatedContext);
 
       // Assert
       const storedPrefs = service.getUserPreferences(userId);
@@ -212,7 +211,7 @@ describe('ContextMemoryService', () => {
       });
 
       // Act
-      await service.storeConversationContext(sessionId, context);
+      await service.storeConversationContext(context);
 
       // Assert
       const storedPrefs = service.getUserPreferences(userId);
@@ -222,11 +221,21 @@ describe('ContextMemoryService', () => {
     it('should update user preferences directly', () => {
       // Arrange
       const userId = testUtils.createUserId();
-      const preferences = {
+      const preferences: UserPreferences = {
         voice_settings: {
           preferred_voice: 'test_voice',
           speech_rate: 1.5,
           pitch: 1.0
+        },
+        interaction_preferences: {
+          proactive_assistance: true,
+          detailed_explanations: true,
+          reminder_frequency: ReminderFrequency.HIGH
+        },
+        routine_patterns: {
+          typical_wake_time: '7:00 AM',
+          breakfast_preferences: ['cereal', 'toast'],
+          medicine_schedule: ['8:00 AM', '8:00 PM']
         }
       };
 
@@ -245,17 +254,16 @@ describe('ContextMemoryService', () => {
   describe('conversation history management', () => {
     it('should merge conversation histories without duplicates', async () => {
       // Arrange
-      const sessionId = testUtils.createSessionId();
       const userId = testUtils.createUserId();
       
       const message1 = {
-        role: 'user' as const,
+        role: ConversationRole.USER,
         content: 'Hello',
         timestamp: new Date()
       };
       
       const message2 = {
-        role: 'assistant' as const,
+            role: ConversationRole.ASSISTANT,
         content: 'Hi there!',
         timestamp: new Date(Date.now() + 1000)
       };
@@ -271,11 +279,11 @@ describe('ContextMemoryService', () => {
       });
 
       // Act
-      await service.storeConversationContext(sessionId, initialContext);
-      await service.storeConversationContext(sessionId, updatedContext);
+      service.storeConversationContext(initialContext);
+      service.storeConversationContext(updatedContext);
 
       // Assert
-      const retrieved = await service.getEnhancedConversationContext(sessionId);
+      const retrieved = service.getEnhancedConversationContext(initialContext.session_id);
       expect(retrieved?.conversation_history).toHaveLength(2); // Should not duplicate message1
       expect(retrieved?.conversation_history[0].content).toBe('Hello');
       expect(retrieved?.conversation_history[1].content).toBe('Hi there!');
@@ -288,7 +296,7 @@ describe('ContextMemoryService', () => {
       
       // First, create a context with some initial messages
       const initialMessages = Array.from({ length: 10 }, (_, i) => ({
-        role: 'user' as const,
+        role: ConversationRole.USER,
         content: `Initial Message ${i + 1}`,
         timestamp: new Date(Date.now() + i * 1000)
       }));
@@ -300,7 +308,7 @@ describe('ContextMemoryService', () => {
 
       // Then add more messages to exceed 20
       const additionalMessages = Array.from({ length: 20 }, (_, i) => ({
-        role: 'user' as const,
+        role: ConversationRole.USER,
         content: `Additional Message ${i + 1}`,
         timestamp: new Date(Date.now() + (i + 10) * 1000)
       }));
@@ -311,11 +319,11 @@ describe('ContextMemoryService', () => {
       });
 
       // Act
-      await service.storeConversationContext(sessionId, initialContext);
-      await service.storeConversationContext(sessionId, updatedContext);
+      await service.storeConversationContext(initialContext);
+      await service.storeConversationContext(updatedContext);
 
       // Assert
-      const retrieved = await service.getEnhancedConversationContext(sessionId);
+      const retrieved = service.getEnhancedConversationContext(sessionId);
       expect(retrieved?.conversation_history).toHaveLength(20); // Should be trimmed to 20
       expect(retrieved?.conversation_history[0].content).toBe('Additional Message 1'); // First 10 initial messages should be removed
       expect(retrieved?.conversation_history[19].content).toBe('Additional Message 20'); // Last should be preserved
@@ -332,17 +340,17 @@ describe('ContextMemoryService', () => {
       });
 
       const message = {
-        role: 'user' as const,
+        role: ConversationRole.USER,
         content: 'Test message',
         timestamp: new Date()
       };
 
       // Act
-      await service.storeConversationContext(sessionId, context, message);
-      await service.storeConversationContext(sessionId, context, message); // Same message again
+      await service.storeConversationContext(context);
+      await service.storeConversationContext(context); // Same message again
 
       // Assert
-      const retrieved = await service.getEnhancedConversationContext(sessionId);
+      const retrieved = service.getEnhancedConversationContext(sessionId);
       expect(retrieved?.conversation_history).toHaveLength(1); // Should not duplicate
       expect(retrieved?.conversation_history[0].content).toBe('Test message');
     });
@@ -363,11 +371,11 @@ describe('ContextMemoryService', () => {
       });
 
       // Act
-      await service.storeConversationContext(sessionId, context1);
-      await service.storeConversationContext(sessionId, context2);
+      await service.storeConversationContext(context1);
+      await service.storeConversationContext(context2);
 
       // Assert
-      const retrieved = await service.getEnhancedConversationContext(sessionId);
+      const retrieved = service.getEnhancedConversationContext(sessionId);
       expect(retrieved?.conversation_history).toHaveLength(0);
     });
     it('should handle undefined user preferences safely', async () => {
@@ -393,7 +401,7 @@ describe('ContextMemoryService', () => {
           interaction_preferences: {
             proactive_assistance: true,
             detailed_explanations: true,
-            reminder_frequency: 'medium'
+            reminder_frequency: ReminderFrequency.MEDIUM
           },
           routine_patterns: {
             typical_wake_time: '7:00 AM',
@@ -404,11 +412,11 @@ describe('ContextMemoryService', () => {
       });
 
       // Act
-      await service.storeConversationContext(sessionId, contextWithUndefinedPrefs);
-      await service.storeConversationContext(sessionId, contextWithPartialPrefs);
+      await service.storeConversationContext(contextWithUndefinedPrefs);
+      await service.storeConversationContext(contextWithPartialPrefs);
 
       // Assert
-      const retrieved = await service.getEnhancedConversationContext(sessionId);
+      const retrieved = service.getEnhancedConversationContext(sessionId);
       expect(retrieved?.user_preferences).toBeDefined();
       expect(retrieved?.user_preferences?.voice_settings.preferred_voice).toBe('custom_voice');
     });
@@ -430,7 +438,7 @@ describe('ContextMemoryService', () => {
           interaction_preferences: {
             proactive_assistance: false,
             detailed_explanations: true,
-            reminder_frequency: 'high'
+            reminder_frequency: ReminderFrequency.HIGH
           },
           routine_patterns: {
             typical_wake_time: '6:00 AM',
@@ -441,10 +449,10 @@ describe('ContextMemoryService', () => {
       });
 
       // Act
-      await service.storeConversationContext(sessionId, contextWithPartialNested);
+      await service.storeConversationContext(contextWithPartialNested);
 
       // Assert
-      const retrieved = await service.getEnhancedConversationContext(sessionId);
+      const retrieved = service.getEnhancedConversationContext(sessionId);
       expect(retrieved?.user_preferences).toBeDefined();
       expect(retrieved?.user_preferences?.voice_settings.preferred_voice).toBe('test_voice');
       expect(retrieved?.user_preferences?.interaction_preferences.proactive_assistance).toBe(false);
@@ -463,7 +471,7 @@ describe('ContextMemoryService', () => {
         user_id: userId,
         session_id: sessionId,
         conversation_history: [{
-          role: 'user' as const,
+          role: ConversationRole.USER,
           content: 'Hello',
           timestamp: now
         }]
@@ -473,18 +481,18 @@ describe('ContextMemoryService', () => {
         user_id: userId,
         session_id: sessionId,
         conversation_history: [{
-          role: 'user' as const,
+          role: ConversationRole.USER,
           content: 'Hello',
           timestamp: new Date(now.getTime() + 500) // 500ms later
         }]
       });
 
       // Act
-      await service.storeConversationContext(sessionId, context1);
-      await service.storeConversationContext(sessionId, context2);
+      await service.storeConversationContext(context1);
+      await service.storeConversationContext(context2);
 
       // Assert
-      const retrieved = await service.getEnhancedConversationContext(sessionId);
+      const retrieved = service.getEnhancedConversationContext(sessionId);
       expect(retrieved?.conversation_history).toHaveLength(1); // Should deduplicate
     });
 
@@ -498,7 +506,7 @@ describe('ContextMemoryService', () => {
         user_id: userId,
         session_id: sessionId,
         conversation_history: [{
-          role: 'user' as const,
+          role: ConversationRole.USER,
           content: 'Hello',
           timestamp: now.toISOString()
         }]
@@ -508,18 +516,18 @@ describe('ContextMemoryService', () => {
         user_id: userId,
         session_id: sessionId,
         conversation_history: [{
-          role: 'user' as const,
+          role: ConversationRole.USER,
           content: 'Hello',
           timestamp: new Date(now.getTime() + 500).toISOString() // 500ms later
         }]
       });
 
       // Act
-      await service.storeConversationContext(sessionId, context1);
-      await service.storeConversationContext(sessionId, context2);
+      await service.storeConversationContext(context1);
+      await service.storeConversationContext(context2);
 
       // Assert
-      const retrieved = await service.getEnhancedConversationContext(sessionId);
+      const retrieved = service.getEnhancedConversationContext(sessionId);
       expect(retrieved?.conversation_history).toHaveLength(1); // Should deduplicate
     });
 
@@ -533,7 +541,7 @@ describe('ContextMemoryService', () => {
         user_id: userId,
         session_id: sessionId,
         conversation_history: [{
-          role: 'user' as const,
+          role: ConversationRole.USER,
           content: 'Hello',
           timestamp: now
         }]
@@ -543,18 +551,18 @@ describe('ContextMemoryService', () => {
         user_id: userId,
         session_id: sessionId,
         conversation_history: [{
-          role: 'user' as const,
+          role: ConversationRole.USER,
           content: 'Hello',
           timestamp: now + 500 // 500ms later
         }]
       });
 
       // Act
-      await service.storeConversationContext(sessionId, context1);
-      await service.storeConversationContext(sessionId, context2);
+      await service.storeConversationContext(context1);
+      await service.storeConversationContext(context2);
 
       // Assert
-      const retrieved = await service.getEnhancedConversationContext(sessionId);
+      const retrieved = service.getEnhancedConversationContext(sessionId);
       expect(retrieved?.conversation_history).toHaveLength(1); // Should deduplicate
     });
 
@@ -567,7 +575,7 @@ describe('ContextMemoryService', () => {
         user_id: userId,
         session_id: sessionId,
         conversation_history: [{
-          role: 'user' as const,
+          role: ConversationRole.USER,
           content: 'Hello',
           timestamp: 'invalid-date' as any
         }]
@@ -577,18 +585,18 @@ describe('ContextMemoryService', () => {
         user_id: userId,
         session_id: sessionId,
         conversation_history: [{
-          role: 'user' as const,
+          role: ConversationRole.USER,
           content: 'Hello',
           timestamp: 'invalid-date' as any
         }]
       });
 
       // Act
-      await service.storeConversationContext(sessionId, context1);
-      await service.storeConversationContext(sessionId, context2);
+      await service.storeConversationContext(context1);
+      await service.storeConversationContext(context2);
 
       // Assert
-      const retrieved = await service.getEnhancedConversationContext(sessionId);
+      const retrieved = service.getEnhancedConversationContext(sessionId);
       expect(retrieved?.conversation_history).toHaveLength(2); // Should not deduplicate invalid timestamps
     });
 
@@ -601,7 +609,7 @@ describe('ContextMemoryService', () => {
         user_id: userId,
         session_id: sessionId,
         conversation_history: [{
-          role: 'user' as const,
+          role: ConversationRole.USER,
           content: 'Hello',
           timestamp: undefined as any
         }]
@@ -611,18 +619,18 @@ describe('ContextMemoryService', () => {
         user_id: userId,
         session_id: sessionId,
         conversation_history: [{
-          role: 'user' as const,
+          role: ConversationRole.USER,
           content: 'Hello',
           timestamp: undefined as any
         }]
       });
 
       // Act
-      await service.storeConversationContext(sessionId, context1);
-      await service.storeConversationContext(sessionId, context2);
+      await service.storeConversationContext(context1);
+      await service.storeConversationContext(context2);
 
       // Assert
-      const retrieved = await service.getEnhancedConversationContext(sessionId);
+      const retrieved = service.getEnhancedConversationContext(sessionId);
       expect(retrieved?.conversation_history).toHaveLength(2); // Should not deduplicate undefined timestamps
     });
 
@@ -636,7 +644,7 @@ describe('ContextMemoryService', () => {
         user_id: userId,
         session_id: sessionId,
         conversation_history: [{
-          role: 'user' as const,
+          role: ConversationRole.USER,
           content: 'Hello',
           timestamp: now
         }]
@@ -646,18 +654,18 @@ describe('ContextMemoryService', () => {
         user_id: userId,
         session_id: sessionId,
         conversation_history: [{
-          role: 'user' as const,
+          role: ConversationRole.USER,
           content: 'Hi there',
           timestamp: new Date(now.getTime() + 500) // 500ms later
         }]
       });
 
       // Act
-      await service.storeConversationContext(sessionId, context1);
-      await service.storeConversationContext(sessionId, context2);
+      await service.storeConversationContext(context1);
+      await service.storeConversationContext(context2);
 
       // Assert
-      const retrieved = await service.getEnhancedConversationContext(sessionId);
+      const retrieved = service.getEnhancedConversationContext(sessionId);
       expect(retrieved?.conversation_history).toHaveLength(2); // Should not deduplicate different content
     });
 
@@ -671,7 +679,7 @@ describe('ContextMemoryService', () => {
         user_id: userId,
         session_id: sessionId,
         conversation_history: [{
-          role: 'user' as const,
+          role: ConversationRole.USER,
           content: 'Hello',
           timestamp: now
         }]
@@ -681,18 +689,18 @@ describe('ContextMemoryService', () => {
         user_id: userId,
         session_id: sessionId,
         conversation_history: [{
-          role: 'assistant' as const,
+            role: ConversationRole.ASSISTANT,
           content: 'Hello',
           timestamp: new Date(now.getTime() + 500) // 500ms later
         }]
       });
 
       // Act
-      await service.storeConversationContext(sessionId, context1);
-      await service.storeConversationContext(sessionId, context2);
+      await service.storeConversationContext(context1);
+      await service.storeConversationContext(context2);
 
       // Assert
-      const retrieved = await service.getEnhancedConversationContext(sessionId);
+      const retrieved = service.getEnhancedConversationContext(sessionId);
       expect(retrieved?.conversation_history).toHaveLength(2); // Should not deduplicate different roles
     });
   });
@@ -708,16 +716,16 @@ describe('ContextMemoryService', () => {
 
     it('should clean up test data after health check', async () => {
       // Arrange
-      const initialMemorySize = service['conversationMemory'].size;
-      const initialUserPrefsSize = service['userPreferences'].size;
+      const initialMemorySize = service['memoryManager']['conversationMemory'].size;
+      const initialUserPrefsSize = service['memoryManager']['userPreferences'].size;
 
       // Act
       await service.healthCheck();
 
       // Assert
       // Memory should be cleaned up after health check
-      expect(service['conversationMemory'].size).toBe(initialMemorySize);
-      expect(service['userPreferences'].size).toBe(initialUserPrefsSize);
+      expect(service['memoryManager']['conversationMemory'].size).toBe(initialMemorySize);
+      expect(service['memoryManager']['userPreferences'].size).toBe(initialUserPrefsSize);
     });
 
     it('should use unique test IDs to avoid collisions', async () => {
@@ -744,17 +752,17 @@ describe('ContextMemoryService', () => {
         session_id: sessionId
       });
 
-      await service.storeConversationContext(sessionId, context);
+      await service.storeConversationContext(context);
 
       // Verify it exists
-      const beforeCleanup = await service.getEnhancedConversationContext(sessionId);
+      const beforeCleanup = service.getEnhancedConversationContext(sessionId);
       expect(beforeCleanup).toBeDefined();
 
       // Act
       service.removeConversationContext(sessionId);
 
       // Assert
-      const afterCleanup = await service.getEnhancedConversationContext(sessionId);
+      const afterCleanup = service.getEnhancedConversationContext(sessionId);
       expect(afterCleanup).toBeNull();
     });
 
@@ -766,13 +774,13 @@ describe('ContextMemoryService', () => {
         user_id: userId,
         session_id: sessionId,
         conversation_history: [
-          { role: 'user' as const, content: 'I take medicine at 8am', timestamp: new Date() },
-          { role: 'assistant' as const, content: 'I\'ll remember that', timestamp: new Date() }
+          { role: ConversationRole.USER, content: 'I take medicine at 8am', timestamp: new Date() },
+          { role: ConversationRole.ASSISTANT, content: 'I\'ll remember that', timestamp: new Date() }
         ]
       });
 
       // Store context to generate learning patterns
-      await service.storeConversationContext(sessionId, context);
+      await service.storeConversationContext(context);
 
       // Verify learning patterns were created for the userId
       const learningPatternsBefore = service['learningPatterns'].get(userId);
@@ -787,7 +795,7 @@ describe('ContextMemoryService', () => {
       expect(learningPatternsAfter).toBeUndefined();
 
       // Verify conversation context is also removed
-      const contextAfter = await service.getEnhancedConversationContext(sessionId);
+      const contextAfter = service.getEnhancedConversationContext(sessionId);
       expect(contextAfter).toBeNull();
     });
 
@@ -805,9 +813,9 @@ describe('ContextMemoryService', () => {
     it('should remove user preferences successfully', async () => {
       // Arrange
       const userId = testUtils.createUserId();
-      const preferences = {
+      const preferences: UserPreferences = {
         voice_settings: { preferred_voice: 'test_voice', speech_rate: 1.0, pitch: 1.0 },
-        interaction_preferences: { proactive_assistance: true, detailed_explanations: true, reminder_frequency: 'medium' as const },
+        interaction_preferences: { proactive_assistance: true, detailed_explanations: true, reminder_frequency: ReminderFrequency.MEDIUM },
         routine_patterns: { typical_wake_time: '7:00 AM', breakfast_preferences: [], medicine_schedule: [] }
       };
 

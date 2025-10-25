@@ -1,7 +1,8 @@
 // Test utilities and type-safe mock data
 import { ConversationContext, DemoObject, ChatMessage } from '../../src/types';
+import { ConversationRole, ReminderFrequency } from '../../src/types/enums';
 
-export const createMockChatMessage = (role: 'user' | 'assistant' | 'system', content: string): ChatMessage => ({
+export const createMockChatMessage = (role: ConversationRole, content: string): ChatMessage => ({
   role,
   content,
   timestamp: new Date()
@@ -11,8 +12,8 @@ export const createMockConversationContext = (overrides: Partial<ConversationCon
   user_id: 'test_user',
   session_id: 'test_session',
   conversation_history: [
-    createMockChatMessage('user', 'Hello'),
-    createMockChatMessage('assistant', 'Hi! How can I help you today?')
+    createMockChatMessage(ConversationRole.USER, 'Hello'),
+    createMockChatMessage(ConversationRole.ASSISTANT, 'Hi! How can I help you today?')
   ],
   user_preferences: {
     voice_settings: {
@@ -23,7 +24,7 @@ export const createMockConversationContext = (overrides: Partial<ConversationCon
     interaction_preferences: {
       proactive_assistance: true,
       detailed_explanations: true,
-      reminder_frequency: 'medium'
+      reminder_frequency: ReminderFrequency.MEDIUM
     },
     routine_patterns: {
       typical_wake_time: '7:00 AM',

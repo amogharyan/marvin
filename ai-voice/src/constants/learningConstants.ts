@@ -76,6 +76,9 @@ export const LEARNING_CONSTANTS = {
     // Learning Metrics Thresholds
     LEARNING_METRICS_MIN: 0.1,
     LEARNING_METRICS_MAX: 1.0,
+    
+    // General Thresholds
+    MEDIUM_THRESHOLD: 0.5,
   },
   
   LEARNING_RATE: {

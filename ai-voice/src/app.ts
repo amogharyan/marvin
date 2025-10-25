@@ -40,12 +40,13 @@ app.get('/health', createHealthEndpoint(
   'Health Check'
 ));
 
-// Object detection processing endpoint
+// Object detection processing endpoint - using voice processing instead
 app.post('/api/process-object', createEndpoint(
-  (req) => aiVoiceService.processObjectDetection(
-    req.body.detectedObject,
-    req.body.userMessage,
-    req.body.conversationContext
+  (req) => aiVoiceService.processVoiceInput(
+    req.body.userMessage || 'Object detected',
+    req.body.conversationContext?.sessionId || 'default-session',
+    req.body.conversationContext?.userId || 'default-user',
+    req.body.detectedObject
   ),
   ['detectedObject'],
   'Object Processing'
@@ -91,11 +92,11 @@ app.post('/api/process-visual', createEndpoint(
   'Visual Processing'
 ));
 
-// Proactive assistance endpoint
+// Proactive assistance endpoint - using personalized suggestions
 app.post('/api/proactive-assistance', createEndpoint(
-  (req) => aiVoiceService.generateProactiveAssistance(
-    req.body.conversationContext,
-    req.body.timeOfDay || 'morning'
+  (req) => aiVoiceService.getPersonalizedSuggestions(
+    req.body.conversationContext?.userId || 'default-user',
+    req.body.objectContext
   ),
   [],
   'Proactive Assistance'

@@ -28,6 +28,7 @@ export interface Vector3 {
 
 export interface AIResponse {
   content: string;
+  response?: string; // Backward compatibility alias for content
   confidence: number;
   context: string;
   suggested_actions?: string[];

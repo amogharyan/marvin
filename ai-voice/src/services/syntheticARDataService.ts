@@ -6,6 +6,7 @@ import { secureLog, debugLog } from '../utils/secureLogger';
 import { ChromaService } from './chromaService';
 import { LearningSimulationService } from './learningSimulationService';
 import { LEARNING_CONSTANTS } from '../constants/learningConstants';
+import { ConversationRole, ReminderFrequency } from '../types/enums';
 
 export interface SyntheticARInteraction {
   id: string;
@@ -265,12 +266,12 @@ export class SyntheticARDataService {
           session_id: interaction.sessionId,
           conversation_history: [
             {
-              role: 'user',
+              role: ConversationRole.USER,
               content: interaction.audioInput,
               timestamp: interaction.timestamp
             },
             {
-              role: 'assistant',
+              role: ConversationRole.ASSISTANT,
               content: `I understand you're asking about ${interaction.objectType}. Let me help you with that.`,
               timestamp: new Date(interaction.timestamp.getTime() + 1000)
             }
@@ -284,7 +285,7 @@ export class SyntheticARDataService {
             interaction_preferences: {
               proactive_assistance: true,
               detailed_explanations: true,
-              reminder_frequency: 'medium'
+              reminder_frequency: ReminderFrequency.MEDIUM
             },
             routine_patterns: {
               typical_wake_time: '7:00 AM',

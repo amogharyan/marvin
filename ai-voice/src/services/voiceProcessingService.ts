@@ -3,6 +3,7 @@
 import { ConversationContext, DemoObject, DEMO_OBJECTS } from '../types';
 import { secureLog, safeLog } from '../utils/secureLogger';
 import { LEARNING_CONSTANTS } from '../constants/learningConstants';
+import { ConversationRole } from '../types/enums';
 
 export class VoiceProcessingService {
   private conversationMemory: Map<string, ConversationContext> = new Map();
@@ -35,7 +36,7 @@ export class VoiceProcessingService {
       // Add to conversation history
       this.addToConversationHistory(
         conversationContext.session_id,
-        'assistant',
+        ConversationRole.ASSISTANT,
         response,
         objectContext?.name
       );
@@ -199,7 +200,7 @@ export class VoiceProcessingService {
    */
   private addToConversationHistory(
     sessionId: string,
-    role: 'user' | 'assistant' | 'system',
+    role: ConversationRole,
     content: string,
     objectContext?: string
   ): void {

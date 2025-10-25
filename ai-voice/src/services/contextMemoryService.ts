@@ -3,7 +3,8 @@
 
 import { ConversationContext, DemoObject, ChatMessage, UserPreferences } from '../types';
 import { errorLog } from '../utils/secureLogger';
-import { MemoryManager } from './contextMemory/memoryManager';
+import { ConversationRole, ReminderFrequency } from '../types/enums';
+import { MemoryManager, MemoryEntry } from './contextMemory/memoryManager';
 import { PatternAnalyzer, LearningPattern } from './contextMemory/patternAnalyzer';
 import { SuggestionGenerator, PersonalizedSuggestion } from './contextMemory/suggestionGenerator';
 
@@ -34,6 +35,9 @@ export class ContextMemoryService {
         this.memoryManager.storeConversationContext(context);
       }
 
+      // Store user preferences separately
+      this.memoryManager.storeUserPreferences(context.user_id, context.user_preferences);
+
       // Analyze patterns from the conversation
       this.analyzeAndStorePatterns(context);
     } catch (error) {
@@ -46,6 +50,13 @@ export class ContextMemoryService {
    */
   public getConversationContext(sessionId: string): ConversationContext | undefined {
     return this.memoryManager.getConversationContext(sessionId);
+  }
+
+  /**
+   * Get enhanced conversation context (alias for backward compatibility)
+   */
+  public getEnhancedConversationContext(sessionId: string): ConversationContext | undefined {
+    return this.getConversationContext(sessionId);
   }
 
   /**
@@ -159,6 +170,20 @@ export class ContextMemoryService {
   }
 
   /**
+   * Update user preferences (alias for backward compatibility)
+   */
+  public updateUserPreferences(userId: string, preferences: UserPreferences): void {
+    this.storeUserPreferences(userId, preferences);
+  }
+
+  /**
+   * Remove user preferences
+   */
+  public removeUserPreferences(userId: string): void {
+    this.memoryManager.removeUserPreferences(userId);
+  }
+
+  /**
    * Get user preferences
    */
   public getUserPreferences(userId: string): UserPreferences | undefined {
@@ -193,7 +218,7 @@ export class ContextMemoryService {
         session_id: testSessionId,
         conversation_history: [
           {
-            role: 'user',
+            role: ConversationRole.USER,
             content: 'Test message',
             timestamp: new Date()
           }

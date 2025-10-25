@@ -52,7 +52,7 @@ export class AIVoiceIntegrationService extends AsyncService {
   /**
    * Ensure the service is initialized before use
    */
-  private ensureInitialized(): void {
+  protected ensureInitialized(): void {
     if (!this.isInitialized) {
       throw new Error('AIVoiceIntegrationService must be initialized before use. Call initialize() or use AIVoiceIntegrationService.create()');
     }
