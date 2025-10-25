@@ -10,14 +10,17 @@ This file provides comprehensive guidance for developing the Marvin AR-powered m
 
 ```
 ┌──────────────────────┐    ┌──────────────────────┐    ┌──────────────────────┐
-│   Snap Spectacles    │    │   AI Processing      │    │   Supabase Services  │
-│   (AR Frontend)      │◄──►│   (Gemini + Voice)   │◄──►│   (BaaS + Edge Funcs)│
+│   Snap Spectacles    │    │   AI Processing      │    │   Backend Services   │
+│   (AR Frontend)      │◄──►│   (Gemini + Voice)   │◄──►│   (BaaS + Vector DB) │
 │                      │    │                      │    │                      │
-│ • Object Detection   │    │ • Gemini API         │    │ • PostgreSQL DB      │
-│ • AR Overlays        │    │ • ElevenLabs Voice   │    │ • Edge Functions     │
-│ • Spatial Tracking   │    │ • Vapi Conversation  │    │ • Realtime Subscr.   │
-│ • Gesture Recognition│    │ • Context Memory     │    │ • Storage & Auth     │
+│ • Object Detection   │    │ • Gemini Live API    │    │ • Supabase DB        │
+│ • AR Overlays        │    │ • ElevenLabs Voice   │    │ • Chroma Vector DB   │
+│ • Spatial Tracking   │    │ • Vision + Context   │    │ • Realtime Subscr.   │
+│ • Gesture Recognition│    │ • Learning Patterns  │    │ • Storage & Auth     │
 └──────────────────────┘    └──────────────────────┘    └──────────────────────┘
+        ▲                            ▲                            ▲
+        │                            │                            │
+        └────────────── Fetch API + Remote Service Gateway ──────┘
 ```
 
 ### Demo Objects & Flow (2-minute demo)
@@ -354,32 +357,190 @@ export class MarvinSupabaseClient extends BaseScriptComponent {
 }
 ```
 
-### 4. Voice Synthesis (Using Remote Service Gateway)
+### 4. ElevenLabs Voice Synthesis (via Fetch API)
+
+```typescript
+// Assets/Scripts/Core/ElevenLabsVoice.ts
+import Event from "SpectaclesInteractionKit.lspkg/Utils/Event";
+
+@component
+export class ElevenLabsVoice extends BaseScriptComponent {
+  @input private apiKey: string;
+  @input private voiceId: string = "JBFqnCBsd6RMkjVDRZzb"; // Default voice
+  @input private audioComponent: AudioComponent;
+  
+  private apiUrl = "https://api.elevenlabs.io/v1/text-to-speech";
+  
+  async synthesizeVoice(text: string): Promise<void> {
+    try {
+      const response = await fetch(`${this.apiUrl}/${this.voiceId}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'audio/mpeg',
+          'Content-Type': 'application/json',
+          'xi-api-key': this.apiKey
+        },
+        body: JSON.stringify({
+          text: text,
+          model_id: 'eleven_multilingual_v2',
+          voice_settings: {
+            stability: 0.5,
+            similarity_boost: 0.75
+          }
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`ElevenLabs API error: ${response.statusText}`);
+      }
+      
+      const audioData = await response.arrayBuffer();
+      this.playAudio(audioData);
+      
+    } catch (error) {
+      print(`ElevenLabs error: ${error.message}`);
+      // Fallback to Gemini Live voice or pre-recorded audio
+    }
+  }
+  
+  private playAudio(audioData: ArrayBuffer): void {
+    // Convert ArrayBuffer to AudioTrack and play
+    const audioTrack = AudioTrackAsset.create();
+    audioTrack.control.loadAudioData(new Uint8Array(audioData));
+    this.audioComponent.audioTrack = audioTrack;
+    this.audioComponent.play();
+  }
+}
+```
+
+### 5. Chroma Vector Database (via Fetch API)
+
+```typescript
+// Assets/Scripts/Storage/ChromaLearning.ts
+import Event from "SpectaclesInteractionKit.lspkg/Utils/Event";
+
+interface UserInteraction {
+  id: string;
+  text: string;
+  object_type: string;
+  timestamp: number;
+  metadata: any;
+}
+
+@component
+export class ChromaLearning extends BaseScriptComponent {
+  @input private chromaUrl: string = "http://localhost:8000"; // Or cloud hosted
+  @input private collectionName: string = "marvin_interactions";
+  
+  async addInteraction(interaction: UserInteraction): Promise<void> {
+    try {
+      // Generate embedding via Gemini or use pre-computed
+      const embedding = await this.generateEmbedding(interaction.text);
+      
+      const response = await fetch(`${this.chromaUrl}/api/v1/collections/${this.collectionName}/add`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ids: [interaction.id],
+          embeddings: [embedding],
+          documents: [interaction.text],
+          metadatas: [{
+            object_type: interaction.object_type,
+            timestamp: interaction.timestamp,
+            ...interaction.metadata
+          }]
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Chroma error: ${response.statusText}`);
+      }
+      
+      print("Interaction stored in Chroma");
+      
+    } catch (error) {
+      print(`Chroma storage error: ${error.message}`);
+      // Fallback to Supabase storage
+    }
+  }
+  
+  async findSimilarInteractions(query: string, limit: number = 5): Promise<UserInteraction[]> {
+    try {
+      const embedding = await this.generateEmbedding(query);
+      
+      const response = await fetch(`${this.chromaUrl}/api/v1/collections/${this.collectionName}/query`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query_embeddings: [embedding],
+          n_results: limit
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Chroma query error: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      return this.parseChromaResults(data);
+      
+    } catch (error) {
+      print(`Chroma query error: ${error.message}`);
+      return []; // Return empty array on error
+    }
+  }
+  
+  private async generateEmbedding(text: string): Promise<number[]> {
+    // Use Gemini or OpenAI embeddings API
+    // For now, return dummy embedding
+    return new Array(384).fill(0).map(() => Math.random());
+  }
+  
+  private parseChromaResults(data: any): UserInteraction[] {
+    // Parse Chroma response format
+    return data.ids[0].map((id: string, index: number) => ({
+      id: id,
+      text: data.documents[0][index],
+      object_type: data.metadatas[0][index].object_type,
+      timestamp: data.metadatas[0][index].timestamp,
+      metadata: data.metadatas[0][index]
+    }));
+  }
+}
+```
+
+### 6. Voice Handler Coordinator
 
 ```typescript
 // Assets/Scripts/Core/VoiceHandler.ts
-import { Gemini } from "RemoteServiceGateway.lspkg/HostedExternal/Gemini";
-import { DynamicAudioOutput } from "RemoteServiceGateway.lspkg/Helpers/DynamicAudioOutput";
+import { GeminiAssistant } from "./GeminiAssistant";
+import { ElevenLabsVoice } from "./ElevenLabsVoice";
 import { AudioComponent } from "SpectaclesInteractionKit.lspkg/Components/Audio/AudioComponent";
 
 @component
 export class VoiceHandler extends BaseScriptComponent {
-  @input private dynamicAudioOutput: DynamicAudioOutput;
+  @input private geminiAssistant: GeminiAssistant;
+  @input private elevenLabsVoice: ElevenLabsVoice;
   @input private audioComponent: AudioComponent;
-  @input
-  @widget(
-    new ComboBoxWidget([
-      new ComboBoxItem("Puck", "Puck"),
-      new ComboBoxItem("Charon", "Charon"),
-      new ComboBoxItem("Aoede", "Aoede"),
-    ])
-  )
-  private voicePreset: string = "Puck";
+  @input private useElevenLabs: boolean = true; // Toggle for premium voice
   
   async speakText(text: string): Promise<void> {
-    // Gemini Live includes voice synthesis
-    // Audio will be streamed through DynamicAudioOutput
-    print(`Speaking: ${text} with voice: ${this.voicePreset}`);
+    if (this.useElevenLabs) {
+      // Try ElevenLabs first for premium quality
+      try {
+        await this.elevenLabsVoice.synthesizeVoice(text);
+      } catch (error) {
+        print("ElevenLabs failed, falling back to Gemini voice");
+        await this.geminiAssistant.speakText(text);
+      }
+    } else {
+      // Use Gemini Live voice (faster, lower quality)
+      await this.geminiAssistant.speakText(text);
+    }
   }
   
   playNotificationSound(soundType: 'reminder' | 'alert' | 'success') {
@@ -406,7 +567,9 @@ export class VoiceHandler extends BaseScriptComponent {
 
 **API Keys & Services:**
 - Remote Service Gateway Token (from Lens Studio)
-- Snap Cloud Access (account must be whitelisted)
+- ElevenLabs API Key (for premium voice synthesis)
+- Chroma Database URL (for vector embeddings and learning)
+- Supabase URL + Anon Key (from Supabase project)
 - Internet connection for testing
 
 ### Initial Setup Steps

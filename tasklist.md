@@ -149,47 +149,78 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
   - Set up response caching in Supabase storage for common scenarios
   - Configure CORS and authentication for Edge Function access
 
-### 1.3 Voice Integration with Gemini Live (FR-015 to FR-021)
+### 1.3 Voice Integration (FR-015 to FR-021)
 
-- [ ] **1.12** [Dev 2] **Configure Gemini Live voice output**
-  - Enable audio output in GeminiAssistant.ts
+- [ ] **1.12** [Dev 2] **Implement ElevenLabsVoice.ts**
+  - Create `Assets/Scripts/Core/ElevenLabsVoice.ts`
+  - Use Fetch API to call ElevenLabs text-to-speech endpoint
+  - Configure voice ID and model (eleven_multilingual_v2)
+  - Implement audio playback with AudioComponent
+  - Add error handling with fallback to Gemini voice
+
+- [ ] **1.13** [Dev 2] **Configure Gemini Live voice fallback**
+  - Enable audio output in GeminiAssistant.ts as backup
   - Configure voice preset (Puck, Charon, Aoede)
   - Set up DynamicAudioOutput at 24kHz
   - Test voice synthesis quality and response time
 
-- [ ] **1.13** [Dev 2] **Implement microphone input**
+- [ ] **1.14** [Dev 2] **Implement microphone input**
   - Configure MicrophoneRecorder at 16kHz
   - Set up AudioProcessor for input handling
   - Implement voice command detection
-  - Test speech-to-text accuracy
+  - Test speech-to-text accuracy with Gemini
 
-- [ ] **1.14** [Dev 2] **Create VoiceHandler.ts**
+- [ ] **1.15** [Dev 2] **Create VoiceHandler.ts coordinator**
   - Create `Assets/Scripts/Core/VoiceHandler.ts`
+  - Coordinate between ElevenLabs (primary) and Gemini (fallback)
   - Implement notification sounds for different events
   - Add voice feedback for user actions
-  - Create fallback system with pre-recorded audio files
+  - Create pre-recorded audio file fallbacks
 
-### 1.4 AR User Interface Foundation (FR-043 to FR-049)
+### 1.4 Learning & Memory System (FR-031 to FR-037)
 
-- [ ] **1.15** [Dev 1] **Create OverlayManager.ts**
+- [ ] **1.16** [Dev 3] **Implement ChromaLearning.ts**
+  - Create `Assets/Scripts/Storage/ChromaLearning.ts`
+  - Use Fetch API to interact with Chroma vector database
+  - Implement `addInteraction()` for storing user patterns
+  - Implement `findSimilarInteractions()` for personalization
+  - Add embedding generation (via Gemini or OpenAI API)
+  - Configure collection name and vector dimensions
+
+- [ ] **1.17** [Dev 3] **Set up Chroma database**
+  - Deploy Chroma server (local or cloud)
+  - Create collection: `marvin_interactions`
+  - Configure embedding function (OpenAI or custom)
+  - Test vector similarity search
+  - Set up backup storage in Supabase
+
+- [ ] **1.18** [Dev 3] **Build learning pattern storage**
+  - Store object interaction patterns in Chroma
+  - Track time-of-day preferences
+  - Record successful suggestion acceptance rates
+  - Implement progressive learning (Day 1 vs Day 30 simulation)
+
+### 1.5 AR User Interface Foundation (FR-043 to FR-049)
+
+- [ ] **1.19** [Dev 1] **Create OverlayManager.ts**
   - Create `Assets/Scripts/AROverlays/OverlayManager.ts`
   - Use RenderMeshVisual for 3D overlays
   - Implement Text components with consistent typography
   - Design visual hierarchy for information display
 
-- [ ] **1.16** [Dev 1] **Build InfoCard.ts component**
+- [ ] **1.20** [Dev 1] **Build InfoCard.ts component**
   - Create `Assets/Scripts/AROverlays/InfoCard.ts`
   - Use RectangleButton from SpectaclesUIKit
   - Implement adaptive brightness based on lighting
   - Position overlays to avoid obstructing view
 
-- [ ] **1.17** [Dev 1] **Create GuideArrow.ts component**
+- [ ] **1.21** [Dev 1] **Create GuideArrow.ts component**
   - Create `Assets/Scripts/AROverlays/GuideArrow.ts`
   - Implement 3D arrow for navigation
   - Add animation for attention direction
   - Test visibility in various environments
 
-- [ ] **1.18** [Dev 3] **Implement MarvinSupabaseClient.ts**
+- [ ] **1.22** [Dev 3] **Implement MarvinSupabaseClient.ts**
   - Create `Assets/Scripts/Storage/SupabaseClient.ts`
   - Import SupabaseClient from SupabaseClient.lspkg
   - Implement database CRUD operations
@@ -306,29 +337,37 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
 
 ### 2.4 Contextual Memory & Learning (FR-029 to FR-035)
 
-- [ ] **2.17** [Dev 2] **Implement learning storage in GeminiAssistant**
-  - Store conversation history in component properties
-  - Track user preferences and patterns
-  - Implement adaptation logic based on interactions
-  - Create Day 1 vs Day 30 simulation data
+- [ ] **2.17** [Dev 2] **Integrate ChromaLearning with GeminiAssistant**
+  - Connect ChromaLearning to AI coordinator
+  - Query similar past interactions for context
+  - Use vector search results to personalize responses
+  - Implement Day 1 vs Day 30 adaptation simulation
 
-- [ ] **2.18** [Dev 3] **Create UserPreferences.ts**
+- [ ] **2.18** [Dev 3] **Build learning pattern analysis**
+  - Implement routine pattern detection with Chroma
+  - Track user preference evolution over time
+  - Build similarity scoring for interaction matching
+  - Generate personalized suggestions based on vector search
+
+- [ ] **2.19** [Dev 3] **Create UserPreferences.ts**
   - Create `Assets/Scripts/Storage/UserPreferences.ts`
   - Implement preference loading from Supabase
   - Store user interaction patterns
   - Add preference update methods
+  - Sync preferences with Chroma metadata
 
-- [ ] **2.19** [Dev 3] **Create learning coordination schema**
-  - Design user_interactions and learning_patterns tables
+- [ ] **2.20** [Dev 3] **Create learning coordination schema**
+  - Design user_interactions and learning_patterns tables in Supabase
   - Create SQL migration for learning data
   - Implement routine pattern analysis functions
-  - Add Edge Function for personalization (optional)
+  - Add Edge Function for advanced personalization (optional)
 
-- [ ] **2.20** [Dev 2] **Build AICoordinator.ts**
+- [ ] **2.21** [Dev 2] **Build AICoordinator.ts**
   - Create `Assets/Scripts/Core/AICoordinator.ts`
   - Wire object detection to AI processing
-  - Implement contextual response routing
+  - Implement contextual response routing with Chroma context
   - Coordinate AR overlays with AI responses
+  - Add learning feedback loop for continuous improvement
 
 **HOUR 16 GIT MERGE:** All developers merge to develop branch
 
@@ -446,11 +485,12 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
   - Create emergency demo control panel
   - Test manual flow matches automated flow
 
-- [ ] **4.6** [Dev 2] **Prepare pre-recorded audio**
-  - Record voice responses for all demo scenarios
-  - Import audio files into Assets/Audio/
-  - Create AudioFallback.ts component
-  - Test audio playback quality
+- [ ] **4.6** [Dev 2] **Prepare pre-recorded ElevenLabs audio**
+  - Generate voice responses using ElevenLabs API for all demo scenarios
+  - Save audio files in Assets/Audio/ (medicine, bowl, laptop, keys, departure)
+  - Create AudioFallback.ts component for emergency playback
+  - Test audio playback quality matches live synthesis
+  - Configure VoiceHandler to use pre-recorded audio on API failures
 
 - [ ] **4.7** [Dev 4] **Build system health monitor**
   - Create HealthMonitor.ts component
