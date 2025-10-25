@@ -13,7 +13,9 @@
     "test:unit": "jest tests/unit",
     "test:integration": "jest tests/integration",
     "test:services": "jest tests/services",
-    "lint": "echo \"Linting not configured yet\"",
+    "lint": "eslint src/**/*.ts tests/**/*.ts --ext .ts",
+    "lint:fix": "eslint src/**/*.ts tests/**/*.ts --ext .ts --fix",
+    "type-check": "tsc --noEmit",
     "clean": "node -e \"const fs = require('fs'); if (fs.existsSync('dist')) fs.rmSync('dist', { recursive: true, force: true });\"",
     "tdd": "jest --watch --verbose"
   },
@@ -45,6 +47,9 @@
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "@types/supertest": "^6.0.3",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
     "jest": "^30.2.0",
     "supertest": "^7.1.4",
     "ts-jest": "^29.4.5"
