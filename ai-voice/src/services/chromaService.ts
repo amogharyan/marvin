@@ -5,20 +5,13 @@ import { CloudClient } from 'chromadb';
 import { randomUUID } from 'crypto';
 import { secureLog, errorLog, debugLog } from '../utils/secureLogger';
 import { ConversationContext, ChatMessage, DemoObject, UserPreferences } from '../types';
+import { ChromaMetadataValidator } from '../utils/chromaMetadataValidator';
 
 export interface VectorMemoryEntry {
   id: string;
   content: string;
   embedding?: number[];
-  metadata: {
-    sessionId: string;
-    userId: string;
-    timestamp: string;
-    objectType?: string;
-    interactionType: 'conversation' | 'preference' | 'pattern' | 'learning';
-    confidence: number;
-    tags: string;
-  };
+  metadata: Record<string, any>; // Allow flexible metadata structure
 }
 
 export interface LearningPattern {
@@ -154,17 +147,15 @@ export class ChromaService {
         entries.push({
           id: randomUUID(),
           content: `${message.role}: ${message.content}`,
-          metadata: {
+          metadata: ChromaMetadataValidator.createConversationMetadata(
             sessionId,
             userId,
-            timestamp: typeof message.timestamp === 'string' ? message.timestamp : 
-                      typeof message.timestamp === 'number' ? message.timestamp.toString() : 
-                      message.timestamp.toISOString(),
-            objectType: objectContext?.name || 'unknown',
-            interactionType: 'conversation',
-            confidence: 1.0,
-            tags: this.extractMessageTags(message).join(',')
-          }
+            message.timestamp,
+            objectContext?.name || 'unknown',
+            'conversation',
+            1.0,
+            this.extractMessageTags(message)
+          )
         });
       });
 
@@ -172,15 +163,14 @@ export class ChromaService {
       if (context.user_preferences) {
         entries.push({
           id: randomUUID(),
-          content: JSON.stringify(context.user_preferences),
-          metadata: {
+          content: ChromaMetadataValidator.sanitizeDocumentContent(context.user_preferences),
+          metadata: ChromaMetadataValidator.createUserPreferenceMetadata(
             sessionId,
             userId,
-            timestamp: new Date().toISOString(),
-            interactionType: 'preference',
-            confidence: 0.9,
-            tags: 'preferences,user_settings'
-          }
+            'preference',
+            0.9,
+            ['preferences', 'user_settings']
+          )
         });
       }
 
@@ -256,15 +246,15 @@ export class ChromaService {
 
       await collection.add({
         ids: [pattern.id],
-        documents: [JSON.stringify(pattern.data)],
-        metadatas: [{
+        documents: [ChromaMetadataValidator.sanitizeDocumentContent(pattern.data)],
+        metadatas: [ChromaMetadataValidator.createLearningPatternMetadata(
           userId,
-          patternType: pattern.patternType,
-          confidence: pattern.confidence,
-          frequency: pattern.frequency,
-          lastSeen: pattern.lastSeen.toISOString(),
-          tags: `learning_pattern,${pattern.patternType}`
-        }]
+          pattern.patternType,
+          pattern.confidence,
+          pattern.frequency,
+          pattern.lastSeen,
+          ['learning_pattern', pattern.patternType]
+        )]
       });
 
       debugLog(`Stored learning pattern: ${pattern.patternType} for user ${userId}`);
