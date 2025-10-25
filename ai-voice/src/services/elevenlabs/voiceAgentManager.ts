@@ -203,7 +203,76 @@ Calendar context: {calendar_context}`,
     prompt = prompt.replace('{learning_stage}', learningStage || 'day_1');
     prompt = prompt.replace('{health_context}', additionalContext?.health || 'General health context');
     prompt = prompt.replace('{calendar_context}', additionalContext?.calendar || 'No calendar context');
+    
+    // Handle user preferences placeholder
+    prompt = prompt.replace('{user_preferences}', this.formatUserPreferences(additionalContext?.userPreferences));
 
     return prompt;
+  }
+
+  /**
+   * Format user preferences into a safe, human-readable string
+   */
+  private formatUserPreferences(userPreferences?: any): string {
+    if (!userPreferences || typeof userPreferences !== 'object') {
+      return 'No user preferences provided';
+    }
+
+    try {
+      const preferences: string[] = [];
+
+      // Extract voice settings
+      if (userPreferences.voice_settings) {
+        const voice = userPreferences.voice_settings.preferred_voice;
+        const rate = userPreferences.voice_settings.speech_rate;
+        if (voice && voice !== 'default') {
+          preferences.push(`Voice: ${voice}`);
+        }
+        if (rate && rate !== 1.0) {
+          preferences.push(`Speech rate: ${rate}x`);
+        }
+      }
+
+      // Extract interaction preferences
+      if (userPreferences.interaction_preferences) {
+        const proactive = userPreferences.interaction_preferences.proactive_assistance;
+        const detailed = userPreferences.interaction_preferences.detailed_explanations;
+        const frequency = userPreferences.interaction_preferences.reminder_frequency;
+        
+        if (proactive) {
+          preferences.push('Proactive assistance enabled');
+        }
+        if (detailed) {
+          preferences.push('Detailed explanations preferred');
+        }
+        if (frequency && frequency !== 'medium') {
+          preferences.push(`Reminder frequency: ${frequency}`);
+        }
+      }
+
+      // Extract routine patterns
+      if (userPreferences.routine_patterns) {
+        const wakeTime = userPreferences.routine_patterns.typical_wake_time;
+        const breakfast = userPreferences.routine_patterns.breakfast_preferences;
+        const medicine = userPreferences.routine_patterns.medicine_schedule;
+        
+        if (wakeTime) {
+          preferences.push(`Typical wake time: ${wakeTime}`);
+        }
+        if (breakfast && Array.isArray(breakfast) && breakfast.length > 0) {
+          preferences.push(`Breakfast preferences: ${breakfast.join(', ')}`);
+        }
+        if (medicine && Array.isArray(medicine) && medicine.length > 0) {
+          preferences.push(`Medicine schedule: ${medicine.join(', ')}`);
+        }
+      }
+
+      return preferences.length > 0 
+        ? preferences.join('; ') 
+        : 'No specific preferences set';
+    } catch (error) {
+      // Fallback if there's any error formatting preferences
+      return 'User preferences available but could not be formatted';
+    }
   }
 }
