@@ -22,6 +22,29 @@ export interface AIResponse {
   suggested_actions?: string[];
   voice_enabled: boolean;
   voice_data?: VoiceResponse;
+  // Phase 2 enhancements
+  intent_analysis?: VoiceIntent;
+  personalized_suggestions?: PersonalizedSuggestion[];
+  visual_analysis?: {
+    objects_detected: DemoObject[];
+    confidence: number;
+  };
+}
+
+export interface VoiceIntent {
+  intent: string;
+  confidence: number;
+  entities: Record<string, any>;
+  action: string;
+  parameters: Record<string, any>;
+}
+
+export interface PersonalizedSuggestion {
+  suggestion: string;
+  confidence: number;
+  context: string;
+  reasoning: string;
+  priority: 'low' | 'medium' | 'high';
 }
 
 export interface VoiceRequest {

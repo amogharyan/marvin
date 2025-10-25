@@ -2,7 +2,7 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { config } from '../config';
-import { GeminiRequest, GeminiResponse, DemoObject, DEMO_OBJECTS } from '../types';
+import { GeminiRequest, GeminiResponse, DemoObject, DEMO_OBJECTS, ChatMessage } from '../types';
 
 export class GeminiService {
   private genAI: GoogleGenerativeAI;
@@ -39,6 +39,48 @@ export class GeminiService {
   }
 
   /**
+   * Advanced multimodal processing combining visual and text context
+   */
+  async processMultimodalContext(
+    imageData: string,
+    voiceText: string,
+    objectContext?: DemoObject,
+    conversationHistory?: ChatMessage[]
+  ): Promise<GeminiResponse> {
+    try {
+      console.log(`🔍 Advanced multimodal processing: ${voiceText}`);
+      
+      const multimodalPrompt = this.buildMultimodalPrompt(
+        voiceText,
+        objectContext,
+        conversationHistory
+      );
+
+      const result = await this.model.generateContent([
+        multimodalPrompt,
+        {
+          inlineData: {
+            data: imageData,
+            mimeType: 'image/jpeg'
+          }
+        }
+      ]);
+
+      const response = await result.response;
+      const text = response.text();
+
+      return {
+        text: text,
+        confidence: 0.95,
+        safety_ratings: response.candidates?.[0]?.safetyRatings || []
+      };
+    } catch (error) {
+      console.error('Multimodal processing error:', error);
+      throw new Error(`Multimodal processing failed: ${error}`);
+    }
+  }
+
+  /**
    * Build contextual prompt for object-specific interactions
    */
   private buildContextualPrompt(request: GeminiRequest, objectContext?: DemoObject): string {
@@ -69,6 +111,59 @@ Please provide a helpful, concise response that considers the object context and
   }
 
   /**
+   * Build advanced multimodal prompt combining visual and conversational context
+   */
+  private buildMultimodalPrompt(
+    voiceText: string,
+    objectContext?: DemoObject,
+    conversationHistory?: ChatMessage[]
+  ): string {
+    const systemContext = this.buildAdvancedSystemContext();
+    
+    let objectSpecificContext = '';
+    if (objectContext && DEMO_OBJECTS[objectContext.name as keyof typeof DEMO_OBJECTS]) {
+      const objectConfig = DEMO_OBJECTS[objectContext.name as keyof typeof DEMO_OBJECTS];
+      objectSpecificContext = `
+OBJECT DETECTED: ${objectContext.name}
+- Detection Confidence: ${objectContext.detection_confidence}
+- Spatial Position: (${objectContext.spatial_position.x}, ${objectContext.spatial_position.y}, ${objectContext.spatial_position.z})
+- Context: ${objectConfig.ai_context}
+- Available Actions: ${objectConfig.triggers.join(', ')}
+- Suggested Prompts: ${objectConfig.voice_prompts.join(', ')}
+`;
+    }
+
+    let conversationContext = '';
+    if (conversationHistory && conversationHistory.length > 0) {
+      const recentHistory = conversationHistory.slice(-5); // Last 5 messages
+      conversationContext = `
+RECENT CONVERSATION:
+${recentHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
+`;
+    }
+
+    return `${systemContext}
+
+${objectSpecificContext}
+
+${conversationContext}
+
+USER VOICE INPUT: "${voiceText}"
+
+VISUAL ANALYSIS: Analyze the image in context with the detected object and user's voice input.
+
+INSTRUCTIONS:
+1. Consider both the visual scene and the user's spoken request
+2. Provide contextual assistance based on the detected object
+3. Reference conversation history for continuity
+4. Be proactive but not intrusive
+5. Keep responses concise (under 100 words) for AR display
+6. Include specific, actionable suggestions
+
+Provide a helpful response that combines visual understanding with conversational context.`;
+  }
+
+  /**
    * Build system context for SnapJarvis AR assistant
    */
   private buildSystemContext(): string {
@@ -89,6 +184,44 @@ Guidelines:
 - Keep responses under 100 words for AR display
 
 Current time: ${new Date().toLocaleTimeString()}`;
+  }
+
+  /**
+   * Build advanced system context for multimodal processing
+   */
+  private buildAdvancedSystemContext(): string {
+    const currentTime = new Date();
+    const hour = currentTime.getHours();
+    const timeOfDay = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
+    
+    return `You are SnapJarvis, an advanced AR morning assistant with multimodal AI capabilities. You provide intelligent, contextual assistance through:
+
+CORE CAPABILITIES:
+- Visual scene understanding and object recognition
+- Conversational AI with memory and context awareness
+- Proactive assistance based on user patterns and preferences
+- Multimodal processing combining vision, voice, and context
+
+ASSISTANCE AREAS:
+- Medicine reminders and health tracking
+- Nutrition analysis and recipe suggestions  
+- Calendar management and meeting preparation
+- Object location and departure assistance
+- Device integration and connectivity help
+
+ADVANCED GUIDELINES:
+- Process both visual and auditory input simultaneously
+- Maintain conversation context and user preferences
+- Provide personalized suggestions based on detected objects
+- Adapt responses to time of day and user patterns
+- Be proactive but not intrusive
+- Keep responses concise (under 100 words) for AR display
+- Include specific, actionable suggestions
+
+CURRENT CONTEXT:
+- Time: ${currentTime.toLocaleTimeString()}
+- Time of Day: ${timeOfDay}
+- Processing Mode: Multimodal (Visual + Voice + Context)`;
   }
 
   /**

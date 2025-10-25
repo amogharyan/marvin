@@ -17,6 +17,7 @@ export interface Config {
   elevenlabs: {
     apiKey: string;
     voiceId: string;
+    voiceAgentId?: string;
     baseUrl: string;
   };
   
@@ -47,14 +48,15 @@ function validateConfig(): Config {
 
   return {
     gemini: {
-      apiKey: process.env.GEMINI_API_KEY!,
+      apiKey: process.env.GEMINI_API_KEY || 'AIzaSyBoR3kmp8cwTReJ4p_nB0XjTzcbOpU1K8g',
       model: process.env.GEMINI_MODEL || 'gemini-pro-vision',
       maxTokens: parseInt(process.env.GEMINI_MAX_TOKENS || '1000')
     },
     
     elevenlabs: {
       apiKey: process.env.ELEVENLABS_API_KEY!,
-      voiceId: process.env.ELEVENLABS_VOICE_ID || 'default',
+      voiceId: process.env.ELEVENLABS_VOICE_ID || 'IKne3meq5aSn9XLyUdCD',
+      voiceAgentId: process.env.ELEVENLABS_VOICE_AGENT_ID || 'agent_2201k8dct0emf1httmyhkdj2gjbf',
       baseUrl: process.env.ELEVENLABS_BASE_URL || 'https://api.elevenlabs.io/v1'
     },
     

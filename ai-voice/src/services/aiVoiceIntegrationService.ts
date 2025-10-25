@@ -1,8 +1,10 @@
-// Main AI & Voice Integration Service - Dev 2 Phase 1
+// Main AI & Voice Integration Service - Dev 2 Phase 2
 
 import { GeminiService } from './geminiService';
 import { ElevenLabsService } from './elevenlabsService';
 import { VoiceProcessingService } from './voiceProcessingService';
+import { VoiceCommandParsingService } from './voiceCommandParsingService';
+import { ContextMemoryService } from './contextMemoryService';
 import { 
   AIResponse, 
   ConversationContext, 
@@ -15,11 +17,15 @@ export class AIVoiceIntegrationService {
   private geminiService: GeminiService;
   private elevenlabsService: ElevenLabsService;
   private voiceProcessingService: VoiceProcessingService;
+  private voiceCommandParsingService: VoiceCommandParsingService;
+  private contextMemoryService: ContextMemoryService;
 
   constructor() {
     this.geminiService = new GeminiService();
     this.elevenlabsService = new ElevenLabsService();
     this.voiceProcessingService = new VoiceProcessingService();
+    this.voiceCommandParsingService = new VoiceCommandParsingService();
+    this.contextMemoryService = new ContextMemoryService();
   }
 
   /**
@@ -82,9 +88,29 @@ export class AIVoiceIntegrationService {
     try {
       console.log(`🎤 Processing voice input: ${voiceText}`);
 
+      // Store conversation context in memory
+      await this.contextMemoryService.storeConversationContext(
+        conversationContext.session_id,
+        conversationContext
+      );
+
+      // Parse voice command for intent recognition
+      const parsedCommand = await this.voiceCommandParsingService.parseVoiceCommand(
+        voiceText,
+        objectContext,
+        conversationContext
+      );
+
       // Process with voice processing service for conversational understanding
       const voiceResponse = await this.voiceProcessingService.processVoiceInput(
         voiceText,
+        conversationContext,
+        objectContext
+      );
+
+      // Generate personalized suggestions
+      const personalizedSuggestions = await this.contextMemoryService.generatePersonalizedSuggestions(
+        conversationContext.user_id,
         conversationContext,
         objectContext
       );
@@ -98,10 +124,16 @@ export class AIVoiceIntegrationService {
       return {
         content: voiceResponse.response,
         confidence: voiceResponse.confidence,
-        context: 'Voice conversation',
-        suggested_actions: voiceResponse.suggested_actions,
+        context: `Voice conversation | Intent: ${parsedCommand.intent.intent}`,
+        suggested_actions: [
+          ...voiceResponse.suggested_actions,
+          ...parsedCommand.follow_up_actions
+        ].slice(0, 5), // Limit to 5 actions
         voice_enabled: true,
-        voice_data: elevenlabsResponse
+        voice_data: elevenlabsResponse,
+        // Phase 2 enhancements
+        intent_analysis: parsedCommand.intent,
+        personalized_suggestions: personalizedSuggestions.slice(0, 3)
       };
     } catch (error) {
       console.error('Voice input processing error:', error);
@@ -110,6 +142,81 @@ export class AIVoiceIntegrationService {
         content: 'I heard you, but I\'m having trouble processing that right now. Can you try again?',
         confidence: 0.3,
         context: 'Voice conversation',
+        suggested_actions: ['Try again', 'Speak clearly', 'Use text'],
+        voice_enabled: false
+      };
+    }
+  }
+
+  /**
+   * Advanced multimodal processing combining visual and voice context
+   */
+  async processMultimodalInput(
+    imageData: string,
+    voiceText: string,
+    conversationContext: ConversationContext,
+    objectContext?: DemoObject
+  ): Promise<AIResponse> {
+    try {
+      console.log(`🔍 Advanced multimodal processing: ${voiceText}`);
+
+      // Store conversation context
+      await this.contextMemoryService.storeConversationContext(
+        conversationContext.session_id,
+        conversationContext
+      );
+
+      // Parse voice command
+      const parsedCommand = await this.voiceCommandParsingService.parseVoiceCommand(
+        voiceText,
+        objectContext,
+        conversationContext
+      );
+
+      // Process with Gemini for multimodal understanding
+      const geminiResponse = await this.geminiService.processMultimodalContext(
+        imageData,
+        voiceText,
+        objectContext,
+        conversationContext.conversation_history
+      );
+
+      // Generate personalized suggestions
+      const personalizedSuggestions = await this.contextMemoryService.generatePersonalizedSuggestions(
+        conversationContext.user_id,
+        conversationContext,
+        objectContext
+      );
+
+      // Generate contextual voice synthesis
+      const elevenlabsResponse = await this.elevenlabsService.generateContextualVoice(
+        geminiResponse.text,
+        objectContext?.name,
+        parsedCommand.intent.intent === 'medicine_reminder' ? 'high' : 'medium'
+      );
+
+      return {
+        content: geminiResponse.text,
+        confidence: geminiResponse.confidence,
+        context: `Multimodal analysis | Intent: ${parsedCommand.intent.intent}`,
+        suggested_actions: parsedCommand.follow_up_actions,
+        voice_enabled: true,
+        voice_data: elevenlabsResponse,
+        // Phase 2 enhancements
+        intent_analysis: parsedCommand.intent,
+        personalized_suggestions: personalizedSuggestions.slice(0, 3),
+        visual_analysis: {
+          objects_detected: objectContext ? [objectContext] : [],
+          confidence: geminiResponse.confidence
+        }
+      };
+    } catch (error) {
+      console.error('Multimodal processing error:', error);
+      
+      return {
+        content: 'I can see your environment and hear you, but I\'m having trouble processing both inputs right now.',
+        confidence: 0.4,
+        context: 'Multimodal analysis',
         suggested_actions: ['Try again', 'Speak clearly', 'Use text'],
         voice_enabled: false
       };
@@ -241,23 +348,30 @@ export class AIVoiceIntegrationService {
     gemini: boolean;
     elevenlabs: boolean;
     voiceProcessing: boolean;
+    voiceCommandParsing: boolean;
+    contextMemory: boolean;
     overall: boolean;
   }> {
     const checks = await Promise.allSettled([
       this.geminiService.processContextualRequest({ prompt: 'test', context: 'health check' }),
       this.elevenlabsService.textToSpeech({ text: 'test' }),
-      this.voiceProcessingService.healthCheck()
+      this.voiceProcessingService.healthCheck(),
+      this.voiceCommandParsingService.healthCheck(),
+      this.contextMemoryService.healthCheck()
     ]);
 
     const results = {
       gemini: checks[0].status === 'fulfilled',
       elevenlabs: checks[1].status === 'fulfilled',
-      voiceProcessing: checks[2].status === 'fulfilled'
+      voiceProcessing: checks[2].status === 'fulfilled',
+      voiceCommandParsing: checks[3].status === 'fulfilled',
+      contextMemory: checks[4].status === 'fulfilled'
     };
 
     return {
       ...results,
-      overall: results.gemini && results.elevenlabs && results.voiceProcessing
+      overall: results.gemini && results.elevenlabs && results.voiceProcessing && 
+               results.voiceCommandParsing && results.contextMemory
     };
   }
 }
