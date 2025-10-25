@@ -5,26 +5,57 @@ import { secureLog, safeLog, errorLog } from '../utils/secureLogger';
 import { AIResponse, ConversationContext, DemoObject } from '../types';
 import { ServiceOrchestrator } from './aiVoiceIntegration/serviceOrchestrator';
 import { RequestProcessor, VoiceRequest, MultimodalRequest, VisualRequest } from './aiVoiceIntegration/requestProcessor';
+import { AsyncService } from '../utils/asyncServiceUtils';
 
-export class AIVoiceIntegrationService {
+export class AIVoiceIntegrationService extends AsyncService {
   private serviceOrchestrator: ServiceOrchestrator;
   private requestProcessor: RequestProcessor;
 
   constructor() {
+    super();
     this.serviceOrchestrator = new ServiceOrchestrator();
     this.requestProcessor = new RequestProcessor(this.serviceOrchestrator);
     
-    // Initialize Phase 3 services
-    this.initializePhase3Services();
-    
-    safeLog('🎯 AI Voice Integration Service initialized');
+    safeLog('🎯 AI Voice Integration Service created (not yet initialized)');
   }
 
   /**
-   * Initialize Phase 3 services
+   * Factory method to create and initialize the service
    */
-  private async initializePhase3Services(): Promise<void> {
-    await this.serviceOrchestrator.initializePhase3Services();
+  public static async create(): Promise<AIVoiceIntegrationService> {
+    const service = new AIVoiceIntegrationService();
+    await service.initialize();
+    return service;
+  }
+
+  /**
+   * Initialize the service and all its dependencies
+   */
+  public async initialize(): Promise<void> {
+    try {
+      await this.serviceOrchestrator.initializePhase3Services();
+      this.isInitialized = true;
+      safeLog('🎯 AI Voice Integration Service initialized successfully');
+    } catch (error) {
+      errorLog('Failed to initialize AI Voice Integration Service:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Check if the service is properly initialized
+   */
+  public isReady(): boolean {
+    return this.isInitialized && this.serviceOrchestrator.getInitializationStatus();
+  }
+
+  /**
+   * Ensure the service is initialized before use
+   */
+  private ensureInitialized(): void {
+    if (!this.isInitialized) {
+      throw new Error('AIVoiceIntegrationService must be initialized before use. Call initialize() or use AIVoiceIntegrationService.create()');
+    }
   }
 
   /**
@@ -37,6 +68,8 @@ export class AIVoiceIntegrationService {
     objectContext?: DemoObject,
     conversationHistory?: any[]
   ): Promise<AIResponse> {
+    this.ensureInitialized();
+    
     const request: VoiceRequest = {
       voiceText,
       sessionId,
@@ -60,6 +93,8 @@ export class AIVoiceIntegrationService {
     conversationHistory?: any[],
     mimeType?: string
   ): Promise<AIResponse> {
+    this.ensureInitialized();
+    
     const request: MultimodalRequest = {
       voiceText,
       imageData,
@@ -83,6 +118,8 @@ export class AIVoiceIntegrationService {
     objectContext?: DemoObject,
     mimeType?: string
   ): Promise<AIResponse> {
+    this.ensureInitialized();
+    
     const request: VisualRequest = {
       imageData,
       sessionId,

@@ -24,6 +24,22 @@ export class VoiceCommandParsingService {
   private entityPatterns: Map<string, RegExp[]> = new Map();
 
   constructor() {
+    // Only sync initialization in constructor
+  }
+
+  /**
+   * Factory method to create and initialize the voice command parsing service
+   */
+  public static async create(): Promise<VoiceCommandParsingService> {
+    const service = new VoiceCommandParsingService();
+    await service.initialize();
+    return service;
+  }
+
+  /**
+   * Initialize the service
+   */
+  public async initialize(): Promise<void> {
     this.initializeIntentPatterns();
     this.initializeEntityPatterns();
     debugLog('🎯 Voice Command Parsing Service initialized');

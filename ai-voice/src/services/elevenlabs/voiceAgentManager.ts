@@ -21,6 +21,22 @@ export class VoiceAgentManager {
   private voiceAgents: Map<string, VoiceAgent> = new Map();
 
   constructor() {
+    // Only sync initialization in constructor
+  }
+
+  /**
+   * Factory method to create and initialize the voice agent manager
+   */
+  public static async create(): Promise<VoiceAgentManager> {
+    const manager = new VoiceAgentManager();
+    await manager.initialize();
+    return manager;
+  }
+
+  /**
+   * Initialize voice agents
+   */
+  public async initialize(): Promise<void> {
     this.initializeVoiceAgents();
   }
 

@@ -16,7 +16,18 @@ import {
 } from './utils/endpointFactory';
 
 const app = express();
-const aiVoiceService = new AIVoiceIntegrationService();
+let aiVoiceService: AIVoiceIntegrationService;
+
+// Initialize the AI Voice Service
+async function initializeService() {
+  try {
+    aiVoiceService = await AIVoiceIntegrationService.create();
+    console.log('✅ AI Voice Service initialized successfully');
+  } catch (error) {
+    console.error('❌ Failed to initialize AI Voice Service:', error);
+    process.exit(1);
+  }
+}
 
 // Middleware
 app.use(cors());
@@ -199,46 +210,57 @@ app.use((error: any, req: any, res: any, next: any) => {
 // Start server
 const PORT = config.server.port;
 
-app.listen(PORT, () => {
-  console.log('🚀 Dev 2 AI & Voice Integration Service Started - Phase 3');
-  console.log(`   Port: ${PORT}`);
-  console.log(`   Environment: ${config.server.environment}`);
-  console.log(`   Gemini Model: ${config.gemini.model}`);
-  console.log(`   ElevenLabs Voice: ${config.elevenlabs.voiceId}`);
-  console.log('');
-  console.log('📡 Available Endpoints:');
-  console.log(`   GET  /health - Health check`);
-  console.log(`   POST /api/process-object - Process object detection`);
-  console.log(`   POST /api/process-voice - Process voice input`);
-  console.log(`   POST /api/process-multimodal - Advanced multimodal processing (Phase 2)`);
-  console.log(`   POST /api/process-visual - Process visual context`);
-  console.log(`   POST /api/proactive-assistance - Generate proactive help`);
-  console.log(`   POST /api/synthesize-voice - Voice synthesis`);
-  console.log(`   GET  /api/demo/objects - Demo objects for testing`);
-  console.log('');
-  console.log('🧠 Phase 3 Endpoints (Learning & Personalization):');
-  console.log(`   POST /api/conversational-ai - Advanced conversational AI with learning`);
-  console.log(`   POST /api/personalized-suggestions - Get personalized suggestions`);
-  console.log(`   GET  /api/learning-insights/:userId - Get learning insights for demo`);
-  console.log(`   POST /api/simulate-demo-progression - Simulate demo learning progression`);
-  console.log(`   GET  /api/synthetic-data/summary - Get synthetic AR data summary`);
-  console.log('');
-  console.log('🎯 Phase 3 Features:');
-  console.log(`   ✅ Chroma Vector Database Integration`);
-  console.log(`   ✅ Learning Simulation System (Day 1 vs Day 30)`);
-  console.log(`   ✅ Enhanced ElevenLabs Conversational AI Platform`);
-  console.log(`   ✅ Personalized Suggestion Algorithms`);
-  console.log(`   ✅ Contextual Memory & Pattern Recognition`);
-  console.log('');
-  console.log('🎯 Phase 2 Features:');
-  console.log(`   ✅ Advanced multimodal processing (visual + voice + context)`);
-  console.log(`   ✅ Context-aware conversation management`);
-  console.log(`   ✅ Object-specific AI response generation`);
-  console.log(`   ✅ Voice command parsing and intent recognition`);
-  console.log(`   ✅ Personalized suggestion algorithms`);
-  console.log(`   ✅ Advanced conversation context management`);
-  console.log('');
-  console.log('🎯 Ready for AR client integration!');
+async function startServer() {
+  // Initialize the AI Voice Service first
+  await initializeService();
+  
+  app.listen(PORT, () => {
+    console.log('🚀 Dev 2 AI & Voice Integration Service Started - Phase 3');
+    console.log(`   Port: ${PORT}`);
+    console.log(`   Environment: ${config.server.environment}`);
+    console.log(`   Gemini Model: ${config.gemini.model}`);
+    console.log(`   ElevenLabs Voice: ${config.elevenlabs.voiceId}`);
+    console.log('');
+    console.log('📡 Available Endpoints:');
+    console.log(`   GET  /health - Health check`);
+    console.log(`   POST /api/process-object - Process object detection`);
+    console.log(`   POST /api/process-voice - Process voice input`);
+    console.log(`   POST /api/process-multimodal - Advanced multimodal processing (Phase 2)`);
+    console.log(`   POST /api/process-visual - Process visual context`);
+    console.log(`   POST /api/proactive-assistance - Generate proactive help`);
+    console.log(`   POST /api/synthesize-voice - Voice synthesis`);
+    console.log(`   GET  /api/demo/objects - Demo objects for testing`);
+    console.log('');
+    console.log('🧠 Phase 3 Endpoints (Learning & Personalization):');
+    console.log(`   POST /api/conversational-ai - Advanced conversational AI with learning`);
+    console.log(`   POST /api/personalized-suggestions - Get personalized suggestions`);
+    console.log(`   GET  /api/learning-insights/:userId - Get learning insights for demo`);
+    console.log(`   POST /api/simulate-demo-progression - Simulate demo learning progression`);
+    console.log(`   GET  /api/synthetic-data/summary - Get synthetic AR data summary`);
+    console.log('');
+    console.log('🎯 Phase 3 Features:');
+    console.log(`   ✅ Chroma Vector Database Integration`);
+    console.log(`   ✅ Learning Simulation System (Day 1 vs Day 30)`);
+    console.log(`   ✅ Enhanced ElevenLabs Conversational AI Platform`);
+    console.log(`   ✅ Personalized Suggestion Algorithms`);
+    console.log(`   ✅ Contextual Memory & Pattern Recognition`);
+    console.log('');
+    console.log('🎯 Phase 2 Features:');
+    console.log(`   ✅ Advanced multimodal processing (visual + voice + context)`);
+    console.log(`   ✅ Context-aware conversation management`);
+    console.log(`   ✅ Object-specific AI response generation`);
+    console.log(`   ✅ Voice command parsing and intent recognition`);
+    console.log(`   ✅ Personalized suggestion algorithms`);
+    console.log(`   ✅ Advanced conversation context management`);
+    console.log('');
+    console.log('🎯 Ready for AR client integration!');
+  });
+}
+
+// Start the server
+startServer().catch(error => {
+  console.error('❌ Failed to start server:', error);
+  process.exit(1);
 });
 
 export default app;
