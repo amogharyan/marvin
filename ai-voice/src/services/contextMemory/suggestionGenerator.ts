@@ -3,19 +3,26 @@
 
 import { ConversationContext, DemoObject, UserPreferences } from '../../types';
 import { LEARNING_CONSTANTS } from '../../constants/learningConstants';
+import { 
+  Priority, 
+  LearningStage, 
+  ContextType, 
+  TimeOfDay,
+  PatternType
+} from '../../types/enums';
 
 export interface PersonalizedSuggestion {
   suggestion: string;
   confidence: number;
   context: string;
   reasoning: string;
-  priority: 'low' | 'medium' | 'high';
+  priority: Priority;
 }
 
 export interface LearningPattern {
   pattern_id: string;
   user_id: string;
-  pattern_type: 'routine' | 'preference' | 'behavior';
+  pattern_type: PatternType;
   data: Record<string, any>;
   confidence: number;
   last_updated: Date;
@@ -78,7 +85,7 @@ export class SuggestionGenerator {
         confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_OBJECT_INTERACTION,
         context: 'object_interaction',
         reasoning: `Historical interaction pattern with ${objectName}`,
-        priority: 'medium'
+        priority: Priority.MEDIUM
       });
     }
 
@@ -90,7 +97,7 @@ export class SuggestionGenerator {
           confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_OBJECT_INTERACTION,
           context: 'medication_reminder',
           reasoning: 'Medicine bottle detected - proactive medication assistance',
-          priority: 'high'
+          priority: Priority.HIGH
         });
         break;
 
@@ -100,7 +107,7 @@ export class SuggestionGenerator {
           confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_OBJECT_INTERACTION,
           context: 'nutrition_assistance',
           reasoning: 'Breakfast bowl detected - nutritional guidance available',
-          priority: 'medium'
+          priority: Priority.MEDIUM
         });
         break;
 
@@ -110,7 +117,7 @@ export class SuggestionGenerator {
           confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_OBJECT_INTERACTION,
           context: 'schedule_assistance',
           reasoning: 'Laptop detected - work/productivity context',
-          priority: 'medium'
+          priority: Priority.MEDIUM
         });
         break;
 
@@ -120,7 +127,7 @@ export class SuggestionGenerator {
           confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_OBJECT_INTERACTION,
           context: 'departure_assistance',
           reasoning: 'Keys detected - departure preparation context',
-          priority: 'high'
+          priority: Priority.HIGH
         });
         break;
 
@@ -130,7 +137,7 @@ export class SuggestionGenerator {
           confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_OBJECT_INTERACTION,
           context: 'device_sync',
           reasoning: 'Phone detected - device synchronization context',
-          priority: 'medium'
+          priority: Priority.MEDIUM
         });
         break;
     }
@@ -153,7 +160,7 @@ export class SuggestionGenerator {
         confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_VOICE_PREFERENCE,
         context: 'voice_preference',
         reasoning: `User prefers ${preferences.voice_settings.preferred_voice} voice`,
-        priority: 'low'
+        priority: Priority.LOW
       });
     }
 
@@ -164,7 +171,7 @@ export class SuggestionGenerator {
         confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_INTERACTION_PREFERENCE,
         context: 'interaction_preference',
         reasoning: 'User prefers proactive assistance',
-        priority: 'medium'
+        priority: Priority.MEDIUM
       });
     }
 
@@ -175,7 +182,7 @@ export class SuggestionGenerator {
         confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_INTERACTION_PREFERENCE,
         context: 'routine_optimization',
         reasoning: 'User has established wake time pattern',
-        priority: 'medium'
+        priority: Priority.MEDIUM
       });
     }
 
@@ -206,7 +213,7 @@ export class SuggestionGenerator {
           confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_INTERACTION_PREFERENCE,
           context: 'routine_pattern',
           reasoning: 'User has established time-based interaction patterns',
-          priority: 'low'
+          priority: Priority.LOW
         });
       }
 
@@ -216,7 +223,7 @@ export class SuggestionGenerator {
           confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_INTERACTION_PREFERENCE,
           context: 'routine_optimization',
           reasoning: 'User has established object interaction patterns',
-          priority: 'medium'
+          priority: Priority.MEDIUM
         });
       }
     }
@@ -227,47 +234,47 @@ export class SuggestionGenerator {
   /**
    * Generate contextual suggestions based on time of day
    */
-  public generateTimeBasedSuggestions(timeOfDay: string): PersonalizedSuggestion[] {
+  public generateTimeBasedSuggestions(timeOfDay: TimeOfDay): PersonalizedSuggestion[] {
     const suggestions: PersonalizedSuggestion[] = [];
 
     switch (timeOfDay) {
-      case 'morning':
+      case TimeOfDay.MORNING:
         suggestions.push({
           suggestion: 'Good morning! Ready to start your day?',
           confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_INTERACTION_PREFERENCE,
           context: 'morning_greeting',
           reasoning: 'Morning time - proactive day start assistance',
-          priority: 'medium'
+          priority: Priority.MEDIUM
         });
         break;
 
-      case 'afternoon':
+      case TimeOfDay.AFTERNOON:
         suggestions.push({
           suggestion: 'How is your day going? Need help with anything?',
           confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_INTERACTION_PREFERENCE,
           context: 'afternoon_checkin',
           reasoning: 'Afternoon time - productivity check-in',
-          priority: 'low'
+          priority: Priority.LOW
         });
         break;
 
-      case 'evening':
+      case TimeOfDay.EVENING:
         suggestions.push({
           suggestion: 'Would you like me to help you prepare for tomorrow?',
           confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_INTERACTION_PREFERENCE,
           context: 'evening_preparation',
           reasoning: 'Evening time - next day preparation',
-          priority: 'medium'
+          priority: Priority.MEDIUM
         });
         break;
 
-      case 'night':
+      case TimeOfDay.NIGHT:
         suggestions.push({
           suggestion: 'Time to wind down. Need help with anything before bed?',
           confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_INTERACTION_PREFERENCE,
           context: 'night_winddown',
           reasoning: 'Night time - bedtime preparation',
-          priority: 'low'
+          priority: Priority.LOW
         });
         break;
     }
@@ -279,39 +286,39 @@ export class SuggestionGenerator {
    * Generate learning progression suggestions
    */
   public generateLearningProgressionSuggestions(
-    learningStage: 'day_1' | 'day_7' | 'day_30',
+    learningStage: LearningStage,
     totalInteractions: number
   ): PersonalizedSuggestion[] {
     const suggestions: PersonalizedSuggestion[] = [];
 
     switch (learningStage) {
-      case 'day_1':
+      case LearningStage.DAY_1:
         suggestions.push({
           suggestion: 'I\'m learning your preferences. The more we interact, the better I can help!',
           confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_INTERACTION_PREFERENCE,
           context: 'learning_progression',
           reasoning: 'Early learning stage - encouraging interaction',
-          priority: 'low'
+          priority: Priority.LOW
         });
         break;
 
-      case 'day_7':
+      case LearningStage.DAY_7:
         suggestions.push({
           suggestion: `I've learned ${totalInteractions} interaction patterns. I can now provide more personalized assistance!`,
           confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_INTERACTION_PREFERENCE,
           context: 'learning_progression',
           reasoning: 'Pattern recognition stage - highlighting personalization',
-          priority: 'medium'
+          priority: Priority.MEDIUM
         });
         break;
 
-      case 'day_30':
+      case LearningStage.DAY_30:
         suggestions.push({
           suggestion: `With ${totalInteractions} interactions learned, I can now predict your needs and provide proactive assistance!`,
           confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_INTERACTION_PREFERENCE,
           context: 'learning_progression',
           reasoning: 'Advanced learning stage - highlighting predictive capabilities',
-          priority: 'high'
+          priority: Priority.HIGH
         });
         break;
     }

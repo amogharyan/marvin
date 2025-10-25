@@ -3,11 +3,12 @@
 
 import { ConversationContext, ChatMessage, UserPreferences } from '../../types';
 import { LEARNING_CONSTANTS } from '../../constants/learningConstants';
+import { PatternType, ReminderFrequency, VolumeLevel } from '../../types/enums';
 
 export interface LearningPattern {
   pattern_id: string;
   user_id: string;
-  pattern_type: 'routine' | 'preference' | 'behavior';
+  pattern_type: PatternType;
   data: Record<string, any>;
   confidence: number;
   last_updated: Date;
@@ -35,7 +36,7 @@ export class PatternAnalyzer {
         return {
           pattern_id: `conversation_${Date.now()}`,
           user_id: context.user_id,
-          pattern_type: 'routine',
+          pattern_type: PatternType.ROUTINE,
           data: {
             time_patterns: timePatterns,
             object_patterns: objectPatterns,
@@ -81,7 +82,7 @@ export class PatternAnalyzer {
         return {
           pattern_id: `preference_${Date.now()}`,
           user_id: context.user_id,
-          pattern_type: 'preference',
+          pattern_type: PatternType.PREFERENCE,
           data: preferences,
           confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_PREFERENCE_PATTERN,
           last_updated: new Date()
@@ -117,7 +118,7 @@ export class PatternAnalyzer {
         return {
           pattern_id: `behavior_${Date.now()}`,
           user_id: context.user_id,
-          pattern_type: 'behavior',
+          pattern_type: PatternType.BEHAVIOR,
           data: behaviors,
           confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_BEHAVIOR_PATTERN,
           last_updated: new Date()
@@ -177,7 +178,7 @@ export class PatternAnalyzer {
       if (content.includes('slow')) preferences.speech_rate = LEARNING_CONSTANTS.VOICE_SETTINGS.SPEECH_RATE.SLOW;
       if (content.includes('fast')) preferences.speech_rate = LEARNING_CONSTANTS.VOICE_SETTINGS.SPEECH_RATE.FAST;
       if (content.includes('loud')) preferences.volume = LEARNING_CONSTANTS.VOICE_SETTINGS.VOLUME.HIGH;
-      if (content.includes('quiet')) preferences.volume = 'low';
+      if (content.includes('quiet')) preferences.volume = VolumeLevel.LOW;
     });
 
     return preferences;
@@ -193,8 +194,8 @@ export class PatternAnalyzer {
       const content = message.content.toLowerCase();
       if (content.includes('proactive')) preferences.proactive_assistance = true;
       if (content.includes('detailed')) preferences.detailed_explanations = true;
-      if (content.includes('frequent')) preferences.reminder_frequency = 'high';
-      if (content.includes('occasional')) preferences.reminder_frequency = 'low';
+      if (content.includes('frequent')) preferences.reminder_frequency = ReminderFrequency.HIGH;
+      if (content.includes('occasional')) preferences.reminder_frequency = ReminderFrequency.LOW;
     });
 
     return preferences;

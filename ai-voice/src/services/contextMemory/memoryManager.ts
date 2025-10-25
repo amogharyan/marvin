@@ -4,10 +4,11 @@
 import { ConversationContext, DemoObject, ChatMessage, UserPreferences } from '../../types';
 import { errorLog } from '../../utils/secureLogger';
 import { LEARNING_CONSTANTS } from '../../constants/learningConstants';
+import { MemoryType, ReminderFrequency } from '../../types/enums';
 
 export interface MemoryEntry {
   id: string;
-  type: 'conversation' | 'preference' | 'pattern' | 'object_interaction';
+  type: MemoryType;
   content: any;
   timestamp: Date;
   confidence: number;
@@ -297,7 +298,7 @@ export class MemoryManager {
       interaction_preferences: {
         proactive_assistance: preferences.interaction_preferences?.proactive_assistance ?? true,
         detailed_explanations: preferences.interaction_preferences?.detailed_explanations ?? true,
-        reminder_frequency: preferences.interaction_preferences?.reminder_frequency || 'medium'
+        reminder_frequency: preferences.interaction_preferences?.reminder_frequency || ReminderFrequency.MEDIUM
       },
       routine_patterns: {
         typical_wake_time: preferences.routine_patterns?.typical_wake_time || '7:00 AM',
@@ -320,7 +321,7 @@ export class MemoryManager {
       interaction_preferences: {
         proactive_assistance: true,
         detailed_explanations: true,
-        reminder_frequency: 'medium'
+        reminder_frequency: ReminderFrequency.MEDIUM
       },
       routine_patterns: {
         typical_wake_time: '7:00 AM',
