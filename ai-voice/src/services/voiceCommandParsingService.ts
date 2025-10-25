@@ -1,6 +1,7 @@
 // Voice Command Parsing and Intent Recognition Service - Dev 2 Phase 2
 
 import { ConversationContext, DemoObject, ChatMessage } from '../types';
+import { secureLog, debugLog, errorLog } from '../utils/secureLogger';
 
 export interface VoiceIntent {
   intent: string;
@@ -24,7 +25,35 @@ export class VoiceCommandParsingService {
   constructor() {
     this.initializeIntentPatterns();
     this.initializeEntityPatterns();
-    console.log('🎯 Voice Command Parsing Service initialized');
+    debugLog('🎯 Voice Command Parsing Service initialized');
+  }
+
+  /**
+   * Redact PII from text for safe logging
+   */
+  private redactPII(text: string): string {
+    if (!text) return '[EMPTY]';
+    
+    // Redact common PII patterns
+    let redacted = text
+      // Phone numbers (various formats)
+      .replace(/\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g, '[PHONE]')
+      .replace(/\b\(\d{3}\)\s*\d{3}[-.]?\d{4}\b/g, '[PHONE]')
+      // Email addresses
+      .replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, '[EMAIL]')
+      // SSN (XXX-XX-XXXX)
+      .replace(/\b\d{3}-\d{2}-\d{4}\b/g, '[SSN]')
+      // Credit card numbers (basic pattern)
+      .replace(/\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/g, '[CARD]')
+      // Common names (basic pattern - could be enhanced)
+      .replace(/\b[A-Z][a-z]+ [A-Z][a-z]+\b/g, '[NAME]');
+    
+    // If text is too long, truncate and add indicator
+    if (redacted.length > 100) {
+      redacted = redacted.substring(0, 97) + '...';
+    }
+    
+    return redacted || '[REDACTED]';
   }
 
   /**
@@ -33,10 +62,20 @@ export class VoiceCommandParsingService {
   async parseVoiceCommand(
     voiceText: string,
     objectContext?: DemoObject,
-    conversationContext?: ConversationContext
+    conversationContext?: ConversationContext,
+    correlationId?: string
   ): Promise<ParsedCommand> {
     try {
-      console.log(`🎯 Parsing voice command: ${voiceText}`);
+      // Secure logging with PII redaction
+      secureLog('🎯 Parsing voice command', voiceText, {
+        redactSensitive: true,
+        includeMetadata: true,
+        maxLength: 100
+      });
+
+      // Debug logging with correlation ID and redacted PII
+      const redactedText = this.redactPII(voiceText);
+      debugLog(`🎯 Parsing voice command [${correlationId || 'no-id'}]: ${redactedText}`);
 
       const normalizedText = voiceText.toLowerCase().trim();
       
@@ -68,7 +107,7 @@ export class VoiceCommandParsingService {
         follow_up_actions: followUpActions
       };
     } catch (error) {
-      console.error('Voice command parsing error:', error);
+      errorLog('Voice command parsing error', error);
       
       return {
         intent: {
@@ -383,7 +422,7 @@ export class VoiceCommandParsingService {
       const testCommand = await this.parseVoiceCommand('help me with my medicine');
       return testCommand.intent.intent !== 'unknown';
     } catch (error) {
-      console.error('Voice command parsing health check failed:', error);
+      errorLog('Voice command parsing health check failed', error);
       return false;
     }
   }

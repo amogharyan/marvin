@@ -117,7 +117,7 @@ export interface GeminiRequest {
 
 export interface GeminiResponse {
   text: string;
-  confidence: number;
+  confidence: number | undefined; // Can be undefined when confidence cannot be determined
   safety_ratings: any[];
 }
 

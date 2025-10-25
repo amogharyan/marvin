@@ -1305,6 +1305,9 @@ elevenlabs_conversational_ai:
   integration_level: "Full conversational AI platform integration"
   backup_plan: "Basic voice commands only"
 
+# Privacy & Compliance Note for Health Data (FR-035/FR-041)
+**IMPORTANT:** Any health-related data used in demos is synthetic or anonymized, retained only for a 24-hour window, encrypted at rest and in transit, and explicitly marked as "demo-only" with no PHI processing or HIPAA scope. Production HIPAA compliance is out of scope for this demo system.
+
 google_calendar:
   status: "Schedule integration"
   integration_level: "Read calendar events and generate briefings"

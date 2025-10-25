@@ -39,6 +39,51 @@ export class ContextMemoryService {
   }
 
   /**
+   * Check if two messages are duplicates based on content and timestamp
+   */
+  private areMessagesDuplicate(msg1: ChatMessage, msg2: ChatMessage): boolean {
+    // Check if messages have the same content and are within 1 second of each other
+    const timeDiff = Math.abs(msg1.timestamp.getTime() - msg2.timestamp.getTime());
+    return msg1.content === msg2.content && 
+           msg1.role === msg2.role && 
+           timeDiff < 1000; // Within 1 second
+  }
+
+  /**
+   * Merge conversation histories with deduplication
+   */
+  private mergeConversationHistories(
+    existingHistory: ChatMessage[],
+    incomingHistory: ChatMessage[]
+  ): ChatMessage[] {
+    // If no existing history, return incoming
+    if (!existingHistory || existingHistory.length === 0) {
+      return incomingHistory;
+    }
+
+    // If no incoming history, return existing
+    if (!incomingHistory || incomingHistory.length === 0) {
+      return existingHistory;
+    }
+
+    // Start with existing history
+    const mergedHistory = [...existingHistory];
+
+    // Add incoming messages, checking for duplicates
+    for (const incomingMsg of incomingHistory) {
+      const isDuplicate = mergedHistory.some(existingMsg => 
+        this.areMessagesDuplicate(existingMsg, incomingMsg)
+      );
+      
+      if (!isDuplicate) {
+        mergedHistory.push(incomingMsg);
+      }
+    }
+
+    return mergedHistory;
+  }
+
+  /**
    * Store conversation context with advanced memory management
    */
   async storeConversationContext(
@@ -52,19 +97,31 @@ export class ContextMemoryService {
       // Update existing context or create new one
       const existingContext = this.conversationMemory.get(sessionId);
       if (existingContext) {
-        // Merge contexts intelligently
-        context.conversation_history = [
-          ...existingContext.conversation_history,
-          ...context.conversation_history
-        ].slice(-20); // Keep last 20 messages
+        // Merge contexts intelligently with deduplication
+        context.conversation_history = this.mergeConversationHistories(
+          existingContext.conversation_history,
+          context.conversation_history
+        );
+
+        // Trim to last 20 messages after merging
+        if (context.conversation_history.length > 20) {
+          context.conversation_history = context.conversation_history.slice(-20);
+        }
 
         // Update user preferences if provided
         if (context.user_preferences) {
           context.user_preferences = this.mergeUserPreferences(
-            existingContext.user_preferences,
+            existingContext.user_preferences, // Safe to pass undefined
             context.user_preferences
           );
+          // Persist merged preferences to the userPreferences Map
+          this.userPreferences.set(context.user_id, context.user_preferences);
         }
+      }
+
+      // Store user preferences to the Map if provided (even for new contexts)
+      if (context.user_preferences) {
+        this.userPreferences.set(context.user_id, context.user_preferences);
       }
 
       this.conversationMemory.set(sessionId, context);
@@ -94,10 +151,21 @@ export class ContextMemoryService {
       tags: this.extractMessageTags(message)
     };
 
-    // Store in conversation history
+    // Store in conversation history with deduplication and trimming
     const context = this.conversationMemory.get(sessionId);
     if (context) {
-      context.conversation_history.push(message);
+      // Check if this message is a duplicate of the last message
+      const lastMessage = context.conversation_history[context.conversation_history.length - 1];
+      const isDuplicate = lastMessage && this.areMessagesDuplicate(lastMessage, message);
+      
+      if (!isDuplicate) {
+        context.conversation_history.push(message);
+        
+        // Trim to last 20 messages after adding
+        if (context.conversation_history.length > 20) {
+          context.conversation_history = context.conversation_history.slice(-20);
+        }
+      }
     }
   }
 
@@ -258,7 +326,14 @@ export class ContextMemoryService {
 
       const suggestions: PersonalizedSuggestion[] = [];
       const patterns = this.learningPatterns.get(userId) || [];
-      const userPrefs = this.userPreferences.get(userId);
+      
+      // Try to get user preferences from the Map first, then from conversation context
+      let userPrefs = this.userPreferences.get(userId);
+      if (!userPrefs && currentContext.user_preferences) {
+        // If not in Map but available in context, store it
+        this.userPreferences.set(userId, currentContext.user_preferences);
+        userPrefs = currentContext.user_preferences;
+      }
 
       // Generate suggestions based on routine patterns
       const routineSuggestions = this.generateRoutineSuggestions(patterns, currentContext);
@@ -491,21 +566,125 @@ export class ContextMemoryService {
   }
 
   private mergeUserPreferences(
-    existing: UserPreferences,
-    updated: UserPreferences
+    existing: UserPreferences | undefined,
+    updated: UserPreferences | undefined
   ): UserPreferences {
+    // Defensive programming: ensure we always have valid objects
+    const existingPrefs = this.safeGetUserPreferences(existing);
+    const updatedPrefs = this.safeGetUserPreferences(updated);
+
+    // Safe merge with null checks
     return {
       voice_settings: {
-        ...existing.voice_settings,
-        ...updated.voice_settings
+        ...existingPrefs.voice_settings,
+        ...(updatedPrefs.voice_settings || {})
       },
       interaction_preferences: {
-        ...existing.interaction_preferences,
-        ...updated.interaction_preferences
+        ...existingPrefs.interaction_preferences,
+        ...(updatedPrefs.interaction_preferences || {})
       },
       routine_patterns: {
-        ...existing.routine_patterns,
-        ...updated.routine_patterns
+        ...existingPrefs.routine_patterns,
+        ...(updatedPrefs.routine_patterns || {})
+      }
+    };
+  }
+
+  /**
+   * Safely get user preferences with fallback to defaults
+   */
+  private safeGetUserPreferences(preferences: UserPreferences | undefined): UserPreferences {
+    if (!preferences) {
+      return this.getDefaultUserPreferences();
+    }
+
+    // Ensure all required properties exist with safe defaults
+    return {
+      voice_settings: {
+        preferred_voice: preferences.voice_settings?.preferred_voice || 'default',
+        speech_rate: preferences.voice_settings?.speech_rate || 1.0,
+        pitch: preferences.voice_settings?.pitch || 1.0
+      },
+      interaction_preferences: {
+        proactive_assistance: preferences.interaction_preferences?.proactive_assistance ?? true,
+        detailed_explanations: preferences.interaction_preferences?.detailed_explanations ?? true,
+        reminder_frequency: preferences.interaction_preferences?.reminder_frequency || 'medium'
+      },
+      routine_patterns: {
+        typical_wake_time: preferences.routine_patterns?.typical_wake_time || '7:00 AM',
+        breakfast_preferences: preferences.routine_patterns?.breakfast_preferences || [],
+        medicine_schedule: preferences.routine_patterns?.medicine_schedule || []
+      }
+    };
+  }
+
+  /**
+   * Get user preferences by user ID
+   */
+  getUserPreferences(userId: string): UserPreferences | undefined {
+    return this.userPreferences.get(userId);
+  }
+
+  /**
+   * Remove conversation context and related data
+   */
+  removeConversationContext(sessionId: string): void {
+    try {
+      // Remove from conversation memory
+      this.conversationMemory.delete(sessionId);
+      
+      // Remove from learning patterns
+      this.learningPatterns.delete(sessionId);
+      
+      // Remove from object interaction history
+      this.objectInteractionHistory.delete(sessionId);
+      
+      // Note: We don't remove from userPreferences Map as it's keyed by userId, not sessionId
+      // and might be shared across multiple sessions
+    } catch (error) {
+      console.error(`Error removing conversation context for session ${sessionId}:`, error);
+    }
+  }
+
+  /**
+   * Remove user preferences by user ID
+   */
+  removeUserPreferences(userId: string): void {
+    try {
+      this.userPreferences.delete(userId);
+    } catch (error) {
+      console.error(`Error removing user preferences for user ${userId}:`, error);
+    }
+  }
+
+  /**
+   * Update user preferences directly
+   */
+  updateUserPreferences(userId: string, preferences: Partial<UserPreferences>): void {
+    const existingPrefs = this.userPreferences.get(userId);
+    const mergedPrefs = this.mergeUserPreferences(existingPrefs, preferences as UserPreferences);
+    this.userPreferences.set(userId, mergedPrefs);
+  }
+
+  /**
+   * Get default user preferences when none are provided
+   */
+  private getDefaultUserPreferences(): UserPreferences {
+    return {
+      voice_settings: {
+        preferred_voice: 'default',
+        speech_rate: 1.0,
+        pitch: 1.0
+      },
+      interaction_preferences: {
+        proactive_assistance: true,
+        detailed_explanations: true,
+        reminder_frequency: 'medium'
+      },
+      routine_patterns: {
+        typical_wake_time: '7:00 AM',
+        breakfast_preferences: [],
+        medicine_schedule: []
       }
     };
   }
@@ -514,11 +693,15 @@ export class ContextMemoryService {
    * Health check for context memory service
    */
   async healthCheck(): Promise<boolean> {
+    // Use namespaced test IDs to avoid collisions
+    const testSessionId = `health_check_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const testUserId = `health_check_user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
     try {
       // Test basic functionality
       const testContext: ConversationContext = {
-        user_id: 'test_user',
-        session_id: 'test_session',
+        user_id: testUserId,
+        session_id: testSessionId,
         conversation_history: [],
         user_preferences: {
           voice_settings: { preferred_voice: 'default', speech_rate: 1.0, pitch: 1.0 },
@@ -527,13 +710,22 @@ export class ContextMemoryService {
         }
       };
 
-      await this.storeConversationContext('test_session', testContext);
-      const retrieved = await this.getEnhancedConversationContext('test_session');
+      await this.storeConversationContext(testSessionId, testContext);
+      const retrieved = await this.getEnhancedConversationContext(testSessionId);
       
       return retrieved !== null;
     } catch (error) {
       console.error('Context memory health check failed:', error);
       return false;
+    } finally {
+      // Always clean up test data, even if health check fails
+      try {
+        this.removeConversationContext(testSessionId);
+        this.removeUserPreferences(testUserId);
+      } catch (cleanupError) {
+        // Log cleanup errors but don't let them mask the health check result
+        console.error(`Health check cleanup failed for session ${testSessionId}:`, cleanupError);
+      }
     }
   }
 }

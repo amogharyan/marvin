@@ -95,7 +95,7 @@ app.post('/api/process-voice', async (req, res) => {
 // Advanced multimodal processing endpoint (Phase 2)
 app.post('/api/process-multimodal', async (req, res) => {
   try {
-    const { imageData, voiceText, conversationContext, objectContext } = req.body;
+    const { imageData, voiceText, conversationContext, objectContext, mimeType } = req.body;
     
     if (!imageData || !voiceText) {
       return res.status(400).json({ error: 'imageData and voiceText are required' });
@@ -105,7 +105,8 @@ app.post('/api/process-multimodal', async (req, res) => {
       imageData,
       voiceText,
       conversationContext,
-      objectContext
+      objectContext,
+      mimeType
     );
 
     res.json({
@@ -126,7 +127,7 @@ app.post('/api/process-multimodal', async (req, res) => {
 // Visual context processing endpoint
 app.post('/api/process-visual', async (req, res) => {
   try {
-    const { imageData, detectedObjects } = req.body;
+    const { imageData, detectedObjects, mimeType } = req.body;
     
     if (!imageData || !detectedObjects) {
       return res.status(400).json({ error: 'imageData and detectedObjects are required' });
@@ -134,7 +135,8 @@ app.post('/api/process-visual', async (req, res) => {
 
     const response = await aiVoiceService.processVisualContext(
       imageData,
-      detectedObjects
+      detectedObjects,
+      mimeType
     );
 
     res.json({

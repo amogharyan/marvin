@@ -1,12 +1,13 @@
 // Voice Processing Service for Basic Conversational Logic
 
 import { ConversationContext, DemoObject, ChatMessage, DEMO_OBJECTS } from '../types';
+import { secureLog, safeLog } from '../utils/secureLogger';
 
 export class VoiceProcessingService {
   private conversationMemory: Map<string, ConversationContext> = new Map();
 
   constructor() {
-    console.log('🎤 Voice Processing Service initialized');
+    safeLog('🎤 Voice Processing Service initialized');
   }
 
   /**
@@ -18,7 +19,11 @@ export class VoiceProcessingService {
     objectContext?: DemoObject
   ): Promise<{ response: string; confidence: number; suggested_actions: string[] }> {
     try {
-      console.log(`🎤 Processing voice input: ${voiceText}`);
+      secureLog('🎤 Processing voice input', voiceText, {
+        redactSensitive: true,
+        includeMetadata: true,
+        maxLength: 100
+      });
 
       // Update conversation context
       this.updateConversationContext(conversationContext);

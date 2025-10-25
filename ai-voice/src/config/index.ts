@@ -37,7 +37,9 @@ export interface Config {
 function validateConfig(): Config {
   const requiredEnvVars = [
     'GEMINI_API_KEY',
-    'ELEVENLABS_API_KEY'
+    'ELEVENLABS_API_KEY',
+    'ELEVENLABS_VOICE_ID',
+    'ELEVENLABS_VOICE_AGENT_ID'
   ];
 
   const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
@@ -48,15 +50,15 @@ function validateConfig(): Config {
 
   return {
     gemini: {
-      apiKey: process.env.GEMINI_API_KEY || 'AIzaSyBoR3kmp8cwTReJ4p_nB0XjTzcbOpU1K8g',
+      apiKey: process.env.GEMINI_API_KEY!,
       model: process.env.GEMINI_MODEL || 'gemini-pro-vision',
       maxTokens: parseInt(process.env.GEMINI_MAX_TOKENS || '1000')
     },
     
     elevenlabs: {
       apiKey: process.env.ELEVENLABS_API_KEY!,
-      voiceId: process.env.ELEVENLABS_VOICE_ID || 'IKne3meq5aSn9XLyUdCD',
-      voiceAgentId: process.env.ELEVENLABS_VOICE_AGENT_ID || 'agent_2201k8dct0emf1httmyhkdj2gjbf',
+      voiceId: process.env.ELEVENLABS_VOICE_ID!,
+      voiceAgentId: process.env.ELEVENLABS_VOICE_AGENT_ID!,
       baseUrl: process.env.ELEVENLABS_BASE_URL || 'https://api.elevenlabs.io/v1'
     },
     

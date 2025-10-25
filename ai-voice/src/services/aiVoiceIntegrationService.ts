@@ -5,6 +5,7 @@ import { ElevenLabsService } from './elevenlabsService';
 import { VoiceProcessingService } from './voiceProcessingService';
 import { VoiceCommandParsingService } from './voiceCommandParsingService';
 import { ContextMemoryService } from './contextMemoryService';
+import { secureLog, safeLog, debugLog } from '../utils/secureLogger';
 import { 
   AIResponse, 
   ConversationContext, 
@@ -37,7 +38,7 @@ export class AIVoiceIntegrationService {
     conversationContext?: ConversationContext
   ): Promise<AIResponse> {
     try {
-      console.log(`🔍 Processing object detection: ${detectedObject.name}`);
+      safeLog(`🔍 Processing object detection: ${detectedObject.name}`);
 
       // Step 1: Generate contextual AI response using voice processing
       const voiceResponse = await this.voiceProcessingService.processVoiceInput(
@@ -86,7 +87,11 @@ export class AIVoiceIntegrationService {
     objectContext?: DemoObject
   ): Promise<AIResponse> {
     try {
-      console.log(`🎤 Processing voice input: ${voiceText}`);
+      secureLog('🎤 Processing voice input', voiceText, {
+        redactSensitive: true,
+        includeMetadata: true,
+        maxLength: 100
+      });
 
       // Store conversation context in memory
       await this.contextMemoryService.storeConversationContext(
@@ -155,10 +160,15 @@ export class AIVoiceIntegrationService {
     imageData: string,
     voiceText: string,
     conversationContext: ConversationContext,
-    objectContext?: DemoObject
+    objectContext?: DemoObject,
+    mimeType?: string
   ): Promise<AIResponse> {
     try {
-      console.log(`🔍 Advanced multimodal processing: ${voiceText}`);
+      secureLog('🔍 Advanced multimodal processing', voiceText, {
+        redactSensitive: true,
+        includeMetadata: true,
+        maxLength: 100
+      });
 
       // Store conversation context
       await this.contextMemoryService.storeConversationContext(
@@ -178,7 +188,8 @@ export class AIVoiceIntegrationService {
         imageData,
         voiceText,
         objectContext,
-        conversationContext.conversation_history
+        conversationContext.conversation_history,
+        mimeType
       );
 
       // Generate personalized suggestions
@@ -197,7 +208,7 @@ export class AIVoiceIntegrationService {
 
       return {
         content: geminiResponse.text,
-        confidence: geminiResponse.confidence,
+        confidence: geminiResponse.confidence ?? 0.5, // Fallback to moderate confidence if undefined
         context: `Multimodal analysis | Intent: ${parsedCommand.intent.intent}`,
         suggested_actions: parsedCommand.follow_up_actions,
         voice_enabled: true,
@@ -207,7 +218,7 @@ export class AIVoiceIntegrationService {
         personalized_suggestions: personalizedSuggestions.slice(0, 3),
         visual_analysis: {
           objects_detected: objectContext ? [objectContext] : [],
-          confidence: geminiResponse.confidence
+          confidence: geminiResponse.confidence ?? 0.5 // Fallback to moderate confidence if undefined
         }
       };
     } catch (error) {
@@ -228,15 +239,17 @@ export class AIVoiceIntegrationService {
    */
   async processVisualContext(
     imageData: string,
-    detectedObjects: DemoObject[]
+    detectedObjects: DemoObject[],
+    mimeType?: string
   ): Promise<AIResponse> {
     try {
-      console.log(`📷 Processing visual context with ${detectedObjects.length} objects`);
+      safeLog(`📷 Processing visual context with ${detectedObjects.length} objects`);
 
       // Use Gemini for visual analysis
       const geminiResponse = await this.geminiService.processVisualContext(
         imageData,
-        detectedObjects
+        detectedObjects,
+        mimeType
       );
 
       // Generate voice for the most confident object
@@ -251,7 +264,7 @@ export class AIVoiceIntegrationService {
 
       return {
         content: geminiResponse.text,
-        confidence: geminiResponse.confidence,
+        confidence: geminiResponse.confidence ?? 0.5, // Fallback to moderate confidence if undefined
         context: `Visual analysis of ${detectedObjects.length} objects`,
         suggested_actions: ['Interact with objects', 'Ask questions', 'Get more info'],
         voice_enabled: true,
@@ -278,7 +291,7 @@ export class AIVoiceIntegrationService {
     timeOfDay: string
   ): Promise<AIResponse> {
     try {
-      console.log(`⏰ Generating proactive assistance for ${timeOfDay}`);
+      safeLog(`⏰ Generating proactive assistance for ${timeOfDay}`);
 
       const proactiveResponse = await this.voiceProcessingService.generateProactiveAssistance(
         conversationContext,
