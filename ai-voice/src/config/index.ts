@@ -34,6 +34,12 @@ export interface Config {
   };
 }
 
+/**
+ * Builds and returns the application configuration by reading environment variables and applying sensible defaults.
+ *
+ * @returns A Config object populated from environment variables; optional values use predefined defaults when not set.
+ * @throws Error when any required environment variable is missing: `GEMINI_API_KEY`, `ELEVENLABS_API_KEY`.
+ */
 function validateConfig(): Config {
   const requiredEnvVars = [
     'GEMINI_API_KEY',
