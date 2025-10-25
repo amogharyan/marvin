@@ -90,8 +90,6 @@ export class ServiceOrchestrator {
   public async getServiceHealthStatus(): Promise<ServiceHealthStatus> {
     try {
       const [
-        gemini,
-        elevenlabs,
         voiceProcessing,
         voiceCommandParsing,
         contextMemory,
@@ -100,8 +98,6 @@ export class ServiceOrchestrator {
         enhancedElevenLabs,
         syntheticARData
       ] = await Promise.allSettled([
-        this.geminiService.healthCheck?.() || Promise.resolve(true),
-        this.elevenlabsService.healthCheck?.() || Promise.resolve(true),
         this.voiceProcessingService.healthCheck?.() || Promise.resolve(true),
         this.voiceCommandParsingService.healthCheck?.() || Promise.resolve(true),
         this.contextMemoryService.healthCheck(),
@@ -112,8 +108,8 @@ export class ServiceOrchestrator {
       ]);
 
       return {
-        gemini: gemini.status === 'fulfilled' && gemini.value === true,
-        elevenlabs: elevenlabs.status === 'fulfilled' && elevenlabs.value === true,
+        gemini: true, // Gemini service doesn't have healthCheck method
+        elevenlabs: true, // ElevenLabs service doesn't have healthCheck method
         voiceProcessing: voiceProcessing.status === 'fulfilled' && voiceProcessing.value === true,
         voiceCommandParsing: voiceCommandParsing.status === 'fulfilled' && voiceCommandParsing.value === true,
         contextMemory: contextMemory.status === 'fulfilled' && contextMemory.value === true,
