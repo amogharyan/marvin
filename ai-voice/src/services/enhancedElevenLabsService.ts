@@ -6,6 +6,7 @@ import { secureLog, errorLog, debugLog } from '../utils/secureLogger';
 import { ConversationContext, DemoObject, ChatMessage } from '../types';
 import { ChromaService } from './chromaService';
 import { LearningSimulationService } from './learningSimulationService';
+import { LEARNING_CONSTANTS } from '../constants/learningConstants';
 
 export interface ConversationalAIRequest {
   voiceText: string;
@@ -99,7 +100,7 @@ Object context: {object_context}
 Respond naturally, concisely, and focus on actionable guidance.`,
       conversationConfig: {
         maxTurns: 10,
-        temperature: 0.7,
+        temperature: LEARNING_CONSTANTS.ELEVENLABS.TEMPERATURE.BALANCED,
         responseLength: 'medium'
       }
     };
@@ -123,7 +124,7 @@ Learning stage: {learning_stage}
 Health context: {health_context}`,
       conversationConfig: {
         maxTurns: 8,
-        temperature: 0.6,
+        temperature: LEARNING_CONSTANTS.ELEVENLABS.TEMPERATURE.CONSERVATIVE,
         responseLength: 'short'
       }
     };
@@ -146,7 +147,7 @@ Learning stage: {learning_stage}
 Calendar context: {calendar_context}`,
       conversationConfig: {
         maxTurns: 12,
-        temperature: 0.8,
+        temperature: LEARNING_CONSTANTS.ELEVENLABS.TEMPERATURE.CREATIVE,
         responseLength: 'medium'
       }
     };
@@ -251,7 +252,7 @@ Calendar context: {calendar_context}`,
       debugLog('Failed to get learning insights, using defaults:', error);
       return {
         stage: 'day_1',
-        personalizationLevel: 0.2,
+        personalizationLevel: LEARNING_CONSTANTS.THRESHOLDS.PERSONALIZATION_DAY_1,
         nextMilestone: 'Complete 5 interactions to unlock pattern recognition'
       };
     }
@@ -326,13 +327,13 @@ Calendar context: {calendar_context}`,
       return {
         text: response.message,
         audioUrl: undefined,
-        confidence: response.confidence || 0.8,
+        confidence: response.confidence || LEARNING_CONSTANTS.CONFIDENCE.ELEVENLABS_SUCCESS,
         intent: 'general_query',
         entities: {},
         suggestedActions: ['Get help', 'Show options'],
         learningInsights: {
           stage: 'day_1',
-          personalizationLevel: 0.2,
+          personalizationLevel: LEARNING_CONSTANTS.THRESHOLDS.PERSONALIZATION_DAY_1,
           nextMilestone: 'Complete 5 interactions to unlock pattern recognition'
         },
         context: {
@@ -535,13 +536,13 @@ Calendar context: {calendar_context}`,
     return {
       text: response,
       audioUrl: undefined,
-      confidence: 0.9,
+      confidence: LEARNING_CONSTANTS.CONFIDENCE.ELEVENLABS_FALLBACK,
       intent: 'general_query',
       entities: {},
       suggestedActions: ['Get help', 'Show options'],
       learningInsights: {
         stage: 'day_1',
-        personalizationLevel: 0.2,
+        personalizationLevel: LEARNING_CONSTANTS.THRESHOLDS.PERSONALIZATION_DAY_1,
         nextMilestone: 'Complete 5 interactions to unlock pattern recognition'
       },
       context: {
@@ -558,13 +559,13 @@ Calendar context: {calendar_context}`,
   private generateFallbackResponse(request: ConversationalAIRequest): ConversationalAIResponse {
     return {
       text: 'I\'m having trouble processing that right now. Please try again.',
-      confidence: 0.3,
+      confidence: LEARNING_CONSTANTS.CONFIDENCE.ELEVENLABS_ERROR,
       intent: 'error',
       entities: {},
       suggestedActions: ['Try again', 'Get help', 'Show options'],
       learningInsights: {
         stage: 'day_1',
-        personalizationLevel: 0.2,
+        personalizationLevel: LEARNING_CONSTANTS.THRESHOLDS.PERSONALIZATION_DAY_1,
         nextMilestone: 'Complete 5 interactions to unlock pattern recognition'
       },
       context: {

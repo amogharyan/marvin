@@ -2,6 +2,7 @@
 
 import { ConversationContext, DemoObject, DEMO_OBJECTS } from '../types';
 import { secureLog, safeLog } from '../utils/secureLogger';
+import { LEARNING_CONSTANTS } from '../constants/learningConstants';
 
 export class VoiceProcessingService {
   private conversationMemory: Map<string, ConversationContext> = new Map();
@@ -41,7 +42,7 @@ export class VoiceProcessingService {
 
       return {
         response: response,
-        confidence: 0.8,
+        confidence: LEARNING_CONSTANTS.CONFIDENCE.VOICE_SUCCESS,
         suggested_actions: this.extractSuggestedActions(response, objectContext)
       };
     } catch (error) {
@@ -49,7 +50,7 @@ export class VoiceProcessingService {
       
       return {
         response: 'I heard you, but I\'m having trouble processing that right now. Can you try again?',
-        confidence: 0.3,
+        confidence: LEARNING_CONSTANTS.CONFIDENCE.VOICE_FALLBACK,
         suggested_actions: ['Try again', 'Speak clearly', 'Use text']
       };
     }
@@ -245,7 +246,7 @@ export class VoiceProcessingService {
 
       return {
         response: response,
-        confidence: 0.9,
+        confidence: LEARNING_CONSTANTS.CONFIDENCE.VOICE_OBJECT_SPECIFIC,
         suggested_actions: suggested_actions
       };
     } catch (error) {
@@ -253,7 +254,7 @@ export class VoiceProcessingService {
       
       return {
         response: 'Good morning! Ready to start your day?',
-        confidence: 0.6,
+        confidence: LEARNING_CONSTANTS.CONFIDENCE.VOICE_GENERAL,
         suggested_actions: ['Check schedule', 'Take medicine', 'Have breakfast']
       };
     }

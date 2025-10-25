@@ -2,6 +2,7 @@
 
 import { ConversationContext, DemoObject } from '../types';
 import { secureLog, debugLog, errorLog } from '../utils/secureLogger';
+import { LEARNING_CONSTANTS } from '../constants/learningConstants';
 
 export interface VoiceIntent {
   intent: string;
@@ -112,7 +113,7 @@ export class VoiceCommandParsingService {
       return {
         intent: {
           intent: 'unknown',
-          confidence: 0.1,
+          confidence: LEARNING_CONSTANTS.CONFIDENCE.COMMAND_UNKNOWN,
           entities: {},
           action: 'clarify',
           parameters: {}
@@ -236,7 +237,7 @@ export class VoiceCommandParsingService {
 
     // Boost confidence if object context matches
     if (objectContext && this.isObjectContextRelevant(bestMatch.intent, objectContext)) {
-      bestMatch.confidence = Math.min(1.0, bestMatch.confidence + 0.2);
+      bestMatch.confidence = Math.min(LEARNING_CONSTANTS.CONFIDENCE.MAX_CONFIDENCE, bestMatch.confidence + LEARNING_CONSTANTS.CONFIDENCE.COMMAND_OBJECT_CONTEXT_BOOST);
     }
 
     return bestMatch;
@@ -384,17 +385,17 @@ export class VoiceCommandParsingService {
     const match = text.match(pattern);
     if (!match) return 0;
 
-    let confidence = 0.5; // Base confidence
+    let confidence = LEARNING_CONSTANTS.CONFIDENCE.COMMAND_BASE; // Base confidence
 
     // Boost confidence for exact matches
     if (match[0].length === text.length) {
-      confidence += 0.3;
+      confidence += LEARNING_CONSTANTS.CONFIDENCE.COMMAND_EXACT_MATCH_BOOST;
     }
 
     // Boost confidence for longer matches
-    confidence += Math.min(0.2, match[0].length / text.length);
+    confidence += Math.min(LEARNING_CONSTANTS.CONFIDENCE.COMMAND_LENGTH_BOOST_MAX, match[0].length / text.length);
 
-    return Math.min(1.0, confidence);
+    return Math.min(LEARNING_CONSTANTS.CONFIDENCE.MAX_CONFIDENCE, confidence);
   }
 
   /**

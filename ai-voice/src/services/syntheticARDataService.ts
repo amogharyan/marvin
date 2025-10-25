@@ -5,6 +5,7 @@
 import { secureLog, debugLog } from '../utils/secureLogger';
 import { ChromaService } from './chromaService';
 import { LearningSimulationService } from './learningSimulationService';
+import { LEARNING_CONSTANTS } from '../constants/learningConstants';
 
 export interface SyntheticARInteraction {
   id: string;
@@ -295,7 +296,7 @@ export class SyntheticARDataService {
         {
           id: `demo-${interaction.objectType}-${interaction.id}`,
           name: interaction.objectType,
-          detection_confidence: 0.95,
+          detection_confidence: LEARNING_CONSTANTS.CONFIDENCE.SYNTHETIC_DETECTION,
           spatial_position: { x: 0, y: 0, z: 0 },
           last_interaction: interaction.timestamp,
           associated_actions: interaction.expectedResponse.suggestedActions
@@ -312,7 +313,7 @@ export class SyntheticARDataService {
           interaction_frequency: 1,
           user_preferences: interaction.expectedResponse.intent
         },
-        confidence: 0.8,
+        confidence: LEARNING_CONSTANTS.CONFIDENCE.SYNTHETIC_LEARNING_PATTERN,
         frequency: 1,
         lastSeen: interaction.timestamp,
         userId: interaction.userId

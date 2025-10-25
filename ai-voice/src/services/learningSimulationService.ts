@@ -4,6 +4,7 @@
 import { secureLog, errorLog, debugLog } from '../utils/secureLogger';
 import { ChromaService, LearningPattern, PersonalizedSuggestion } from './chromaService';
 import { ConversationContext, DemoObject, UserPreferences } from '../types';
+import { LEARNING_CONSTANTS } from '../constants/learningConstants';
 
 export interface LearningStage {
   stage: 'day_1' | 'day_7' | 'day_30';
@@ -42,7 +43,7 @@ export class LearningSimulationService {
         'Learning user preferences',
         'Establishing interaction patterns'
       ],
-      personalizationLevel: 0.2
+      personalizationLevel: LEARNING_CONSTANTS.THRESHOLDS.PERSONALIZATION_DAY_1
     },
     {
       stage: 'day_7',
@@ -53,7 +54,7 @@ export class LearningSimulationService {
         'Adaptive responses based on context',
         'Learning object interaction preferences'
       ],
-      personalizationLevel: 0.6
+      personalizationLevel: LEARNING_CONSTANTS.THRESHOLDS.PERSONALIZATION_DAY_7
     },
     {
       stage: 'day_30',
@@ -64,7 +65,7 @@ export class LearningSimulationService {
         'Proactive routine optimization',
         'Advanced pattern recognition'
       ],
-      personalizationLevel: 0.9
+      personalizationLevel: LEARNING_CONSTANTS.THRESHOLDS.PERSONALIZATION_DAY_30
     }
   ];
 
@@ -85,9 +86,9 @@ export class LearningSimulationService {
       preferencesIdentified: 0,
       lastInteraction: new Date(),
       learningMetrics: {
-        suggestionAccuracy: 0.5,
-        userSatisfaction: 0.5,
-        responseRelevance: 0.5
+        suggestionAccuracy: LEARNING_CONSTANTS.THRESHOLDS.MEDIUM_THRESHOLD,
+        userSatisfaction: LEARNING_CONSTANTS.THRESHOLDS.MEDIUM_THRESHOLD,
+        responseRelevance: LEARNING_CONSTANTS.THRESHOLDS.MEDIUM_THRESHOLD
       }
     };
 
@@ -157,7 +158,11 @@ export class LearningSimulationService {
           object_interactions: [interaction.objectContext?.name],
           frequency: userData.totalInteractions
         },
-        confidence: Math.min(0.9, 0.5 + (userData.totalInteractions * 0.05)),
+        confidence: Math.min(
+          LEARNING_CONSTANTS.CONFIDENCE.MAX_ROUTINE_PATTERN,
+          LEARNING_CONSTANTS.CONFIDENCE.BASE_ROUTINE + 
+          (userData.totalInteractions * LEARNING_CONSTANTS.CONFIDENCE.INCREMENT_PER_INTERACTION)
+        ),
         frequency: userData.totalInteractions,
         lastSeen: new Date(),
         userId
@@ -177,7 +182,11 @@ export class LearningSimulationService {
           interaction_frequency: 1,
           last_interaction: new Date()
         },
-        confidence: Math.min(0.8, 0.3 + (userData.totalInteractions * 0.03)),
+        confidence: Math.min(
+          LEARNING_CONSTANTS.CONFIDENCE.MAX_PREFERENCE_PATTERN,
+          LEARNING_CONSTANTS.CONFIDENCE.BASE_PREFERENCE + 
+          (userData.totalInteractions * LEARNING_CONSTANTS.CONFIDENCE.PREFERENCE_INCREMENT)
+        ),
         frequency: 1,
         lastSeen: new Date(),
         userId
@@ -195,7 +204,7 @@ export class LearningSimulationService {
     userData: SimulatedLearningData,
     suggestionAccepted: boolean
   ): void {
-    const learningRate = 0.1;
+    const learningRate = LEARNING_CONSTANTS.LEARNING_RATE.BASE;
     
     if (suggestionAccepted) {
       userData.learningMetrics.suggestionAccuracy = Math.min(1.0, 
@@ -208,11 +217,13 @@ export class LearningSimulationService {
         userData.learningMetrics.responseRelevance + learningRate
       );
     } else {
-      userData.learningMetrics.suggestionAccuracy = Math.max(0.1,
-        userData.learningMetrics.suggestionAccuracy - learningRate * 0.5
+      userData.learningMetrics.suggestionAccuracy = Math.max(
+        LEARNING_CONSTANTS.THRESHOLDS.LEARNING_METRICS_MIN,
+        userData.learningMetrics.suggestionAccuracy - learningRate * LEARNING_CONSTANTS.LEARNING_RATE.DECREASE_FACTOR
       );
-      userData.learningMetrics.responseRelevance = Math.max(0.1,
-        userData.learningMetrics.responseRelevance - learningRate * 0.5
+      userData.learningMetrics.responseRelevance = Math.max(
+        LEARNING_CONSTANTS.THRESHOLDS.LEARNING_METRICS_MIN,
+        userData.learningMetrics.responseRelevance - learningRate * LEARNING_CONSTANTS.LEARNING_RATE.DECREASE_FACTOR
       );
     }
   }
@@ -233,9 +244,9 @@ export class LearningSimulationService {
     ) / 5;
 
     // Determine stage based on learning score
-    if (learningScore >= 0.8) {
+    if (learningScore >= LEARNING_CONSTANTS.THRESHOLDS.DAY_30_SCORE) {
       return this.LEARNING_STAGES[2]; // day_30
-    } else if (learningScore >= 0.5) {
+    } else if (learningScore >= LEARNING_CONSTANTS.THRESHOLDS.DAY_7_SCORE) {
       return this.LEARNING_STAGES[1]; // day_7
     } else {
       return this.LEARNING_STAGES[0]; // day_1
@@ -374,11 +385,11 @@ export class LearningSimulationService {
 
     // Simulate multiple interactions to show progression
     const demoInteractions = [
-      { objectContext: { name: 'medicine_bottle', id: 'demo_1', detection_confidence: 0.9, spatial_position: { x: 0, y: 0, z: 0 }, last_interaction: new Date(), associated_actions: [] }, timeOfDay: 'morning' },
-      { objectContext: { name: 'breakfast_bowl', id: 'demo_2', detection_confidence: 0.9, spatial_position: { x: 0, y: 0, z: 0 }, last_interaction: new Date(), associated_actions: [] }, timeOfDay: 'morning' },
-      { objectContext: { name: 'laptop', id: 'demo_3', detection_confidence: 0.9, spatial_position: { x: 0, y: 0, z: 0 }, last_interaction: new Date(), associated_actions: [] }, timeOfDay: 'morning' },
-      { objectContext: { name: 'keys', id: 'demo_4', detection_confidence: 0.9, spatial_position: { x: 0, y: 0, z: 0 }, last_interaction: new Date(), associated_actions: [] }, timeOfDay: 'morning' },
-      { objectContext: { name: 'phone', id: 'demo_5', detection_confidence: 0.9, spatial_position: { x: 0, y: 0, z: 0 }, last_interaction: new Date(), associated_actions: [] }, timeOfDay: 'morning' }
+      { objectContext: { name: 'medicine_bottle', id: 'demo_1', detection_confidence: LEARNING_CONSTANTS.CONFIDENCE.SYNTHETIC_DETECTION, spatial_position: { x: 0, y: 0, z: 0 }, last_interaction: new Date(), associated_actions: [] }, timeOfDay: 'morning' },
+      { objectContext: { name: 'breakfast_bowl', id: 'demo_2', detection_confidence: LEARNING_CONSTANTS.CONFIDENCE.SYNTHETIC_DETECTION, spatial_position: { x: 0, y: 0, z: 0 }, last_interaction: new Date(), associated_actions: [] }, timeOfDay: 'morning' },
+      { objectContext: { name: 'laptop', id: 'demo_3', detection_confidence: LEARNING_CONSTANTS.CONFIDENCE.SYNTHETIC_DETECTION, spatial_position: { x: 0, y: 0, z: 0 }, last_interaction: new Date(), associated_actions: [] }, timeOfDay: 'morning' },
+      { objectContext: { name: 'keys', id: 'demo_4', detection_confidence: LEARNING_CONSTANTS.CONFIDENCE.SYNTHETIC_DETECTION, spatial_position: { x: 0, y: 0, z: 0 }, last_interaction: new Date(), associated_actions: [] }, timeOfDay: 'morning' },
+      { objectContext: { name: 'phone', id: 'demo_5', detection_confidence: LEARNING_CONSTANTS.CONFIDENCE.SYNTHETIC_DETECTION, spatial_position: { x: 0, y: 0, z: 0 }, last_interaction: new Date(), associated_actions: [] }, timeOfDay: 'morning' }
     ];
 
     for (const interaction of demoInteractions) {

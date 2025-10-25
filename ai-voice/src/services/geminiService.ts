@@ -4,6 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { config } from '../config';
 import { GeminiRequest, GeminiResponse, DemoObject, DEMO_OBJECTS, ChatMessage } from '../types';
 import { secureLog, errorLog } from '../utils/secureLogger';
+import { LEARNING_CONSTANTS } from '../constants/learningConstants';
 
 export class GeminiService {
   private genAI: GoogleGenerativeAI;
@@ -67,30 +68,30 @@ export class GeminiService {
       );
       
       // Base confidence on candidate existence and safety
-      let confidence = 0.8; // Base confidence for successful response
+      let confidence = LEARNING_CONSTANTS.CONFIDENCE.GEMINI_BASE; // Base confidence for successful response
       
       // Reduce confidence for safety issues
       if (hasHighSeveritySafety) {
-        confidence -= 0.3;
+        confidence -= LEARNING_CONSTANTS.CONFIDENCE.GEMINI_SAFETY_PENALTY_HIGH;
       }
       
       // Check if response has finish reason (indicates completion)
       if (candidate.finishReason === 'STOP') {
-        confidence += 0.1; // Slight boost for complete responses
+        confidence += LEARNING_CONSTANTS.CONFIDENCE.GEMINI_COMPLETE_BOOST; // Slight boost for complete responses
       } else if (candidate.finishReason === 'SAFETY') {
-        confidence -= 0.2; // Reduce for safety-related stops
+        confidence -= LEARNING_CONSTANTS.CONFIDENCE.GEMINI_SAFETY_PENALTY_MEDIUM; // Reduce for safety-related stops
       }
       
       // Check response length (very short responses might be less confident)
       const text = response.text?.() || '';
-      if (text.length < 10) {
-        confidence -= 0.1;
-      } else if (text.length > 100) {
-        confidence += 0.05; // Slight boost for detailed responses
+      if (text.length < LEARNING_CONSTANTS.CONTEXT.MIN_TEXT_LENGTH) {
+        confidence -= LEARNING_CONSTANTS.CONFIDENCE.GEMINI_SHORT_RESPONSE_PENALTY;
+      } else if (text.length > LEARNING_CONSTANTS.CONTEXT.LONG_TEXT_LENGTH) {
+        confidence += LEARNING_CONSTANTS.CONFIDENCE.GEMINI_LONG_RESPONSE_BOOST; // Slight boost for detailed responses
       }
       
       // Normalize to valid range
-      return Math.max(0.1, Math.min(1.0, confidence));
+      return Math.max(LEARNING_CONSTANTS.CONFIDENCE.LOW_THRESHOLD, Math.min(LEARNING_CONSTANTS.CONFIDENCE.MAX_CONFIDENCE, confidence));
       
     } catch (error) {
       // If calculation fails, return undefined to indicate unknown confidence

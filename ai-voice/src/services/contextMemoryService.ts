@@ -2,6 +2,7 @@
 
 import { ConversationContext, DemoObject, ChatMessage, UserPreferences } from '../types';
 import { errorLog } from '../utils/secureLogger';
+import { LEARNING_CONSTANTS } from '../constants/learningConstants';
 
 export interface MemoryEntry {
   id: string;
@@ -264,7 +265,7 @@ export class ContextMemoryService {
           object_patterns: objectPatterns,
           frequency: messages.length
         },
-        confidence: Math.min(0.9, messages.length / 10),
+        confidence: Math.min(LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_MESSAGE_FREQUENCY_MAX, messages.length / LEARNING_CONSTANTS.CONTEXT.MESSAGE_FREQUENCY_DIVISOR),
         last_updated: new Date()
       };
     }
@@ -304,7 +305,7 @@ export class ContextMemoryService {
         user_id: context.user_id,
         pattern_type: 'preference',
         data: preferences,
-        confidence: 0.8,
+        confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_PREFERENCE_PATTERN,
         last_updated: new Date()
       };
     }
@@ -333,7 +334,7 @@ export class ContextMemoryService {
         user_id: context.user_id,
         pattern_type: 'behavior',
         data: behaviors,
-        confidence: 0.7,
+        confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_BEHAVIOR_PATTERN,
         last_updated: new Date()
       };
     }
@@ -449,7 +450,7 @@ export class ContextMemoryService {
     if (relevantPatterns.length > 0) {
       suggestions.push({
         suggestion: `You often interact with ${objectName} around this time`,
-        confidence: 0.8,
+        confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_OBJECT_INTERACTION,
         context: 'object_interaction',
         reasoning: `Historical interaction pattern with ${objectName}`,
         priority: 'medium'
@@ -472,7 +473,7 @@ export class ContextMemoryService {
     if (preferences.voice_settings.preferred_voice !== 'default') {
       suggestions.push({
         suggestion: `Using your preferred voice settings`,
-        confidence: 0.9,
+        confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_VOICE_PREFERENCE,
         context: 'voice_preference',
         reasoning: `User prefers ${preferences.voice_settings.preferred_voice} voice`,
         priority: 'low'
@@ -483,7 +484,7 @@ export class ContextMemoryService {
     if (preferences.interaction_preferences.proactive_assistance) {
       suggestions.push({
         suggestion: `I'll provide proactive assistance based on your preferences`,
-        confidence: 0.8,
+        confidence: LEARNING_CONSTANTS.CONFIDENCE.CONTEXT_INTERACTION_PREFERENCE,
         context: 'interaction_preference',
         reasoning: 'User prefers proactive assistance',
         priority: 'medium'
@@ -533,9 +534,9 @@ export class ContextMemoryService {
   private extractVoicePreferences(content: string): Record<string, any> {
     const preferences: Record<string, any> = {};
     
-    if (content.includes('slow')) preferences.speech_rate = 0.8;
-    if (content.includes('fast')) preferences.speech_rate = 1.2;
-    if (content.includes('loud')) preferences.volume = 'high';
+    if (content.includes('slow')) preferences.speech_rate = LEARNING_CONSTANTS.VOICE_SETTINGS.SPEECH_RATE.SLOW;
+    if (content.includes('fast')) preferences.speech_rate = LEARNING_CONSTANTS.VOICE_SETTINGS.SPEECH_RATE.FAST;
+    if (content.includes('loud')) preferences.volume = LEARNING_CONSTANTS.VOICE_SETTINGS.VOLUME.HIGH;
     if (content.includes('quiet')) preferences.volume = 'low';
 
     return preferences;
