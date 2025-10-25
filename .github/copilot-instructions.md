@@ -44,6 +44,93 @@ Focus strictly on the 68 functional requirements. Avoid building functionality o
 - **Fail Fast**: Check for errors early and throw exceptions immediately
 - **Demo Reliability**: 99%+ uptime during 2-minute demo is critical
 
+## 🧠 AI-Assisted Development Tools
+
+### Sequential Thinking MCP (mcp_sequentialthi_sequentialthinking)
+**When to Use:**
+- Breaking down complex problems into logical steps
+- Planning multi-step implementations
+- Analyzing bugs or unexpected behavior
+- Designing new features or architecture
+- Solving problems that require deep reasoning
+- Tasks that need careful consideration of edge cases
+- Problems where the full scope isn't clear initially
+
+**How to Use:**
+```
+Use Sequential Thinking to analyze [problem/task description]
+```
+
+The tool will guide you through:
+1. Initial analysis with estimated thought count
+2. Step-by-step reasoning process
+3. Revision of thoughts when needed
+4. Hypothesis generation and verification
+5. Final solution with confidence level
+
+**Best Practices:**
+- Use at the START of complex tasks, not after hitting issues
+- Allow the tool to adjust thought count as understanding deepens
+- Let it revise previous thoughts if new information emerges
+- Use for planning before coding, not just debugging
+
+### Context7 MCP (mcp_context7)
+**When to Use:**
+- Starting work with a new library or framework
+- Planning integrations with external services
+- Need up-to-date documentation (Gemini API, Supabase, ElevenLabs, etc.)
+- Understanding best practices for a technology
+- Beginning new feature development
+- Researching API capabilities and limitations
+
+**How to Use:**
+```
+# Step 1: Resolve library ID
+Use Context7 to resolve library ID for [library name]
+
+# Step 2: Get documentation
+Use Context7 to get documentation for [resolved library ID] focusing on [topic]
+```
+
+**Supported Libraries for This Project:**
+- **Gemini API**: `/google/generative-ai` - For multimodal AI integration
+- **Supabase**: `/supabase/supabase` - For backend and realtime features
+- **Next.js**: `/vercel/next.js` - If building web interfaces
+- **TypeScript**: `/microsoft/TypeScript` - For type definitions and best practices
+- **Lens Studio**: Search for Snap Spectacles documentation
+
+**Best Practices:**
+- Use BEFORE starting implementation, not during debugging
+- Request focused documentation (e.g., "authentication" not "everything")
+- Combine with Sequential Thinking for planning new features
+- Keep token limits in mind (default 5000 tokens per query)
+
+### Recommended Workflow
+
+**For New Features:**
+```
+1. Context7: Get documentation for relevant libraries
+2. Sequential Thinking: Break down the feature into steps
+3. Implementation: Write code following the plan
+4. Testing: Use TDD framework to validate
+```
+
+**For Complex Bugs:**
+```
+1. Sequential Thinking: Analyze the problem systematically
+2. Context7: Check if library behavior changed or has edge cases
+3. Implementation: Fix with understanding
+4. Testing: Add tests to prevent regression
+```
+
+**For Planning Sessions:**
+```
+1. Sequential Thinking: Understand requirements and constraints
+2. Context7: Research API capabilities and best practices
+3. Sequential Thinking: Design architecture with new information
+4. Documentation: Write plan before implementing
+```
+
 ## 📐 Project Architecture
 
 ### Team Structure (4 Developers)
