@@ -50,19 +50,40 @@ serve(async (req) => {
   }
 
   try {
-    // Initialize Supabase client
+    // Initialize Supabase clients
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const supabase = createClient(supabaseUrl, anonKey)
+    const supabaseAdmin = createClient(supabaseUrl, serviceKey)
 
     // Parse request body
     const body: ConversationStateRequest = await req.json()
+    const { user_id: reqUserId, action, conversation_data = {} } = body
 
-    const {
-      user_id,
-      action,
-      conversation_data = {}
-    } = body
+    // Extract and validate Authorization token
+    const authHeader = req.headers.get('Authorization') || req.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Missing or invalid Authorization header' }), { status: 401 })
+    }
+    const token = authHeader.replace('Bearer ', '').trim()
+    // Validate token and get caller user_id
+    const { data: userSession, error: authError } = await supabase.auth.getUser(token)
+    if (authError || !userSession?.user?.id) {
+      return new Response(JSON.stringify({ error: 'Unauthorized: invalid token' }), { status: 401 })
+    }
+    const callerUserId = userSession.user.id
+
+    // Admin check (service-role)
+    const isAdmin = token === serviceKey
+
+    // Bind user_id to caller unless admin
+    let user_id = callerUserId
+    if (isAdmin && reqUserId) {
+      user_id = reqUserId
+    } else if (reqUserId && reqUserId !== callerUserId) {
+      return new Response(JSON.stringify({ error: 'Forbidden: cannot set user_id for other users' }), { status: 403 })
+    }
 
     // Validate required fields
     if (!user_id || !action) {
@@ -96,7 +117,7 @@ serve(async (req) => {
           })
           .eq('user_id', user_id)
           .eq('interaction_type', 'conversation_session')
-          .is('context->conversation_status', 'active')
+          .eq('context->>conversation_status', 'active')
 
         // Create new conversation session
         const { data: sessionData, error: sessionError } = await supabase
@@ -135,16 +156,16 @@ serve(async (req) => {
         }
 
         // Broadcast session start
-        const channel = supabase.channel('conversation_state')
-        await channel.send({
-          type: 'broadcast',
+        // Durable notification: insert into notifications table
+        await supabase.from('notifications').insert({
+          user_id,
           event: 'conversation_started',
           payload: {
-            user_id,
             session_id,
             conversation_id: sessionData.id,
             timestamp: new Date().toISOString()
-          }
+          },
+          created_at: new Date().toISOString()
         })
 
         break
@@ -157,7 +178,7 @@ serve(async (req) => {
           .select('*')
           .eq('user_id', user_id)
           .eq('interaction_type', 'conversation_session')
-          .eq('context->conversation_status', 'active')
+          .eq('context->>conversation_status', 'active')
           .order('created_at', { ascending: false })
           .limit(1)
           .single()
@@ -208,17 +229,17 @@ serve(async (req) => {
         }
 
         // Broadcast state update
-        const channel = supabase.channel('conversation_state')
-        await channel.send({
-          type: 'broadcast',
+        // Durable notification: insert into notifications table
+        await supabase.from('notifications').insert({
+          user_id,
           event: 'conversation_updated',
           payload: {
-            user_id,
             session_id: activeSession.context.session_id,
             conversation_id: activeSession.id,
             context: updatedContext,
             timestamp: new Date().toISOString()
-          }
+          },
+          created_at: new Date().toISOString()
         })
 
         break
@@ -261,17 +282,17 @@ serve(async (req) => {
           }
 
           // Broadcast session end
-          const channel = supabase.channel('conversation_state')
-          await channel.send({
-            type: 'broadcast',
+          // Durable notification: insert into notifications table
+          await supabase.from('notifications').insert({
+            user_id,
             event: 'conversation_ended',
             payload: {
-              user_id,
               session_id: activeSession.context.session_id,
               conversation_id: activeSession.id,
               duration: result.duration,
               timestamp: new Date().toISOString()
-            }
+            },
+            created_at: new Date().toISOString()
           })
         } else {
           result = {

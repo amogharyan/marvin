@@ -29,32 +29,49 @@ serve(async (req) => {
   }
 
   try {
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    const supabase = createClient(supabaseUrl, supabaseKey)
-
     // Parse request body
     const body: LearningUpdateRequest = await req.json()
-
-    const {
-      user_id,
-      update_type,
-      trigger_context = {}
-    } = body
+    const { user_id, update_type, trigger_context = {} } = body
 
     // Validate required fields
     if (!user_id || !update_type) {
       return new Response(
-        JSON.stringify({
-          error: 'Missing required fields: user_id, update_type'
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
+        JSON.stringify({ error: 'Missing required fields: user_id, update_type' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+
+    // Extract and validate Authorization Bearer token
+    const authHeader = req.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ error: 'Missing or invalid Authorization header' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    const accessToken = authHeader.replace('Bearer ', '').trim()
+
+    // Use anon client for user-scoped auth
+    const anonSupabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!)
+    const { data: userData, error: userError } = await anonSupabase.auth.getUser(accessToken)
+    if (userError || !userData?.user?.id) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid or expired token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    const authenticatedUserId = userData.user.id
+    if (authenticatedUserId !== user_id) {
+      return new Response(
+        JSON.stringify({ error: 'User ID mismatch or unauthorized' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Use service-role client only for privileged ops, otherwise use anonSupabase
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const supabase = createClient(supabaseUrl, supabaseKey)
 
     let result: any = {}
 
@@ -141,6 +158,8 @@ serve(async (req) => {
           .filter(([key, interactions]) => interactions.length >= 3)
           .map(([key, interactions]) => {
             const [hour, object_type] = key.split('-')
+            const totalConfidence = interactions.reduce((sum, i) => sum + (i.confidence_score ?? 0), 0)
+            const avg_confidence = interactions.length === 0 ? 0 : totalConfidence / interactions.length
             return {
               pattern_type: 'routine',
               time_of_day: parseInt(hour),
@@ -150,7 +169,7 @@ serve(async (req) => {
               pattern_data: {
                 hour: parseInt(hour),
                 object_type,
-                avg_confidence: interactions.reduce((sum, i) => sum + i.confidence_score, 0) / interactions.length,
+                avg_confidence,
                 interactions: interactions.length
               }
             }
@@ -167,8 +186,7 @@ serve(async (req) => {
               pattern_data: routine.pattern_data,
               confidence_score: routine.confidence,
               frequency: routine.frequency
-            })
-            .on('conflict', 'do nothing') // Avoid duplicates
+            }, { ignoreDuplicates: true }) // Avoid duplicates
         }
 
         result = {
@@ -191,18 +209,23 @@ serve(async (req) => {
         )
     }
 
-    // Trigger real-time notification for learning updates
-    const channel = supabase.channel('learning_updates')
-    await channel.send({
-      type: 'broadcast',
-      event: 'patterns_updated',
-      payload: {
-        user_id,
-        update_type,
-        result,
-        timestamp: new Date().toISOString()
-      }
-    })
+    // Durable notification: insert row into notifications table for Postgres changefeed
+    const notificationPayload = {
+      user_id,
+      event_type: 'patterns_updated',
+      update_type,
+      payload: result,
+      timestamp: new Date().toISOString()
+    }
+    const { data: notifData, error: notifError } = await supabase
+      .from('notifications')
+      .insert([notificationPayload])
+      .select()
+    if (notifError) {
+      console.error('Failed to insert learning update notification:', notifError)
+    } else {
+      console.log('Learning update notification inserted:', notifData)
+    }
 
     const response = {
       success: true,
@@ -223,12 +246,18 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Learning pattern update failed:', error)
+    let errorMsg = 'Unknown error';
+    if (error instanceof Error) {
+      errorMsg = error.message;
+    } else if (typeof error === 'string') {
+      errorMsg = error;
+    }
+    console.error('Learning pattern update failed:', errorMsg);
 
     return new Response(
       JSON.stringify({
         error: 'Learning update failed',
-        details: error.message,
+        details: errorMsg,
         timestamp: new Date().toISOString()
       }),
       {

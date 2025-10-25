@@ -1,0 +1,7 @@
+# This file is intentionally left blank to preserve the legacy migrations directory for reference only.
+
+**Do NOT use this directory for any new migrations.**
+
+All active migrations must be placed in `snap-cloud/supabase/migrations/`.
+
+This directory is retained for historical reference and will not be executed by CI/CD or deployment scripts.

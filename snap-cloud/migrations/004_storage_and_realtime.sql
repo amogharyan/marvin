@@ -19,6 +19,10 @@ CREATE POLICY "Authenticated voice cache write access" ON storage.objects
 CREATE POLICY "Users can update own voice cache" ON storage.objects
   FOR UPDATE USING (bucket_id = 'voice-cache' AND auth.role() = 'authenticated');
 
+-- Service role full access for voice-cache
+CREATE POLICY "Service role full access (voice-cache)" ON storage.objects
+  FOR ALL USING (bucket_id = 'voice-cache' AND auth.role() = 'service_role');
+
 -- Create storage policies for user images (user-specific access)
 CREATE POLICY "Users can view own images" ON storage.objects
   FOR SELECT USING (bucket_id = 'user-images' AND auth.uid()::text = (storage.foldername(name))[1]);
@@ -31,6 +35,10 @@ CREATE POLICY "Users can update own images" ON storage.objects
 
 CREATE POLICY "Users can delete own images" ON storage.objects
   FOR DELETE USING (bucket_id = 'user-images' AND auth.uid()::text = (storage.foldername(name))[1]);
+
+-- Service role full access for user-images
+CREATE POLICY "Service role full access (user-images)" ON storage.objects
+  FOR ALL USING (bucket_id = 'user-images' AND auth.role() = 'service_role');
 
 -- Create storage policies for AR captures (user-specific access)
 CREATE POLICY "Users can view own AR captures" ON storage.objects
@@ -45,6 +53,10 @@ CREATE POLICY "Users can update own AR captures" ON storage.objects
 CREATE POLICY "Users can delete own AR captures" ON storage.objects
   FOR DELETE USING (bucket_id = 'ar-captures' AND auth.uid()::text = (storage.foldername(name))[1]);
 
+-- Service role full access for ar-captures
+CREATE POLICY "Service role full access (ar-captures)" ON storage.objects
+  FOR ALL USING (bucket_id = 'ar-captures' AND auth.role() = 'service_role');
+
 -- Add tables to existing publication for real-time subscriptions
 ALTER PUBLICATION supabase_realtime ADD TABLE object_interactions;
 ALTER PUBLICATION supabase_realtime ADD TABLE health_reminders;
@@ -58,6 +70,7 @@ ALTER TABLE object_interactions REPLICA IDENTITY FULL;
 ALTER TABLE health_reminders REPLICA IDENTITY FULL;
 ALTER TABLE calendar_events REPLICA IDENTITY FULL;
 ALTER TABLE user_interactions REPLICA IDENTITY FULL;
+ALTER TABLE medication_schedules REPLICA IDENTITY FULL;
 ALTER TABLE learning_patterns REPLICA IDENTITY FULL;
 
 -- Create functions for real-time notifications
@@ -125,35 +138,68 @@ CREATE UNIQUE INDEX idx_user_dashboard_data_user_id ON user_dashboard_data(user_
 -- Create function to refresh dashboard data
 CREATE OR REPLACE FUNCTION refresh_user_dashboard_data()
 RETURNS VOID AS $$
+DECLARE
+  _lock_acquired BOOLEAN := FALSE;
 BEGIN
-  REFRESH MATERIALIZED VIEW CONCURRENTLY user_dashboard_data;
+  -- Acquire application-level advisory lock (unique key: 424242)
+  PERFORM pg_advisory_lock(424242);
+  _lock_acquired := TRUE;
+  BEGIN
+    REFRESH MATERIALIZED VIEW CONCURRENTLY user_dashboard_data;
+  EXCEPTION WHEN OTHERS THEN
+    -- On error, fallback to non-concurrent refresh
+    REFRESH MATERIALIZED VIEW user_dashboard_data;
+  END;
+  -- Release advisory lock
+  IF _lock_acquired THEN
+    PERFORM pg_advisory_unlock(424242);
+  END IF;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Create function to clean up old data (for performance)
 CREATE OR REPLACE FUNCTION cleanup_old_data()
 RETURNS VOID AS $$
+DECLARE
+  obj_days CONSTANT INTEGER := 90;
+  user_days CONSTANT INTEGER := 30;
+  health_days CONSTANT INTEGER := 7;
+  food_days CONSTANT INTEGER := 30;
+  deleted_object_interactions INTEGER := 0;
+  deleted_user_interactions INTEGER := 0;
+  deleted_health_reminders INTEGER := 0;
+  deleted_food_logs INTEGER := 0;
 BEGIN
-  -- Clean up old object interactions (keep last 90 days)
+  -- Validate retention intervals
+  IF obj_days <= 0 OR user_days <= 0 OR health_days <= 0 OR food_days <= 0 THEN
+    RAISE EXCEPTION 'Retention intervals must be positive';
+  END IF;
+
+  -- Clean up old object interactions (keep last obj_days)
   DELETE FROM object_interactions
-  WHERE created_at < NOW() - INTERVAL '90 days';
+  WHERE created_at < NOW() - INTERVAL '1 day' * obj_days;
+  GET DIAGNOSTICS deleted_object_interactions = ROW_COUNT;
 
-  -- Clean up old user interactions (keep last 30 days)
+  -- Clean up old user interactions (keep last user_days)
   DELETE FROM user_interactions
-  WHERE created_at < NOW() - INTERVAL '30 days'
-    AND interaction_type NOT IN ('conversation_session', 'voice_synthesis');
+  WHERE created_at < NOW() - INTERVAL '1 day' * user_days
+    AND (interaction_type IS NULL OR interaction_type NOT IN ('conversation_session', 'voice_synthesis'));
+  GET DIAGNOSTICS deleted_user_interactions = ROW_COUNT;
 
-  -- Clean up completed health reminders (keep last 7 days)
+  -- Clean up completed health reminders (keep last health_days)
   DELETE FROM health_reminders
   WHERE status = 'completed'
-    AND taken_at < NOW() - INTERVAL '7 days';
+    AND taken_at < NOW() - INTERVAL '1 day' * health_days;
+  GET DIAGNOSTICS deleted_health_reminders = ROW_COUNT;
 
-  -- Clean up old food logs (keep last 30 days)
+  -- Clean up old food logs (keep last food_days)
   DELETE FROM food_logs
-  WHERE logged_at < NOW() - INTERVAL '30 days';
+  WHERE logged_at < NOW() - INTERVAL '1 day' * food_days;
+  GET DIAGNOSTICS deleted_food_logs = ROW_COUNT;
 
   -- Clean up voice cache files older than 7 days would be handled by storage policies
 
-  RAISE NOTICE 'Old data cleanup completed';
+  RAISE NOTICE 'Old data cleanup completed: object_interactions=% deleted, user_interactions=% deleted, health_reminders=% deleted, food_logs=% deleted',
+    deleted_object_interactions, deleted_user_interactions, deleted_health_reminders, deleted_food_logs;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
