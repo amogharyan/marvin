@@ -179,15 +179,6 @@ export class ContextMemoryService {
    * Store individual message with context analysis
    */
   public async storeMessage(sessionId: string, message: ChatMessage): Promise<void> {
-    const memoryEntry: MemoryEntry = {
-      id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      type: 'conversation',
-      content: message,
-      timestamp: new Date(),
-      confidence: 1.0,
-      tags: this.extractMessageTags(message)
-    };
-
     // Store in conversation history with deduplication and trimming
     const context = this.conversationMemory.get(sessionId);
     if (context) {
@@ -408,7 +399,7 @@ export class ContextMemoryService {
    */
   private generateRoutineSuggestions(
     patterns: LearningPattern[],
-    context: ConversationContext
+    _context: ConversationContext
   ): PersonalizedSuggestion[] {
     const suggestions: PersonalizedSuggestion[] = [];
     const routinePatterns = patterns.filter(p => p.pattern_type === 'routine');
@@ -473,7 +464,7 @@ export class ContextMemoryService {
    */
   private generatePreferenceSuggestions(
     preferences: UserPreferences,
-    context: ConversationContext
+    _context: ConversationContext
   ): PersonalizedSuggestion[] {
     const suggestions: PersonalizedSuggestion[] = [];
 

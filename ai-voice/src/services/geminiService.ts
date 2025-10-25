@@ -3,7 +3,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { config } from '../config';
 import { GeminiRequest, GeminiResponse, DemoObject, DEMO_OBJECTS, ChatMessage } from '../types';
-import { secureLog, errorLog, debugLog } from '../utils/secureLogger';
+import { secureLog, errorLog } from '../utils/secureLogger';
 
 export class GeminiService {
   private genAI: GoogleGenerativeAI;

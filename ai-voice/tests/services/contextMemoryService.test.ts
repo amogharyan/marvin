@@ -1,5 +1,4 @@
 import { ContextMemoryService } from '../../src/services/contextMemoryService';
-import { ChatMessage } from '../../src/types';
 import { createMockConversationContext, createMockDemoObject, testUtils } from '../utils/testHelpers';
 
 describe('ContextMemoryService', () => {

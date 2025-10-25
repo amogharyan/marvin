@@ -37,16 +37,19 @@
     "@types/express": "^5.0.4",
     "@types/node": "^24.9.1",
     "axios": "^1.12.2",
+    "chromadb": "^3.0.17",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "elevenlabs": "^1.59.0",
     "express": "^5.1.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "@types/supertest": "^6.0.3",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.0.0",

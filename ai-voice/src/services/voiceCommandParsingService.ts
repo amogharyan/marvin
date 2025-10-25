@@ -1,6 +1,6 @@
 // Voice Command Parsing and Intent Recognition Service - Dev 2 Phase 2
 
-import { ConversationContext, DemoObject, ChatMessage } from '../types';
+import { ConversationContext, DemoObject } from '../types';
 import { secureLog, debugLog, errorLog } from '../utils/secureLogger';
 
 export interface VoiceIntent {
@@ -245,7 +245,7 @@ export class VoiceCommandParsingService {
   /**
    * Extract entities from voice text
    */
-  private extractEntities(text: string, intent: string): Record<string, any> {
+  private extractEntities(text: string, _intent: string): Record<string, any> {
     const entities: Record<string, any> = {};
     
     for (const [entityType, patterns] of this.entityPatterns) {
@@ -263,7 +263,7 @@ export class VoiceCommandParsingService {
   /**
    * Determine action based on intent and entities
    */
-  private determineAction(intent: { intent: string; confidence: number }, entities: Record<string, any>, objectContext?: DemoObject): string {
+  private determineAction(intent: { intent: string; confidence: number }, _entities: Record<string, any>, _objectContext?: DemoObject): string {
     switch (intent.intent) {
       case 'medicine_reminder':
         return 'show_medicine_schedule';
@@ -354,7 +354,7 @@ export class VoiceCommandParsingService {
   /**
    * Generate follow-up actions based on parsed command
    */
-  private generateFollowUpActions(intent: { intent: string; confidence: number }, entities: Record<string, any>, objectContext?: DemoObject): string[] {
+  private generateFollowUpActions(intent: { intent: string; confidence: number }, _entities: Record<string, any>, _objectContext?: DemoObject): string[] {
     switch (intent.intent) {
       case 'medicine_reminder':
         return ['Show medicine schedule', 'Set reminder', 'Track medication'];
@@ -380,7 +380,7 @@ export class VoiceCommandParsingService {
   /**
    * Calculate confidence score for intent matching
    */
-  private calculateConfidence(text: string, pattern: RegExp, objectContext?: DemoObject): number {
+  private calculateConfidence(text: string, pattern: RegExp, _objectContext?: DemoObject): number {
     const match = text.match(pattern);
     if (!match) return 0;
 

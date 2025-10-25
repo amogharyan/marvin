@@ -1,5 +1,4 @@
 import { GeminiService } from '../../src/services/geminiService';
-import { config } from '../../src/config';
 
 // Mock the Gemini API
 jest.mock('@google/generative-ai', () => ({

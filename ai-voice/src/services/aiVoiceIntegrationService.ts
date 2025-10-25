@@ -1,17 +1,20 @@
-// Main AI & Voice Integration Service - Dev 2 Phase 2
+// Main AI & Voice Integration Service - Dev 2 Phase 3
+// Enhanced with Chroma vector database, learning simulation, and advanced conversational AI
 
 import { GeminiService } from './geminiService';
 import { ElevenLabsService } from './elevenlabsService';
 import { VoiceProcessingService } from './voiceProcessingService';
 import { VoiceCommandParsingService } from './voiceCommandParsingService';
 import { ContextMemoryService } from './contextMemoryService';
-import { secureLog, safeLog, debugLog } from '../utils/secureLogger';
+import { ChromaService } from './chromaService';
+import { LearningSimulationService } from './learningSimulationService';
+import { EnhancedElevenLabsService } from './enhancedElevenLabsService';
+import { SyntheticARDataService } from './syntheticARDataService';
+import { secureLog, safeLog } from '../utils/secureLogger';
 import { 
   AIResponse, 
   ConversationContext, 
-  DemoObject, 
-  VoiceRequest,
-  ChatMessage 
+  DemoObject
 } from '../types';
 
 export class AIVoiceIntegrationService {
@@ -20,13 +23,42 @@ export class AIVoiceIntegrationService {
   private voiceProcessingService: VoiceProcessingService;
   private voiceCommandParsingService: VoiceCommandParsingService;
   private contextMemoryService: ContextMemoryService;
+  
+  // Phase 3 Services
+  private chromaService: ChromaService;
+  private learningService: LearningSimulationService;
+  private enhancedElevenLabsService: EnhancedElevenLabsService;
+  private syntheticARDataService: SyntheticARDataService;
 
   constructor() {
+    // Phase 2 Services
     this.geminiService = new GeminiService();
     this.elevenlabsService = new ElevenLabsService();
     this.voiceProcessingService = new VoiceProcessingService();
     this.voiceCommandParsingService = new VoiceCommandParsingService();
     this.contextMemoryService = new ContextMemoryService();
+    
+    // Phase 3 Services
+    this.chromaService = new ChromaService();
+    this.learningService = new LearningSimulationService(this.chromaService);
+    this.enhancedElevenLabsService = new EnhancedElevenLabsService(this.chromaService, this.learningService);
+    this.syntheticARDataService = new SyntheticARDataService(this.chromaService, this.learningService);
+    
+    // Initialize Phase 3 services
+    this.initializePhase3Services();
+  }
+
+  /**
+   * Initialize Phase 3 services
+   */
+  private async initializePhase3Services(): Promise<void> {
+    try {
+      await this.chromaService.initialize();
+      await this.syntheticARDataService.initialize();
+      secureLog('✅ Phase 3 services initialized successfully');
+    } catch (error) {
+      secureLog('⚠️ Phase 3 services initialized in fallback mode');
+    }
   }
 
   /**
@@ -353,6 +385,269 @@ export class AIVoiceIntegrationService {
     };
   }
 
+  // ==================== PHASE 3 METHODS ====================
+
+  /**
+   * Process advanced conversational AI request with learning
+   */
+  async processAdvancedConversationalRequest(
+    voiceText: string,
+    sessionId: string,
+    userId: string,
+    objectContext?: DemoObject,
+    conversationHistory?: any[]
+  ): Promise<{
+    response: string;
+    audioUrl?: string;
+    confidence: number;
+    intent: string;
+    entities: Record<string, any>;
+    suggestedActions: string[];
+    learningInsights: {
+      stage: 'day_1' | 'day_7' | 'day_30';
+      personalizationLevel: number;
+      nextMilestone: string;
+    };
+    context: {
+      objectType?: string;
+      timeOfDay: string;
+      interactionType: string;
+    };
+  }> {
+    try {
+      // Initialize user learning if needed
+      await this.learningService.initializeUserLearning(userId);
+
+      // Process with Enhanced ElevenLabs Conversational AI
+      const conversationalResponse = await this.enhancedElevenLabsService.processConversationalRequest({
+        voiceText,
+        sessionId,
+        userId,
+        objectContext,
+        conversationHistory,
+        learningStage: 'day_1' // Will be determined by learning service
+      });
+
+      // Simulate learning progression
+      await this.learningService.simulateLearningProgression(userId, {
+        objectContext,
+        userResponse: voiceText,
+        suggestionAccepted: true,
+        timeOfDay: this.getTimeOfDay()
+      });
+
+      return {
+        response: conversationalResponse.text,
+        audioUrl: conversationalResponse.audioUrl,
+        confidence: conversationalResponse.confidence,
+        intent: conversationalResponse.intent,
+        entities: conversationalResponse.entities,
+        suggestedActions: conversationalResponse.suggestedActions,
+        learningInsights: conversationalResponse.learningInsights,
+        context: conversationalResponse.context
+      };
+    } catch (error: any) {
+      secureLog('Advanced conversational request failed, using fallback:', error);
+      return {
+        response: 'I\'m learning about your preferences. Please try again.',
+        confidence: 0.5,
+        intent: 'fallback',
+        entities: {},
+        suggestedActions: ['Try again', 'Get help'],
+        learningInsights: {
+          stage: 'day_1',
+          personalizationLevel: 0.2,
+          nextMilestone: 'Complete 5 interactions to unlock pattern recognition'
+        },
+        context: {
+          objectType: objectContext?.name,
+          timeOfDay: this.getTimeOfDay(),
+          interactionType: 'fallback'
+        }
+      };
+    }
+  }
+
+  /**
+   * Get personalized suggestions based on learning patterns
+   */
+  async getPersonalizedSuggestions(
+    userId: string,
+    context: string,
+    objectContext?: DemoObject
+  ): Promise<{
+    suggestions: Array<{
+      suggestion: string;
+      confidence: number;
+      context: string;
+      reasoning: string;
+      priority: 'high' | 'medium' | 'low';
+      learningStage: 'day_1' | 'day_7' | 'day_30';
+    }>;
+    learningSummary: {
+      currentStage: string;
+      progress: {
+        interactions: number;
+        patternsLearned: number;
+        preferencesIdentified: number;
+        overallProgress: number;
+      };
+      metrics: {
+        suggestionAccuracy: number;
+        userSatisfaction: number;
+        responseRelevance: number;
+      };
+      nextMilestone: string;
+    };
+  }> {
+    try {
+      // Generate personalized suggestions
+      const suggestions = await this.chromaService.generatePersonalizedSuggestions(
+        userId,
+        context,
+        objectContext
+      );
+
+      // Get learning progression summary
+      const learningSummary = this.learningService.getLearningProgressionSummary(userId);
+
+      return {
+        suggestions,
+        learningSummary: {
+          currentStage: learningSummary.currentStage.stage,
+          progress: learningSummary.progress,
+          metrics: learningSummary.metrics,
+          nextMilestone: learningSummary.nextMilestone
+        }
+      };
+    } catch (error: any) {
+      secureLog('Failed to get personalized suggestions:', error);
+      return {
+        suggestions: [],
+        learningSummary: {
+          currentStage: 'day_1',
+          progress: {
+            interactions: 0,
+            patternsLearned: 0,
+            preferencesIdentified: 0,
+            overallProgress: 0
+          },
+          metrics: {
+            suggestionAccuracy: 0.5,
+            userSatisfaction: 0.5,
+            responseRelevance: 0.5
+          },
+          nextMilestone: 'Complete 5 interactions to unlock pattern recognition'
+        }
+      };
+    }
+  }
+
+  /**
+   * Simulate demo learning progression (for hackathon demo)
+   */
+  async simulateDemoLearningProgression(userId: string): Promise<void> {
+    try {
+      await this.learningService.simulateDemoProgression(userId);
+      secureLog(`✅ Simulated demo learning progression for user: ${userId}`);
+    } catch (error: any) {
+      secureLog('Failed to simulate demo progression:', error);
+    }
+  }
+
+  /**
+   * Get learning insights for demo presentation
+   */
+  getLearningInsightsForDemo(userId: string): {
+    day1: {
+      description: string;
+      characteristics: string[];
+      personalizationLevel: number;
+    };
+    day7: {
+      description: string;
+      characteristics: string[];
+      personalizationLevel: number;
+    };
+    day30: {
+      description: string;
+      characteristics: string[];
+      personalizationLevel: number;
+    };
+    currentStage: string;
+    progress: number;
+  } {
+    try {
+      const summary = this.learningService.getLearningProgressionSummary(userId);
+      
+      return {
+        day1: {
+          description: 'Initial Learning Phase',
+          characteristics: [
+            'Generic responses and suggestions',
+            'Basic object recognition',
+            'Learning user preferences',
+            'Establishing interaction patterns'
+          ],
+          personalizationLevel: 0.2
+        },
+        day7: {
+          description: 'Pattern Recognition Phase',
+          characteristics: [
+            'Recognizing routine patterns',
+            'Personalized timing suggestions',
+            'Adaptive responses based on context',
+            'Learning object interaction preferences'
+          ],
+          personalizationLevel: 0.6
+        },
+        day30: {
+          description: 'Advanced Personalization Phase',
+          characteristics: [
+            'Predictive assistance',
+            'Highly personalized suggestions',
+            'Proactive routine optimization',
+            'Advanced pattern recognition'
+          ],
+          personalizationLevel: 0.9
+        },
+        currentStage: summary.currentStage.stage,
+        progress: summary.progress.overallProgress
+      };
+    } catch (error: any) {
+      secureLog('Failed to get learning insights:', error);
+      return {
+        day1: { description: 'Initial Learning', characteristics: [], personalizationLevel: 0.2 },
+        day7: { description: 'Pattern Recognition', characteristics: [], personalizationLevel: 0.6 },
+        day30: { description: 'Advanced Personalization', characteristics: [], personalizationLevel: 0.9 },
+        currentStage: 'day_1',
+        progress: 0
+      };
+    }
+  }
+
+  /**
+   * Get current time of day
+   */
+  private getTimeOfDay(): string {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'morning';
+    if (hour < 17) return 'afternoon';
+    return 'evening';
+  }
+
+
+  /**
+   * Get synthetic data summary for demo
+   */
+  async getSyntheticDataSummary(): Promise<{
+    totalInteractions: number;
+    objectTypes: string[];
+    timeRange: string;
+    learningStage: string;
+  }> {
+    return await this.syntheticARDataService.getSyntheticDataSummary();
+  }
 
   /**
    * Health check for all services
@@ -363,6 +658,9 @@ export class AIVoiceIntegrationService {
     voiceProcessing: boolean;
     voiceCommandParsing: boolean;
     contextMemory: boolean;
+    chroma: boolean;
+    learningSimulation: boolean;
+    enhancedElevenLabs: boolean;
     overall: boolean;
   }> {
     const checks = await Promise.allSettled([
@@ -370,7 +668,10 @@ export class AIVoiceIntegrationService {
       this.elevenlabsService.textToSpeech({ text: 'test' }),
       this.voiceProcessingService.healthCheck(),
       this.voiceCommandParsingService.healthCheck(),
-      this.contextMemoryService.healthCheck()
+      this.contextMemoryService.healthCheck(),
+      this.chromaService.healthCheck(),
+      this.learningService.healthCheck(),
+      this.enhancedElevenLabsService.healthCheck()
     ]);
 
     const results = {
@@ -378,13 +679,14 @@ export class AIVoiceIntegrationService {
       elevenlabs: checks[1].status === 'fulfilled',
       voiceProcessing: checks[2].status === 'fulfilled',
       voiceCommandParsing: checks[3].status === 'fulfilled',
-      contextMemory: checks[4].status === 'fulfilled'
+      contextMemory: checks[4].status === 'fulfilled',
+      chroma: checks[5].status === 'fulfilled',
+      learningSimulation: checks[6].status === 'fulfilled',
+      enhancedElevenLabs: checks[7].status === 'fulfilled',
+      overall: false
     };
 
-    return {
-      ...results,
-      overall: results.gemini && results.elevenlabs && results.voiceProcessing && 
-               results.voiceCommandParsing && results.contextMemory
-    };
+    results.overall = Object.values(results).every(result => result === true);
+    return results;
   }
 }

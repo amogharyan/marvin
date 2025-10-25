@@ -1,6 +1,6 @@
 // Voice Processing Service for Basic Conversational Logic
 
-import { ConversationContext, DemoObject, ChatMessage, DEMO_OBJECTS } from '../types';
+import { ConversationContext, DemoObject, DEMO_OBJECTS } from '../types';
 import { secureLog, safeLog } from '../utils/secureLogger';
 
 export class VoiceProcessingService {
@@ -61,7 +61,7 @@ export class VoiceProcessingService {
   private generateContextualResponse(
     voiceText: string,
     objectContext?: DemoObject,
-    conversationContext?: ConversationContext
+    _conversationContext?: ConversationContext
   ): string {
     const lowerText = voiceText.toLowerCase();
     
@@ -112,7 +112,7 @@ export class VoiceProcessingService {
   private generateObjectSpecificResponse(
     voiceText: string,
     objectContext: DemoObject,
-    objectConfig: any
+    _objectConfig: any
   ): string {
     const objectName = objectContext.name;
     
@@ -155,7 +155,7 @@ export class VoiceProcessingService {
   /**
    * Extract suggested actions from response
    */
-  private extractSuggestedActions(response: string, objectContext?: DemoObject): string[] {
+  private extractSuggestedActions(response: string, _objectContext?: DemoObject): string[] {
     const actions: string[] = [];
     
     if (response.includes('schedule') || response.includes('calendar')) {
