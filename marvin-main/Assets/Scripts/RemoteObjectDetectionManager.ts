@@ -61,6 +61,7 @@ export class RemoteObjectDetectionManager extends BaseScriptComponent {
 
   @ui.group_start("Detection Prefab")
   @input
+  @allowUndefined
   detectionPrefab: ObjectPrefab;
 
   @input
@@ -347,13 +348,13 @@ export class RemoteObjectDetectionManager extends BaseScriptComponent {
         container.setBillboardOnUpdate(this.prefabBillboardEnabled);
       }
 
-      // Update text labels
+      // Hide text labels - disable object names and distances
       if (container.categoryAndConfidence) {
-        container.categoryAndConfidence.text = detection.class_name;
+        container.categoryAndConfidence.enabled = false;
       }
 
       if (container.distanceFromCamera) {
-        container.distanceFromCamera.text = `${detection.distance.toFixed(2)}m`;
+        container.distanceFromCamera.enabled = false;
       }
 
       // Set polyline color (safely check if method exists)

@@ -1517,6 +1517,7 @@
   ScriptInputsDefault:
     confidenceThreshold: true
     distanceThreshold: true
+    prefabBillboardEnabled: true
   ScriptTypesDefault:
     {}
   ScriptInputs:
@@ -1527,7 +1528,7 @@
       confidenceThreshold: 0.500000
       distanceThreshold: !<float> 10.000000
       detectionPrefab: !<reference.ObjectPrefab> 34558c10-7f16-47a0-babc-aba68210fadb
-      prefabBillboardEnabled: true
+      prefabBillboardEnabled: false
       pinholeCapture: !<MappingBased.AssignableType> c2462743-2cdb-4cb8-80da-7a7730c359ac
   ScriptTypes:
     "":
@@ -6385,8 +6386,7 @@
   Enabled: true
   ScriptAsset: !<reference> 5afb453b-3d19-4d20-84b0-b350642bf6d0
   ScriptInputsDefault:
-    showObjectLabels: true
-    showRelationshipLines: true
+    {}
   ScriptTypesDefault:
     {}
   ScriptInputs:
@@ -6402,8 +6402,8 @@
       hintTitle: !<reference.Text> 679aa029-99e5-46ab-9d75-2f06437050fc
       hintText: !<reference.Text> ba710944-8232-4a06-b997-0837303f3da1
       statusText: !<reference.Text> 7591d592-0166-495f-a2c0-0baa10bca25b
-      showObjectLabels: true
-      showRelationshipLines: true
+      showObjectLabels: false
+      showRelationshipLines: false
   ScriptTypes:
     "":
       {}
