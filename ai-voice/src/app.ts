@@ -43,7 +43,8 @@ async function initializeService() {
             learningSimulation: true,
             enhancedElevenLabs: true,
             syntheticARData: true,
-            letta: true
+            letta: true,
+            livekit: false // LiveKit not configured in test environment
           },
           stats: {
             uptime: '0s',
@@ -94,7 +95,22 @@ async function initializeService() {
         }),
         syncToLetta: async () => ({ success: true }),
         getLettaContext: async () => 'Mock context',
-        searchLettaPassages: async () => ({ passages: [] })
+        searchLettaPassages: async () => ({ passages: [] }),
+        serviceOrchestrator: {
+          livekitService: {
+            isAvailable: () => false,
+            getConnectionStatus: () => ({
+              available: false,
+              configured: false,
+              initialized: false
+            }),
+            generateToken: async () => ({
+              token: 'mock_token',
+              roomUrl: 'wss://mock.livekit.cloud',
+              roomName: 'marvin-mock-session'
+            })
+          }
+        }
       } as any;
     } else {
       aiVoiceService = await AIVoiceIntegrationService.create();
@@ -353,6 +369,67 @@ app.post('/api/departure-intelligence', createEndpoint(
   ),
   ['voiceText'],
   'Departure Intelligence'
+));
+
+// ==================== PHASE 2.5 LIVEKIT ENDPOINTS ====================
+
+// LiveKit token generation endpoint
+app.post('/api/livekit/token', createEndpoint(
+  async (req) => {
+    const service = ensureServiceInitialized();
+    const livekitService = service['serviceOrchestrator']?.livekitService;
+    
+    if (livekitService && livekitService.isAvailable()) {
+      const tokenResponse = await livekitService.generateToken({
+        userId: req.body.userId,
+        sessionId: req.body.sessionId
+      });
+      return tokenResponse;
+    } else {
+      // Fallback to mock response if LiveKit not available
+      return {
+        token: 'mock_livekit_token',
+        roomUrl: process.env.LIVEKIT_URL || 'wss://marvin.livekit.cloud',
+        roomName: `marvin-${req.body.sessionId || 'default-session'}`
+      };
+    }
+  },
+  ['userId'],
+  'LiveKit Token Generation'
+));
+
+// LiveKit room creation endpoint
+app.post('/api/livekit/create-room', createEndpoint(
+  async (req) => {
+    // This would create a LiveKit room
+    // For now, return mock response
+    return {
+      roomName: `marvin-${req.body.sessionId || 'default-session'}`,
+      url: process.env.LIVEKIT_URL || 'wss://marvin.livekit.cloud',
+      status: 'created'
+    };
+  },
+  ['sessionId'],
+  'LiveKit Room Creation'
+));
+
+// LiveKit connection status endpoint
+app.get('/api/livekit/status', createGetEndpoint(
+  async () => {
+    const service = ensureServiceInitialized();
+    const livekitService = service['serviceOrchestrator']?.livekitService;
+    
+    if (livekitService) {
+      return livekitService.getConnectionStatus();
+    } else {
+      return {
+        available: false,
+        configured: false,
+        initialized: false
+      };
+    }
+  },
+  'LiveKit Connection Status'
 ));
 
 // Error handling middleware

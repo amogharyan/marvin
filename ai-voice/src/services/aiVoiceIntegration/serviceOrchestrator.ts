@@ -11,6 +11,7 @@ import { LearningSimulationService } from '../learningSimulationService';
 import { EnhancedElevenLabsService } from '../enhancedElevenLabsService';
 import { SyntheticARDataService } from '../syntheticARDataService';
 import { LettaService } from '../lettaService';
+import { LiveKitService } from '../livekitService';
 import { secureLog, safeLog, errorLog } from '../../utils/secureLogger';
 
 export interface ServiceHealthStatus {
@@ -24,6 +25,7 @@ export interface ServiceHealthStatus {
   enhancedElevenLabs: boolean;
   syntheticARData: boolean;
   letta: boolean;
+  livekit: boolean;
 }
 
 export class ServiceOrchestrator {
@@ -40,6 +42,9 @@ export class ServiceOrchestrator {
   public readonly enhancedElevenLabsService: EnhancedElevenLabsService;
   public readonly syntheticARDataService: SyntheticARDataService;
   public readonly lettaService: LettaService;
+  
+  // Phase 2.5 Services (LiveKit)
+  public readonly livekitService: LiveKitService;
 
   private isInitialized: boolean = false;
 
@@ -57,6 +62,9 @@ export class ServiceOrchestrator {
     this.enhancedElevenLabsService = new EnhancedElevenLabsService(this.chromaService, this.learningService);
     this.syntheticARDataService = new SyntheticARDataService(this.chromaService, this.learningService);
     this.lettaService = new LettaService();
+    
+    // Phase 2.5 Services (LiveKit)
+    this.livekitService = new LiveKitService();
     
     safeLog('🎯 Service Orchestrator initialized');
   }
@@ -84,6 +92,10 @@ export class ServiceOrchestrator {
       await this.lettaService.initialize();
       secureLog('✅ Letta service initialized');
 
+      // Initialize LiveKit service
+      await this.livekitService.initialize();
+      secureLog('✅ LiveKit service initialized');
+
       this.isInitialized = true;
       secureLog('🎉 All Phase 3 services initialized successfully');
     } catch (error) {
@@ -105,7 +117,8 @@ export class ServiceOrchestrator {
         learningSimulation,
         enhancedElevenLabs,
         syntheticARData,
-        letta
+        letta,
+        livekit
       ] = await Promise.allSettled([
         this.voiceProcessingService.healthCheck(),
         this.voiceCommandParsingService.healthCheck(),
@@ -114,7 +127,8 @@ export class ServiceOrchestrator {
         this.learningService.healthCheck(),
         this.enhancedElevenLabsService.healthCheck(),
         this.syntheticARDataService.healthCheck(),
-        this.lettaService.healthCheck()
+        this.lettaService.healthCheck(),
+        this.livekitService.healthCheck()
       ]);
 
       return {
@@ -127,7 +141,8 @@ export class ServiceOrchestrator {
         learningSimulation: learningSimulation.status === 'fulfilled' && learningSimulation.value === true,
         enhancedElevenLabs: enhancedElevenLabs.status === 'fulfilled' && enhancedElevenLabs.value === true,
         syntheticARData: syntheticARData.status === 'fulfilled' && syntheticARData.value === true,
-        letta: letta.status === 'fulfilled' && letta.value === true
+        letta: letta.status === 'fulfilled' && letta.value === true,
+        livekit: livekit.status === 'fulfilled' && livekit.value === true
       };
     } catch (error) {
       errorLog('Failed to get service health status:', error);
@@ -141,7 +156,8 @@ export class ServiceOrchestrator {
         learningSimulation: false,
         enhancedElevenLabs: false,
         syntheticARData: false,
-        letta: false
+        letta: false,
+        livekit: false
       };
     }
   }

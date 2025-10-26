@@ -690,6 +690,135 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
 
 ---
 
+## Phase 2.5: **LiveKit Voice Streaming** (Hours 14-18) - PRIZE INTEGRATION
+
+**Goal:** Integrate LiveKit for professional multi-agent voice streaming (+3 prizes: Most Complex, Creative, Startup)  
+**Time:** 4 hours total (2 hour Dev 3 + 1 hour Dev 2 + 1 hour Dev 1)
+
+### 2.5.1 LiveKit Infrastructure Setup (Dev 3 - 2 hours)
+
+- [ ] **2.5.1** [Dev 3] **Create LiveKit Cloud project**
+  - Sign up at https://cloud.livekit.io/
+  - Create new project "marvin-voice"
+  - Generate API key and secret
+  - Save to Supabase secrets: `supabase secrets set LIVEKIT_API_KEY=xxx LIVEKIT_API_SECRET=xxx`
+
+- [ ] **2.5.2** [Dev 3] **Create voice-enhance Edge Function**
+  - Create `snap-cloud/functions/voice-enhance/index.ts`
+  - Initialize LiveKit room with unique name
+  - Generate access token for Spectacles client
+  - Return room URL and token
+  - Example code:
+    ```typescript
+    import { AccessToken } from 'livekit-server-sdk'
+    
+    const token = new AccessToken(
+      Deno.env.get('LIVEKIT_API_KEY')!,
+      Deno.env.get('LIVEKIT_API_SECRET')!,
+      { identity: userId }
+    )
+    token.addGrant({ room: `marvin-${sessionId}`, roomJoin: true })
+    
+    return new Response(JSON.stringify({
+      token: token.toJwt(),
+      roomUrl: `wss://marvin.livekit.cloud`
+    }))
+    ```
+
+- [ ] **2.5.3** [Dev 3] **Create LiveKit Agent implementation**
+  - Create `snap-cloud/functions/livekit-agent/index.ts`
+  - Implement agent session with STT, LLM, TTS configuration
+  - Use ElevenLabs TTS plugin for voice synthesis
+  - Configure voice interaction options: `allowInterruptions: true`
+  - Set up agent state monitoring (listening, thinking, speaking)
+
+- [ ] **2.5.4** [Dev 3] **Deploy voice-enhance Edge Function**
+  - Deploy: `supabase functions deploy voice-enhance`
+  - Deploy: `supabase functions deploy livekit-agent`
+  - Test with curl: Create room, get token, verify connection
+  - Monitor LiveKit Cloud dashboard for room creation
+
+### 2.5.2 LiveKit Integration in AI Voice Service (Dev 2 - 1 hour)
+
+- [ ] **2.5.5** [Dev 2] **Add LiveKit service to ai-voice**
+  - Create `ai-voice/src/services/livekitService.ts`
+  - Implement LiveKit room connection logic
+  - Add token generation endpoint integration
+  - Implement audio track management (microphone input, speaker output)
+  - Add connection state management (disconnected, connecting, connected)
+
+- [ ] **2.5.6** [Dev 2] **Integrate LiveKit with AI Voice Service**
+  - Connect LiveKit audio to ElevenLabs voice synthesis pipeline
+  - Implement fallback: ElevenLabs if LiveKit unavailable
+  - Add health checks for LiveKit connectivity
+  - Update service orchestration to include LiveKit
+
+- [ ] **2.5.7** [Dev 2] **Add LiveKit API endpoints**
+  - Create `POST /api/livekit/create-room` endpoint
+  - Create `POST /api/livekit/token` endpoint
+  - Add LiveKit connection status endpoint
+  - Implement error handling for LiveKit failures
+
+- [ ] **2.5.8** [Dev 2] **Test LiveKit integration**
+  - Test room creation and token generation
+  - Test audio streaming quality
+  - Test fallback to ElevenLabs if LiveKit fails
+  - Verify conversation context maintained
+
+### 2.5.3 Client-Side Integration (Dev 1 - 1 hour)
+
+- [ ] **2.5.9** [Dev 1] **Add LiveKit client to Lens Studio**
+  - Install LiveKit client SDK (if available for Lens Studio)
+  - Or use WebSocket directly to connect to LiveKit room
+  - Request room token from voice-enhance Edge Function
+  - Connect to LiveKit room with token
+
+- [ ] **2.5.10** [Dev 1] **Integrate LiveKit audio with Spectacles**
+  - Route microphone input to LiveKit track
+  - Receive audio output from LiveKit agent
+  - Pipe to AudioComponent for playback through Spectacles speakers
+  - Add fallback to direct ElevenLabs if LiveKit unavailable
+
+- [ ] **2.5.11** [Dev 1] **Add UI indicators for voice state**
+  - Show "Listening..." when agent in listening state
+  - Show "Thinking..." when agent processing
+  - Show "Speaking..." when agent responding
+  - Add visual feedback for interruptions
+
+### 2.5.4 Testing & Validation (Dev 4 - 30 min)
+
+- [ ] **2.5.12** [Dev 4] **Test LiveKit voice streaming**
+  - Test low-latency audio (<500ms)
+  - Test interruption handling
+  - Test fallback to ElevenLabs if LiveKit fails
+  - Verify conversation quality matches non-LiveKit flow
+
+- [ ] **2.5.13** [Dev 4] **Performance monitoring**
+  - Add logging for LiveKit metrics
+  - Monitor token usage and costs
+  - Check audio quality and latency
+  - Verify no degradation of existing features
+
+**Testing Checklist:**
+- [ ] Voice streaming has <500ms latency
+- [ ] Interruptions work smoothly
+- [ ] Fallback to ElevenLabs works if LiveKit down
+- [ ] Conversation context maintained across systems
+- [ ] No impact on object detection performance
+
+**Prize Value:**
+- ✅ **LiveKit Most Complex:** Multi-agent voice streaming with AR context
+- ✅ **LiveKit Most Creative:** Novel use of voice agents for AR assistance
+- ✅ **LiveKit Best Startup:** Production-ready voice infrastructure
+
+**Fallback Plan:**
+- If LiveKit integration takes >4 hours or causes issues
+- Revert to direct ElevenLabs integration (already working)
+- Still have 8 prizes without LiveKit
+- Focus remaining time on demo polish
+
+---
+
 ## Phase 3: Integration & Real-time (Hours 16-24)
 
 ### 3.0 Complete AR-AI Integration
