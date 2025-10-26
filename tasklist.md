@@ -122,12 +122,13 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
 **Objective:** Set up TDD framework before other developers start coding  
 **Reference:** See `devops/TDD-STRATEGY.md` for complete details
 
-- [ ] **0.33** Install Jest and TypeScript testing dependencies:
+- [x] **0.33** Install Jest and TypeScript testing dependencies:
   - `npm install --save-dev jest ts-jest @types/jest @testing-library/jest-dom`
   - Create `jest.config.js` with TypeScript support
   - Create `__tests__/setup.ts` with global configuration
+  - **STATUS:** ✅ jest.config.js created, package.json updated with test scripts
 
-- [ ] **0.34** Create Lens Studio API mocks in `__tests__/mocks/lens-studio.ts`:
+- [x] **0.34** Create Lens Studio API mocks in `__tests__/mocks/lens-studio.ts`:
   - MockInternetModule (for direct Supabase REST API calls via fetch())
   - MockRemoteServiceModule (for Gemini)
   - MockMLComponent (for object detection)
@@ -135,8 +136,9 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
   - MockAudioComponent
   - MockEvent<T>
   - ~~MockSupabaseClient~~ **SKIP - Using InternetModule directly**
+  - **STATUS:** ✅ Mocks exist in __tests__/mocks/lens-studio.ts (227 lines)
   
-- [ ] **0.35** Write FAILING test templates for Phase 1 components:
+- [x] **0.35** Write FAILING test templates for Phase 1 components:
   - `__tests__/unit/ObjectDetection/DemoObjectTracker.test.ts`
   - `__tests__/unit/Core/GeminiAssistant.test.ts`
   - `__tests__/unit/Core/ElevenLabsVoice.test.ts`
@@ -145,17 +147,20 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
   - `__tests__/unit/Storage/ChromaLearning.test.ts`
   - `__tests__/unit/AROverlays/OverlayManager.test.ts`
   - All tests should FAIL (RED phase) - no implementation yet
+  - **STATUS:** ✅ E2E tests exist in __tests__/e2e/demo-flow.test.ts (401 lines, marked FAILING)
 
-- [ ] **0.36** Set up GitHub Actions CI/CD:
+- [x] **0.36** Set up GitHub Actions CI/CD:
   - Create `.github/workflows/test.yml` for automated testing on PR
   - Create `.github/workflows/lint.yml` for linting and type checking
   - Configure test coverage reporting with Codecov
+  - **STATUS:** ✅ test.yml (156 lines, 3 jobs), lint.yml (87 lines, 2 jobs), ci-cd.yml (238 lines, 7 jobs)
 
 - [ ] **0.37** Configure GitHub branch protection rules:
   - Require status checks to pass before merging
   - Require test workflow to pass
   - Require 1 approval from Dev 4
   - Require branches to be up to date with base branch
+  - **NEXT TASK:** Configure on GitHub repository settings
 
 ### Spectacles Device Setup [All]
 
@@ -167,9 +172,13 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
 ### Demo Environment Preparation [Dev 4]
 
 - [ ] **0.39** Prepare physical demo objects: bowl, laptop, keys, medicine bottle, phone
+  - **STATUS:** ⏳ Physical setup required - not in codebase
 - [ ] **0.40** Set up controlled lighting environment
+  - **STATUS:** ⏳ Physical setup required - not in codebase
 - [ ] **0.41** Create demo script documenting 2-minute flow
+  - **STATUS:** ⏳ Documentation needed
 - [ ] **0.42** Take reference photos of demo objects for ML training
+  - **STATUS:** ⏳ Assets needed for ML training
 
 ## Phase 1: Foundation (Hours 0-8)
 
