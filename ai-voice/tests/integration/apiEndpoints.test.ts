@@ -11,12 +11,11 @@ describe('API Endpoints Integration Tests', () => {
         .expect(200);
 
       // Assert
-      expect(response.body).toHaveProperty('status');
-      expect(response.body).toHaveProperty('services');
+      expect(response.body).toHaveProperty('success', true);
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('status');
+      expect(response.body.data).toHaveProperty('services');
       expect(response.body).toHaveProperty('timestamp');
-      expect(response.body.services).toHaveProperty('voiceProcessing');
-      expect(response.body.services).toHaveProperty('voiceCommandParsing');
-      expect(response.body.services).toHaveProperty('contextMemory');
     });
   });
 

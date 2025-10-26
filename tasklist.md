@@ -61,11 +61,11 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
   - Create initial agent via Letta dashboard or API
   - Save agent ID and API key to .env file
   - **Purpose:** Stateful agent memory for long-term learning (+2 prizes: Letta + AirPods)
-- [ ] **0.9** [Dev 3] OPTIONAL: Sign up for LiveKit Cloud (if time permits after Hour 10)
-  - Create account at https://cloud.livekit.io/
-  - Generate API key and secret
-  - **Purpose:** Professional voice streaming (+3 prizes: Most Complex, Creative, Startup)
-  - **Decision Point:** Only proceed if Letta + object detection complete by Hour 10
+- [ ] **0.9** [Dev 3] OPTIONAL: Configure additional ElevenLabs voice models
+  - Explore different voice options in ElevenLabs dashboard
+  - Test different voice styles for conversation
+  - **Purpose:** Enhanced voice personality and variety
+  - **Decision Point:** Only if time permits after Hour 10
 
 ### Lens Studio Project Setup [Dev 1]
 
@@ -197,7 +197,7 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
 - **Dev 3 = Data Layer:** Database tables, RLS policies, Realtime subscriptions, Storage buckets
 - **Dev 4 = Quality Layer:** TDD framework, tests, CI/CD, merge management (does NOT wait for Dev 1)
 
-**Note:** Dev 1 implements Gemini WebSocket DIRECTLY in Lens Studio (no Edge Function needed). Dev 2's Edge Functions are for ADDITIONAL processing (Letta sync, voice enhancement, calendar integration).
+**Note:** Dev 1 implements Gemini WebSocket DIRECTLY in Lens Studio (no Edge Function needed). Dev 2's Edge Functions are for ADDITIONAL processing (Letta sync, voice enhancement).
 
 ### 1.0 Core Lens Studio Scene Setup
 
@@ -580,31 +580,25 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
   - Add Edge Function for nutrition data aggregation (optional)
   - Implement daily/weekly summary functions
 
-### 2.2 Calendar & Productivity Integration (FR-024, FR-036-040)
+### 2.2 Productivity Integration (FR-024, FR-036-040)
 
 - [ ] **2.9** [Dev 1] **Implement laptop interaction detection**
   - Fine-tune ML Component for laptop recognition
   - Implement LaptopTracker.ts component
   - Add proximity-based work mode trigger
-  - Test calendar overlay positioning
+  - Test productivity overlay positioning
 
-- [ ] **2.10** [Dev 2] **Build calendar intelligence in GeminiAssistant**
-  - Create meeting preparation prompts
-  - Implement schedule briefing generation
-  - Build conflict detection logic
+- [ ] **2.10** [Dev 2] **Build productivity intelligence in GeminiAssistant**
+  - Create task preparation prompts
+  - Implement daily briefing generation
+  - Build priority management logic
   - Add daily schedule overview with priorities
 
-- [ ] **2.11** [Dev 1] **Create CalendarOverlay.ts**
-  - Create `Assets/Scripts/AROverlays/CalendarOverlay.ts`
-  - Display upcoming meetings and tasks
-  - Show meeting preparation checklist
+- [ ] **2.11** [Dev 1] **Create ProductivityOverlay.ts**
+  - Create `Assets/Scripts/AROverlays/ProductivityOverlay.ts`
+  - Display upcoming tasks and priorities
+  - Show task preparation checklist
   - Add time-based urgency indicators
-
-- [ ] **2.12** [Dev 3] **Create calendar integration (optional)**
-  - Design calendar_events and meeting_prep tables
-  - Create Edge Function for Google Calendar API (optional)
-  - Implement calendar data caching in Supabase
-  - Set up real-time notifications for schedule updates
 
 ### 2.3 Key Location & Departure System (FR-025)
 
@@ -617,7 +611,7 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
 - [ ] **2.14** [Dev 2] **Build departure intelligence**
   - Create departure preparation prompts for Gemini
   - Implement checklist generation based on time
-  - Build weather-based suggestions
+  - Build time-based departure suggestions
   - Add commute time estimation logic
 
 - [ ] **2.15** [Dev 1] **Create DepartureOverlay.ts**
@@ -696,149 +690,7 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
 
 ---
 
-## Phase 2.5: **OPTIONAL - LiveKit Voice Streaming** (Hours 16-20) - STRETCH GOAL
-
-**⚠️ DECISION POINT (Hour 16):**
-- ✅ **PROCEED IF:** Letta integration complete ✅ + Object detection working ✅ + 4+ hours remaining ✅
-- ❌ **SKIP IF:** Any core features incomplete OR less than 4 hours until demo
-- **Prize Value:** +3 prizes (LiveKit Most Complex, Most Creative, Best Startup)
-- **Risk:** MEDIUM (3-4 hours of complex integration, optional enhancement)
-
-### 2.5.1 LiveKit Infrastructure Setup (Dev 3 - 1 hour)
-
-- [ ] **2.5.1** [Dev 3] **Create LiveKit Cloud project**
-  - Sign up at https://cloud.livekit.io/
-  - Create new project "marvin-voice"
-  - Generate API key and secret
-  - Save to Supabase secrets: `supabase secrets set LIVEKIT_API_KEY=xxx LIVEKIT_API_SECRET=xxx`
-
-- [ ] **2.5.2** [Dev 3] **Install LiveKit Agents dependencies**
-  - Create `snap-cloud/functions/voice-enhance/index.ts`
-  - Install LiveKit SDK: Add to import map in Supabase config
-  - Install ElevenLabs plugin for LiveKit: `@livekit/agents-plugin-elevenlabs`
-  - Test imports compile correctly
-
-- [ ] **2.5.3** [Dev 3] **Create voice-enhance Edge Function**
-  - Accept POST with: `{ userId: string, sessionId: string }`
-  - Initialize LiveKit room with unique name
-  - Generate access token for Spectacles client
-  - Return room URL and token
-  - Example code:
-    ```typescript
-    import { AccessToken } from 'livekit-server-sdk'
-    
-    const token = new AccessToken(
-      Deno.env.get('LIVEKIT_API_KEY')!,
-      Deno.env.get('LIVEKIT_API_SECRET')!,
-      { identity: userId }
-    )
-    token.addGrant({ room: `marvin-${sessionId}`, roomJoin: true })
-    
-    return new Response(JSON.stringify({
-      token: token.toJwt(),
-      roomUrl: `wss://marvin.livekit.cloud`
-    }))
-    ```
-
-### 2.5.2 LiveKit Agent Session (Dev 3 - 2 hours)
-
-- [ ] **2.5.4** [Dev 3] **Implement LiveKit Agent with voice**
-  - Create agent session with STT, LLM, TTS configuration
-  - Use ElevenLabs TTS plugin: `new elevenlabs.TTS({ voice: 'rachel' })`
-  - Configure voice interaction options: `allowInterruptions: true`
-  - Set up agent state monitoring (listening, thinking, speaking)
-  - Example code:
-    ```typescript
-    import { voice } from '@livekit/agents'
-    import * as elevenlabs from '@livekit/agents-plugin-elevenlabs'
-    
-    const session = new voice.AgentSession({
-      stt: 'assemblyai/universal-streaming:en',
-      llm: 'openai/gpt-4.1-mini', // Or proxy to Gemini
-      tts: new elevenlabs.TTS({ 
-        voice: 'rachel',
-        model: 'eleven_multilingual_v2'
-      }),
-      voiceOptions: {
-        allowInterruptions: true,
-        minInterruptionDuration: 500,
-        maxEndpointingDelay: 6000
-      }
-    })
-    ```
-
-- [ ] **2.5.5** [Dev 3] **Integrate with existing Gemini flow**
-  - Accept Gemini context as agent instructions
-  - Forward object detection events to LiveKit agent
-  - Sync agent responses back to Gemini conversation history
-  - Maintain conversation context across both systems
-
-- [ ] **2.5.6** [Dev 3] **Add voice streaming handlers**
-  - Listen to `UserInputTranscribed` events
-  - Listen to `AgentStateChanged` events (for UI feedback)
-  - Handle speech interruptions gracefully
-  - Log metrics with `MetricsCollected` events
-
-- [ ] **2.5.7** [Dev 3] **Deploy voice-enhance Edge Function**
-  - Deploy: `supabase functions deploy voice-enhance`
-  - Test with curl: Create room, get token, verify connection
-  - Monitor LiveKit Cloud dashboard for room creation
-
-### 2.5.3 Client-Side Integration (Dev 2 - 1 hour)
-
-- [ ] **2.5.8** [Dev 2] **Add LiveKit client to ai-voice service**
-  - Install LiveKit client SDK (if available for Lens Studio/Deno)
-  - Or use WebSocket directly to connect to LiveKit room
-  - Request room token from voice-enhance Edge Function
-  - Connect to LiveKit room with token
-
-- [ ] **2.5.9** [Dev 2] **Integrate LiveKit audio with Spectacles**
-  - Route microphone input to LiveKit track
-  - Receive audio output from LiveKit agent
-  - Pipe to AudioComponent for playback through Spectacles speakers
-  - Add fallback to direct ElevenLabs if LiveKit unavailable
-
-- [ ] **2.5.10** [Dev 2] **Add UI indicators for voice state**
-  - Show "Listening..." when agent in listening state
-  - Show "Thinking..." when agent processing
-  - Show "Speaking..." when agent responding
-  - Add visual feedback for interruptions
-
-### 2.5.4 Testing & Validation (Dev 4 - 30 min)
-
-- [ ] **2.5.11** [Dev 4] **Test LiveKit voice streaming**
-  - Test low-latency audio (<500ms)
-  - Test interruption handling
-  - Test fallback to ElevenLabs if LiveKit fails
-  - Verify conversation quality matches non-LiveKit flow
-
-- [ ] **2.5.12** [Dev 4] **Performance monitoring**
-  - Add logging for LiveKit metrics
-  - Monitor token usage and costs
-  - Check audio quality and latency
-  - Verify no degradation of existing features
-
-**Testing Checklist:**
-- [ ] Voice streaming has <500ms latency
-- [ ] Interruptions work smoothly
-- [ ] Fallback to ElevenLabs works if LiveKit down
-- [ ] Conversation context maintained across systems
-- [ ] No impact on object detection performance
-
-**Prize Value:**
-- ✅ **LiveKit Most Complex:** Multi-agent voice streaming with AR context
-- ✅ **LiveKit Most Creative:** Novel use of voice agents for AR assistance
-- ✅ **LiveKit Best Startup:** Production-ready voice infrastructure
-
-**Fallback Plan:**
-- If LiveKit integration takes >4 hours or causes issues
-- Revert to direct ElevenLabs integration (already working)
-- Still have 8 prizes without LiveKit
-- Focus remaining time on demo polish
-
----
-
-## Phase 3: Integration & Real-time (Hours 16-24 OR 20-24 if LiveKit attempted)
+## Phase 3: Integration & Real-time (Hours 16-24)
 
 ### 3.0 Complete AR-AI Integration
 

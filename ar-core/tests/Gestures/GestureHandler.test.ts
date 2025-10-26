@@ -239,7 +239,7 @@ describe('GestureHandler', () => {
   describe('Event System', () => {
     test('should emit onGestureStart event', () => {
       // FAILING TEST: Event emission needed
-      const callback = jest.fn();
+      const _callback = jest.fn();
       const event = {
         type: 'gestureStart',
         gesture: 'reach',
@@ -251,7 +251,7 @@ describe('GestureHandler', () => {
 
     test('should emit onGestureUpdate event during gesture', () => {
       // FAILING TEST: Update events needed
-      const callback = jest.fn();
+      const _callback = jest.fn();
       const event = {
         type: 'gestureUpdate',
         gesture: 'touch',
@@ -264,7 +264,7 @@ describe('GestureHandler', () => {
 
     test('should emit onGestureEnd event', () => {
       // FAILING TEST: End event needed
-      const callback = jest.fn();
+      const _callback = jest.fn();
       const event = {
         type: 'gestureEnd',
         gesture: 'touch',

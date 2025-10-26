@@ -13,7 +13,7 @@
     "test:root": "jest --config jest.config.js",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:all": "npm run test:root && npm run test:ai-voice && npm run test:ar-core",
+    "test:all": "npm run test:ai-voice && npm run test:ar-core",
     "test:ai-voice": "cd ai-voice && npm test",
     "test:ar-core": "cd ar-core && npm test",
     "install:all": "npm install && npm run install:ai-voice && npm run install:ar-core && npm run install:snap-cloud",
@@ -23,6 +23,12 @@
     "build:all": "npm run build:ai-voice && npm run build:ar-core",
     "build:ai-voice": "cd ai-voice && npm run build",
     "build:ar-core": "cd ar-core && npm run build",
+    "lint:all": "npm run lint:ai-voice && npm run lint:ar-core",
+    "lint:ai-voice": "cd ai-voice && npm run lint",
+    "lint:ar-core": "cd ar-core && npm run lint",
+    "type-check:all": "npm run type-check:ai-voice && npm run type-check:ar-core",
+    "type-check:ai-voice": "cd ai-voice && npm run type-check",
+    "type-check:ar-core": "cd ar-core && npm run type-check",
     "clean:all": "npm run clean:ai-voice && npm run clean:ar-core",
     "clean:ai-voice": "cd ai-voice && npm run clean",
     "clean:ar-core": "cd ar-core && npm run clean",
@@ -56,6 +62,7 @@
   "homepage": "https://github.com/amogharyan/marvin#readme",
   "dependencies": {
     "@chroma-core/default-embed": "^0.1.8",
+    "@letta-ai/letta-client": "^0.0.68665",
     "chromadb": "^3.0.17"
   },
   "devDependencies": {

@@ -131,36 +131,156 @@ serve(async (req) => {
       )
     }
 
-    // Queue request for AI processing (mock implementation)
-    // In a full implementation, this would integrate with Gemini API
+    // Process request with real Gemini API
     let aiResponse: any = {}
+    const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
 
-    switch (request_type) {
+    if (!geminiApiKey) {
+      console.error('GEMINI_API_KEY environment variable not set')
+      return new Response(
+        JSON.stringify({ error: 'Server configuration error' }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    try {
+      switch (request_type) {
         case 'visual_analysis': {
+          if (!image_data) {
+            return new Response(
+              JSON.stringify({ error: 'image_data required for visual_analysis' }),
+              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            )
+          }
+
+          // Call Gemini Vision API
+          const geminiResponse = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                contents: [{
+                  parts: [
+                    {
+                      text: `Analyze this image for morning routine objects. Look for medicine bottles, breakfast bowls, laptops, keys, or phones. Provide specific recommendations for each detected object. Context: ${text_prompt || 'Morning routine'}.`
+                    },
+                    {
+                      inline_data: {
+                        mime_type: "image/jpeg",
+                        data: image_data
+                      }
+                    }
+                  ]
+                }],
+                generationConfig: {
+                  temperature: 0.7,
+                  topK: 40,
+                  topP: 0.95,
+                  maxOutputTokens: 1024,
+                }
+              })
+            }
+          )
+
+          if (!geminiResponse.ok) {
+            throw new Error(`Gemini API error: ${geminiResponse.statusText}`)
+          }
+
+          const geminiData = await geminiResponse.json()
+          const analysisText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'No analysis available'
+
           aiResponse = {
-            analysis: 'Mock visual analysis result',
-            objects_detected: ['medicine', 'bowl'],
-            confidence_scores: { medicine: 0.95, bowl: 0.87 },
-            recommendations: ['Take your morning medication', 'Consider a healthy breakfast']
+            analysis: analysisText,
+            objects_detected: extractObjects(analysisText),
+            confidence_scores: extractConfidence(analysisText),
+            recommendations: extractRecommendations(analysisText),
+            source: 'gemini_vision'
           }
           break
         }
         case 'context_query': {
+          // Call Gemini Text API for contextual queries
+          const geminiResponse = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                contents: [{
+                  parts: [{
+                    text: `You are Marvin, an AR morning assistant. Answer this question based on the context: ${text_prompt}. Context: ${JSON.stringify(context)}. Provide a helpful, concise response.`
+                  }]
+                }],
+                generationConfig: {
+                  temperature: 0.7,
+                  topK: 40,
+                  topP: 0.95,
+                  maxOutputTokens: 512,
+                }
+              })
+            }
+          )
+
+          if (!geminiResponse.ok) {
+            throw new Error(`Gemini API error: ${geminiResponse.statusText}`)
+          }
+
+          const geminiData = await geminiResponse.json()
+          const answerText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'No answer available'
+
           aiResponse = {
-            answer: 'Mock contextual response',
+            answer: answerText,
             confidence: 0.9,
-            sources: ['user_patterns', 'schedule_data']
+            sources: ['gemini_ai', 'user_context'],
+            source: 'gemini_text'
           }
           break
         }
         case 'suggestion': {
+          // Call Gemini for proactive suggestions
+          const geminiResponse = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                contents: [{
+                  parts: [{
+                    text: `You are Marvin, an AR morning assistant. Generate 2-3 proactive suggestions for the user's morning routine. Context: ${JSON.stringify(context)}. Current time awareness: morning routine. Be helpful and specific.`
+                  }]
+                }],
+                generationConfig: {
+                  temperature: 0.8,
+                  topK: 40,
+                  topP: 0.95,
+                  maxOutputTokens: 256,
+                }
+              })
+            }
+          )
+
+          if (!geminiResponse.ok) {
+            throw new Error(`Gemini API error: ${geminiResponse.statusText}`)
+          }
+
+          const geminiData = await geminiResponse.json()
+          const suggestionText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'No suggestions available'
+
           aiResponse = {
-            suggestions: [
-              'Based on your routine, it\'s time to take your medication',
-              'Your calendar shows a meeting in 30 minutes'
-            ],
+            suggestions: extractSuggestions(suggestionText),
             priority: priority,
-            type: 'proactive'
+            type: 'proactive',
+            source: 'gemini_ai'
           }
           break
         }
@@ -170,6 +290,15 @@ serve(async (req) => {
             supported_types: ['visual_analysis', 'context_query', 'suggestion']
           }
       }
+    } catch (geminiError) {
+      console.error('Gemini API error:', geminiError)
+      // Fallback to mock responses if Gemini fails
+      aiResponse = {
+        error: 'AI processing temporarily unavailable',
+        fallback: true,
+        message: 'Using cached response due to API error'
+      }
+    }
 
     // Store the interaction and response
     const { data: interactionId, error: insertError } = await supabase
@@ -282,3 +411,52 @@ serve(async (req) => {
     )
   }
 })
+
+// Helper functions for extracting structured data from Gemini responses
+function extractObjects(text: string): string[] {
+  const objects = ['medicine', 'bowl', 'laptop', 'keys', 'phone', 'breakfast', 'medication']
+  const detected = objects.filter(obj => text.toLowerCase().includes(obj))
+  return detected.length > 0 ? detected : ['unknown']
+}
+
+function extractConfidence(text: string): Record<string, number> {
+  const confidence: Record<string, number> = {}
+  const objects = extractObjects(text)
+  
+  // Look for confidence indicators in the text
+  objects.forEach(obj => {
+    const match = text.match(new RegExp(`${obj}[^.]*?(\\d+(?:\\.\\d+)?)%`, 'i'))
+    confidence[obj] = match ? parseFloat(match[1]) / 100 : 0.8
+  })
+  
+  return confidence
+}
+
+function extractRecommendations(text: string): string[] {
+  const recommendations: string[] = []
+  const lines = text.split('\n').filter(line => line.trim())
+  
+  lines.forEach(line => {
+    if (line.toLowerCase().includes('recommend') || 
+        line.toLowerCase().includes('suggest') ||
+        line.toLowerCase().includes('should') ||
+        line.toLowerCase().includes('consider')) {
+      recommendations.push(line.trim())
+    }
+  })
+  
+  return recommendations.length > 0 ? recommendations : ['No specific recommendations available']
+}
+
+function extractSuggestions(text: string): string[] {
+  const suggestions: string[] = []
+  const lines = text.split('\n').filter(line => line.trim())
+  
+  lines.forEach(line => {
+    if (line.match(/^\d+\./) || line.match(/^[-•]/) || line.includes('suggestion')) {
+      suggestions.push(line.replace(/^\d+\.\s*/, '').replace(/^[-•]\s*/, '').trim())
+    }
+  })
+  
+  return suggestions.length > 0 ? suggestions : ['Continue with your morning routine']
+}

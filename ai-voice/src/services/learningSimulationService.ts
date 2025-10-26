@@ -3,7 +3,7 @@
 
 import { secureLog, errorLog, debugLog } from '../utils/secureLogger';
 import { ChromaService, LearningPattern, PersonalizedSuggestion } from './chromaService';
-import { ConversationContext, DemoObject, UserPreferences } from '../types';
+import { DemoObject } from '../types';
 import { LEARNING_CONSTANTS } from '../constants/learningConstants';
 
 export interface LearningStage {

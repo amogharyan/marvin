@@ -4,7 +4,7 @@
 import { CloudClient } from 'chromadb';
 import { randomUUID } from 'crypto';
 import { secureLog, errorLog, debugLog } from '../utils/secureLogger';
-import { ConversationContext, ChatMessage, DemoObject, UserPreferences } from '../types';
+import { ConversationContext, ChatMessage, DemoObject } from '../types';
 import { ChromaMetadataValidator } from '../utils/chromaMetadataValidator';
 
 export interface VectorMemoryEntry {
@@ -143,7 +143,7 @@ export class ChromaService {
       // Create vector entries for conversation history
       const entries: VectorMemoryEntry[] = [];
       
-      context.conversation_history.forEach((message, index) => {
+      context.conversation_history.forEach((message) => {
         entries.push({
           id: randomUUID(),
           content: `${message.role}: ${message.content}`,
@@ -518,7 +518,7 @@ export class ChromaService {
 
     try {
       // Remove test data from all collections
-      for (const [name, collection] of this.collections) {
+      for (const [, collection] of this.collections) {
         await collection.delete({
           where: { 
             $or: [

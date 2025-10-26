@@ -31,7 +31,7 @@ export class VoiceProcessingService {
       this.updateConversationContext(conversationContext);
 
       // Generate contextual response
-      const response = this.generateContextualResponse(voiceText, objectContext, conversationContext);
+      const response = this.generateContextualResponse(voiceText, objectContext);
       
       // Add to conversation history
       this.addToConversationHistory(
@@ -44,7 +44,7 @@ export class VoiceProcessingService {
       return {
         response: response,
         confidence: LEARNING_CONSTANTS.CONFIDENCE.VOICE_SUCCESS,
-        suggested_actions: this.extractSuggestedActions(response, objectContext)
+        suggested_actions: this.extractSuggestedActions(response)
       };
     } catch (error) {
       console.error('Voice processing error:', error);
@@ -62,8 +62,7 @@ export class VoiceProcessingService {
    */
   private generateContextualResponse(
     voiceText: string,
-    objectContext?: DemoObject,
-    _conversationContext?: ConversationContext
+    objectContext?: DemoObject
   ): string {
     const lowerText = voiceText.toLowerCase();
     
@@ -71,7 +70,7 @@ export class VoiceProcessingService {
     if (objectContext) {
       const objectConfig = DEMO_OBJECTS[objectContext.name as keyof typeof DEMO_OBJECTS];
       if (objectConfig) {
-        return this.generateObjectSpecificResponse(lowerText, objectContext, objectConfig);
+        return this.generateObjectSpecificResponse(lowerText, objectContext);
       }
     }
 
@@ -113,8 +112,7 @@ export class VoiceProcessingService {
    */
   private generateObjectSpecificResponse(
     voiceText: string,
-    objectContext: DemoObject,
-    _objectConfig: any
+    objectContext: DemoObject
   ): string {
     const objectName = objectContext.name;
     
@@ -157,7 +155,7 @@ export class VoiceProcessingService {
   /**
    * Extract suggested actions from response
    */
-  private extractSuggestedActions(response: string, _objectContext?: DemoObject): string[] {
+  private extractSuggestedActions(response: string): string[] {
     const actions: string[] = [];
     
     if (response.includes('schedule') || response.includes('calendar')) {
@@ -281,7 +279,7 @@ export class VoiceProcessingService {
   async healthCheck(): Promise<boolean> {
     try {
       // Simple test to ensure service is working
-      const testResponse = this.generateContextualResponse('test', undefined, undefined);
+      const testResponse = this.generateContextualResponse('test');
       return testResponse.length > 0;
     } catch (error) {
       console.error('Voice processing health check failed:', error);
