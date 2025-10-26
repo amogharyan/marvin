@@ -6,6 +6,7 @@ import { AIResponse, ConversationContext, DemoObject } from '../types';
 import { ServiceOrchestrator } from './aiVoiceIntegration/serviceOrchestrator';
 import { RequestProcessor, VoiceRequest, MultimodalRequest, VisualRequest } from './aiVoiceIntegration/requestProcessor';
 import { AsyncService } from '../utils/asyncServiceUtils';
+import type { LettaSearchResult } from './lettaService';
 
 export class AIVoiceIntegrationService extends AsyncService {
   private serviceOrchestrator: ServiceOrchestrator;
@@ -167,23 +168,25 @@ export class AIVoiceIntegrationService extends AsyncService {
    */
   public async simulateDemoLearningProgression(userId: string): Promise<AIResponse> {
     try {
-      await this.serviceOrchestrator.enhancedElevenLabsService.simulateDemoLearningProgression(userId);
+      await this.serviceOrchestrator.learningService.simulateDemoProgression(userId);
       
       return {
+        content: 'Demo learning progression simulated successfully',
         response: 'Demo learning progression simulated successfully',
         confidence: 0.9,
+        context: 'demo_progression',
         suggested_actions: ['View progression', 'Get insights', 'Continue demo'],
-        intent: 'demo_progression',
-        entities: { user_id: userId }
+        voice_enabled: true
       };
     } catch (error) {
       errorLog('Demo learning progression error:', error);
       return {
+        content: 'Failed to simulate demo learning progression',
         response: 'Failed to simulate demo learning progression',
         confidence: 0.3,
+        context: 'error',
         suggested_actions: ['Try again', 'Get help'],
-        intent: 'error',
-        entities: {}
+        voice_enabled: true
       };
     }
   }
@@ -210,7 +213,7 @@ export class AIVoiceIntegrationService extends AsyncService {
       const healthStatus = await this.serviceOrchestrator.getServiceHealthStatus();
       const allHealthy = await this.serviceOrchestrator.areAllServicesHealthy();
       
-      secureLog('Service health status:', healthStatus);
+      secureLog('Service health status:', JSON.stringify(healthStatus));
       return allHealthy;
     } catch (error) {
       errorLog('Health check failed:', error);
@@ -300,6 +303,80 @@ export class AIVoiceIntegrationService extends AsyncService {
    */
   public getObjectInteractionHistory(userId: string): DemoObject[] {
     return this.serviceOrchestrator.contextMemoryService.getObjectInteractionHistory(userId);
+  }
+
+  // ===== LETTA INTEGRATION METHODS =====
+
+  /**
+   * Sync conversation to Letta Cloud (non-blocking)
+   * @param agentId - The Letta agent ID
+   * @param transcript - User's voice transcript
+   * @param response - AI assistant's response
+   * @param metadata - Additional metadata for the conversation
+   */
+  public async syncToLetta(
+    agentId: string, 
+    transcript: string, 
+    response: string, 
+    metadata?: Record<string, any>
+  ): Promise<void> {
+    await this.ensureInitialized();
+    
+    try {
+      const passage = {
+        text: `User: ${transcript}\nAssistant: ${response}`,
+        metadata: {
+          timestamp: new Date().toISOString(),
+          source: 'marvin-ar',
+          ...metadata
+        }
+      };
+
+      // Fire and forget - don't block the main conversation flow
+      this.serviceOrchestrator.lettaService.syncPassage(agentId, passage)
+        .catch(error => {
+          errorLog('Letta sync failed (non-blocking):', error);
+        });
+    } catch (error) {
+      errorLog('Failed to prepare Letta sync:', error);
+    }
+  }
+
+  /**
+   * Get conversation context from Letta
+   * @param agentId - The Letta agent ID
+   * @param objectContext - Current object context for relevant memories
+   */
+  public async getLettaContext(agentId: string, objectContext?: string): Promise<string> {
+    await this.ensureInitialized();
+    
+    try {
+      return await this.serviceOrchestrator.lettaService.getConversationContext(agentId, objectContext);
+    } catch (error) {
+      errorLog('Failed to get Letta context:', error);
+      return '';
+    }
+  }
+
+  /**
+   * Search Letta passages for relevant information
+   * @param agentId - The Letta agent ID
+   * @param query - Search query
+   * @param limit - Maximum number of results
+   */
+  public async searchLettaPassages(
+    agentId: string, 
+    query: string, 
+    limit: number = 5
+  ): Promise<LettaSearchResult> {
+    await this.ensureInitialized();
+    
+    try {
+      return await this.serviceOrchestrator.lettaService.searchPassages(agentId, query, limit);
+    } catch (error) {
+      errorLog('Failed to search Letta passages:', error);
+      return { passages: [] } as LettaSearchResult;
+    }
   }
 
   /**

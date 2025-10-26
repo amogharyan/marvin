@@ -5,10 +5,7 @@ import {
   ReminderFrequency, 
   ConversationRole, 
   LearningStage,
-  IntentType,
-  ContextType,
-  VoiceDefaults,
-  VolumeLevel
+  IntentType
 } from './enums';
 
 export interface DemoObject {

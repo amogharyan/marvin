@@ -1,4 +1,5 @@
 import { GeminiService } from '../../src/services/geminiService';
+import { ConversationRole } from '../../src/types/enums';
 
 // Mock the Gemini API
 jest.mock('@google/generative-ai', () => ({
@@ -34,7 +35,7 @@ describe('GeminiService', () => {
         associated_actions: ['test_action']
       };
       const conversationHistory = [
-        { role: 'user' as const, content: 'Hello', timestamp: new Date() }
+        { role: ConversationRole.USER, content: 'Hello', timestamp: new Date() }
       ];
 
       // Act

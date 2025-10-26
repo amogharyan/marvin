@@ -58,37 +58,31 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: ${{ matrix.workspace }}/package-lock.json
           
       - name: Install dependencies
-        run: npm ci
-        working-directory: ${{ matrix.workspace }}
+        run: npm install
         env:
           NODE_ENV: test
         
       - name: Run linter
-        run: npm run lint
-        working-directory: ${{ matrix.workspace }}
+        run: npm run lint:${{ matrix.workspace }}
         continue-on-error: true
         env:
           NODE_ENV: test
         
       - name: Type check
-        run: npm run type-check
-        working-directory: ${{ matrix.workspace }}
+        run: npm run type-check:${{ matrix.workspace }}
         env:
           NODE_ENV: test
         
       - name: Run tests
-        run: npm test
-        working-directory: ${{ matrix.workspace }}
+        run: npm run test:${{ matrix.workspace }}
         continue-on-error: false
         env:
           NODE_ENV: test
         
       - name: Run tests with coverage
-        run: npm test -- --coverage --maxWorkers=2
-        working-directory: ${{ matrix.workspace }}
+        run: cd ${{ matrix.workspace }} && npm test -- --coverage --maxWorkers=2
         continue-on-error: true
         env:
           NODE_ENV: test

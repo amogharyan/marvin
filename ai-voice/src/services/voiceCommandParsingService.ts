@@ -100,16 +100,16 @@ export class VoiceCommandParsingService {
       const intent = this.extractIntent(normalizedText, objectContext);
       
       // Extract entities
-      const entities = this.extractEntities(normalizedText, intent.intent);
+      const entities = this.extractEntities(normalizedText);
       
       // Determine action and parameters
-      const action = this.determineAction(intent, entities, objectContext);
+      const action = this.determineAction(intent);
       const parameters = this.extractParameters(intent, entities, objectContext);
       
       // Generate context and suggestions
       const context = this.generateContext(intent, entities, objectContext);
       const suggestedResponse = this.generateSuggestedResponse(intent, entities, objectContext);
-      const followUpActions = this.generateFollowUpActions(intent, entities, objectContext);
+      const followUpActions = this.generateFollowUpActions(intent);
 
       return {
         intent: {
@@ -243,7 +243,7 @@ export class VoiceCommandParsingService {
     for (const [intent, patterns] of this.intentPatterns) {
       for (const pattern of patterns) {
         if (pattern.test(text)) {
-          const confidence = this.calculateConfidence(text, pattern, objectContext);
+          const confidence = this.calculateConfidence(text, pattern);
           if (confidence > bestMatch.confidence) {
             bestMatch = { intent, confidence };
           }
@@ -262,7 +262,7 @@ export class VoiceCommandParsingService {
   /**
    * Extract entities from voice text
    */
-  private extractEntities(text: string, _intent: string): Record<string, any> {
+  private extractEntities(text: string): Record<string, any> {
     const entities: Record<string, any> = {};
     
     for (const [entityType, patterns] of this.entityPatterns) {
@@ -280,7 +280,7 @@ export class VoiceCommandParsingService {
   /**
    * Determine action based on intent and entities
    */
-  private determineAction(intent: { intent: string; confidence: number }, _entities: Record<string, any>, _objectContext?: DemoObject): string {
+  private determineAction(intent: { intent: string; confidence: number }): string {
     switch (intent.intent) {
       case 'medicine_reminder':
         return 'show_medicine_schedule';
@@ -371,7 +371,7 @@ export class VoiceCommandParsingService {
   /**
    * Generate follow-up actions based on parsed command
    */
-  private generateFollowUpActions(intent: { intent: string; confidence: number }, _entities: Record<string, any>, _objectContext?: DemoObject): string[] {
+  private generateFollowUpActions(intent: { intent: string; confidence: number }): string[] {
     switch (intent.intent) {
       case 'medicine_reminder':
         return ['Show medicine schedule', 'Set reminder', 'Track medication'];
@@ -397,7 +397,7 @@ export class VoiceCommandParsingService {
   /**
    * Calculate confidence score for intent matching
    */
-  private calculateConfidence(text: string, pattern: RegExp, _objectContext?: DemoObject): number {
+  private calculateConfidence(text: string, pattern: RegExp): number {
     const match = text.match(pattern);
     if (!match) return 0;
 
