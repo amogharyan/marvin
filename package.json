@@ -9,22 +9,27 @@
     "snap-cloud"
   ],
   "scripts": {
-    "test": "npm run test:all",
+    "test": "jest",
+    "test:root": "jest --config jest.config.js",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:all": "npm run test:root && npm run test:ai-voice && npm run test:ar-core",
+    "test:ai-voice": "cd ai-voice && npm test",
+    "test:ar-core": "cd ar-core && npm test",
     "install:all": "npm install && npm run install:ai-voice && npm run install:ar-core && npm run install:snap-cloud",
     "install:ai-voice": "cd ai-voice && npm install",
-    "install:ar-core": "cd ar-core && npm install", 
+    "install:ar-core": "cd ar-core && npm install",
     "install:snap-cloud": "cd snap-cloud && npm install",
     "build:all": "npm run build:ai-voice && npm run build:ar-core",
     "build:ai-voice": "cd ai-voice && npm run build",
     "build:ar-core": "cd ar-core && npm run build",
-    "test:all": "npm run test:ai-voice && npm run test:ar-core",
-    "test:ai-voice": "cd ai-voice && npm test",
-    "test:ar-core": "cd ar-core && npm test",
     "clean:all": "npm run clean:ai-voice && npm run clean:ar-core",
     "clean:ai-voice": "cd ai-voice && npm run clean",
     "clean:ar-core": "cd ar-core && npm run clean",
     "dev:ai-voice": "cd ai-voice && npm run dev",
-    "start:ai-voice": "cd ai-voice && npm start"
+    "start:ai-voice": "cd ai-voice && npm start",
+    "lint": "echo 'Linting not configured at root level'",
+    "type-check": "echo 'Type checking not configured at root level'"
   },
   "keywords": [
     "ar",
@@ -48,5 +53,17 @@
   "bugs": {
     "url": "https://github.com/amogharyan/marvin/issues"
   },
-  "homepage": "https://github.com/amogharyan/marvin#readme"
+  "homepage": "https://github.com/amogharyan/marvin#readme",
+  "dependencies": {
+    "@chroma-core/default-embed": "^0.1.8",
+    "chromadb": "^3.0.17"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.19",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.3.3"
+  }
 }

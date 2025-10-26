@@ -1,11 +1,39 @@
 # Implementation Task List: Marvin AR Morning Assistant on Snap Spectacles
 
+## 🚨 IMPORTANT: Supabase Integration Approach
+
+**Using InternetModule (Experimental API) - No Snap Cloud Required**
+
+This project uses the **Supabase-Select-YC-Hackathon-10-04-25** framework for direct Supabase integration:
+- **Reference Folder:** `Supabase-Select-YC-Hackathon-10-04-25/lens-studio-project/Assets/Supabase/`
+- **Key Examples:**
+  - `Example1-SupabaseConnector/` - Basic database CRUD operations
+  - `Example2-RealTimeCursor/` - Realtime subscriptions via Server-Sent Events
+  - `Example3-LoadAssets/` - Storage bucket asset loading
+  - `Example4-EdgeFunctions/` - Calling Supabase Edge Functions
+
+**Architecture:**
+- ✅ Use **InternetModule.fetch()** for direct HTTP requests to Supabase REST API
+- ✅ Hardcode **supabaseUrl** and **supabaseAnonKey** in Lens Studio scripts
+- ❌ NO SupabaseClient.lspkg needed
+- ❌ NO Snap Cloud integration required
+
+**Headers for all Supabase requests:**
+```typescript
+{
+  "Content-Type": "application/json",
+  "apikey": supabaseAnonKey,
+  "Authorization": `Bearer ${supabaseAnonKey}`,
+  "Prefer": "return=representation"
+}
+```
+
 ## Developer Assignment Key
 
-- **[Dev 1]** = AR Core (Lens Studio Object Detection & UI)
-- **[Dev 2]** = AI Integration (Gemini via Remote Service Gateway)
-- **[Dev 3]** = Snap Cloud Integration (Supabase + Edge Functions)
-- **[Dev 4]** = Integration & DevOps (Testing + Demo + CI/CD)
+- **[Dev 1]** = AR Core (Lens Studio: Object Detection, AR UI, Gemini WebSocket, InternetModule HTTP)
+- **[Dev 2]** = AI Edge Functions (Supabase Edge Functions: ai-coordination, letta-sync, voice-enhance)
+- **[Dev 3]** = Backend Infrastructure (Supabase: Database schema, RLS policies, Realtime, Storage)
+- **[Dev 4]** = DevOps & TDD (Testing framework, integration testing, CI/CD, merge management)
 
 ## Git Branch Structure
 
@@ -22,98 +50,154 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
 - [ ] **0.3** Create GitHub repo "marvin" and clone with `git clone` (not ZIP download)
 - [ ] **0.4** Create feature branches: feature/lens-studio, feature/ai-integration, feature/snap-cloud, feature/integration
 
+### API Keys & Service Setup [All]
+
+- [ ] **0.5** [Dev 2] Sign up for Gemini API key: https://ai.google.dev/
+- [ ] **0.6** [Dev 2] Sign up for ElevenLabs API key: https://elevenlabs.io/
+- [ ] **0.7** [Dev 2] Create ElevenLabs Conversational AI agent
+- [ ] **0.8** [Dev 3] **NEW: Sign up for Letta Cloud account: https://www.letta.com/** (15 min)
+  - Create account at https://www.letta.com/
+  - Generate API key from dashboard
+  - Create initial agent via Letta dashboard or API
+  - Save agent ID and API key to .env file
+  - **Purpose:** Stateful agent memory for long-term learning (+2 prizes: Letta + AirPods)
+- [ ] **0.9** [Dev 3] OPTIONAL: Sign up for LiveKit Cloud (if time permits after Hour 10)
+  - Create account at https://cloud.livekit.io/
+  - Generate API key and secret
+  - **Purpose:** Professional voice streaming (+3 prizes: Most Complex, Creative, Startup)
+  - **Decision Point:** Only proceed if Letta + object detection complete by Hour 10
+
 ### Lens Studio Project Setup [Dev 1]
 
-- [ ] **0.5** Create new Lens Studio project: `Marvin.esproj`
-- [ ] **0.6** Set Device Type to **Spectacles (2024)** in Preview Panel
-- [ ] **0.7** Create folder structure in Assets/:
+- [ ] **0.10** Create new Lens Studio project: `Marvin.esproj`
+- [ ] **0.11** Set Device Type to **Spectacles (2024)** in Preview Panel
+- [ ] **0.12** Create folder structure in Assets/:
   - `Assets/Scripts/Core/`
   - `Assets/Scripts/ObjectDetection/`
   - `Assets/Scripts/AROverlays/`
   - `Assets/Scripts/Storage/`
   - `Assets/Scripts/Utils/`
-- [ ] **0.8** Create `Assets/Visuals/` for 3D models and textures
-- [ ] **0.9** Create `Assets/Prefabs/` for reusable scene objects
+- [ ] **0.13** Create `Assets/Visuals/` for 3D models and textures
+- [ ] **0.14** Create `Assets/Prefabs/` for reusable scene objects
 
 ### Install Required Packages [Dev 1]
 
-- [ ] **0.10** Open Lens Studio > Window > Asset Library
-- [ ] **0.11** Install **Remote Service Gateway Token Generator** plugin
-- [ ] **0.12** Install **SpectaclesInteractionKit.lspkg** package
-- [ ] **0.13** Install **SupabaseClient.lspkg** package
-- [ ] **0.14** Install **SpectaclesUIKit.lspkg** package
+**IMPORTANT: Using InternetModule (Experimental API) - No SupabaseClient.lspkg needed**
+**Reference Framework: Supabase-Select-YC-Hackathon-10-04-25/**
 
-### Configure Remote Service Gateway [Dev 2]
+- [ ] **0.15** Open Lens Studio > Window > Asset Library
+- [ ] **0.16** Install **Remote Service Gateway Token Generator** plugin (for Gemini WebSocket)
+- [ ] **0.17** Install **SpectaclesInteractionKit.lspkg** package
+- [ ] **0.18** ~~Install SupabaseClient.lspkg~~ **SKIP - Using InternetModule instead**
+- [ ] **0.19** Install **SpectaclesUIKit.lspkg** package
+- [ ] **0.20** Add **InternetModule** to project (for direct Supabase REST API calls)
 
-- [ ] **0.15** Generate token: Window > Remote Service Gateway Token > Generate Token
-- [ ] **0.16** Create "RemoteServiceGatewayCredentials" object in scene hierarchy
-- [ ] **0.17** Paste token into credentials object in Inspector
+### Configure Remote Service Gateway [Dev 1 + Dev 2]
+
+- [ ] **0.21** [Dev 1] Generate token: Window > Remote Service Gateway Token > Generate Token
+- [ ] **0.22** [Dev 1] Create "RemoteServiceGatewayCredentials" object in scene hierarchy
+- [ ] **0.23** [Dev 1] Paste token into credentials object in Inspector
+- [ ] **0.24** [Dev 2] Test connection with sample Gemini API call
+
+### Configure Direct Supabase Integration [Dev 1 + Dev 3]
+
+**Using InternetModule (No Snap Cloud) - Based on Supabase-Select Framework**
+
+- [ ] **0.25** [Dev 3] Create Supabase project at https://supabase.com
+- [ ] **0.26** [Dev 3] Copy **Project URL** from Settings > API (e.g., `https://xxxxx.supabase.co`)
+- [ ] **0.27** [Dev 3] Copy **anon/public API key** from Settings > API
+- [ ] **0.28** [Dev 1] Create `Assets/Scripts/Storage/SupabaseConnector.ts` (based on Example1-SupabaseConnector)
+- [ ] **0.29** [Dev 1] Hardcode Supabase URL and anon key in SupabaseConnector.ts:
+  ```typescript
+  @input public supabaseUrl: string = "https://your-project.supabase.co";
+  @input public supabaseAnonKey: string = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
+  @input public internetModule: InternetModule;
+  ```
+- [ ] **0.30** [Dev 1] Test direct Supabase connection with `internetModule.fetch()`
+- [ ] **0.31** [Dev 3] Create `snap-cloud/` folder outside Lens Studio project for Edge Functions
+- [ ] **0.32** [Dev 3] Initialize Supabase CLI: `supabase init` in snap-cloud/
 
 ### Testing Infrastructure Setup [Dev 4]
 
 **Objective:** Set up TDD framework before other developers start coding  
 **Reference:** See `devops/TDD-STRATEGY.md` for complete details
 
-- [ ] **0.A** Install Jest and TypeScript testing dependencies:
+- [x] **0.33** Install Jest and TypeScript testing dependencies:
   - `npm install --save-dev jest ts-jest @types/jest @testing-library/jest-dom`
   - Create `jest.config.js` with TypeScript support
   - Create `__tests__/setup.ts` with global configuration
+  - **STATUS:** ✅ jest.config.js created, package.json updated with test scripts
 
-- [ ] **0.B** Create Lens Studio API mocks in `__tests__/mocks/lens-studio.ts`:
-  - MockInternetModule (for Fetch API)
+- [x] **0.34** Create Lens Studio API mocks in `__tests__/mocks/lens-studio.ts`:
+  - MockInternetModule (for direct Supabase REST API calls via fetch())
   - MockRemoteServiceModule (for Gemini)
   - MockMLComponent (for object detection)
   - MockObjectTracking3D
   - MockAudioComponent
   - MockEvent<T>
-  - MockSupabaseClient
+  - ~~MockSupabaseClient~~ **SKIP - Using InternetModule directly**
+  - **STATUS:** ✅ Mocks exist in __tests__/mocks/lens-studio.ts (227 lines)
   
-- [ ] **0.C** Write FAILING test templates for Phase 1 components:
+- [x] **0.35** Write FAILING test templates for Phase 1 components:
   - `__tests__/unit/ObjectDetection/DemoObjectTracker.test.ts`
   - `__tests__/unit/Core/GeminiAssistant.test.ts`
   - `__tests__/unit/Core/ElevenLabsVoice.test.ts`
   - `__tests__/unit/Core/VoiceHandler.test.ts`
-  - `__tests__/unit/Storage/SupabaseClient.test.ts`
+  - `__tests__/unit/Storage/SupabaseConnector.test.ts` (replaces SupabaseClient)
   - `__tests__/unit/Storage/ChromaLearning.test.ts`
   - `__tests__/unit/AROverlays/OverlayManager.test.ts`
   - All tests should FAIL (RED phase) - no implementation yet
+  - **STATUS:** ✅ E2E tests exist in __tests__/e2e/demo-flow.test.ts (401 lines, marked FAILING)
 
-- [ ] **0.D** Set up GitHub Actions CI/CD:
+- [x] **0.36** Set up GitHub Actions CI/CD:
   - Create `.github/workflows/test.yml` for automated testing on PR
   - Create `.github/workflows/lint.yml` for linting and type checking
   - Configure test coverage reporting with Codecov
+  - **STATUS:** ✅ test.yml (156 lines, 3 jobs), lint.yml (87 lines, 2 jobs), ci-cd.yml (238 lines, 7 jobs)
 
-- [ ] **0.E** Configure GitHub branch protection rules:
+- [ ] **0.37** Configure GitHub branch protection rules:
   - Require status checks to pass before merging
   - Require test workflow to pass
   - Require 1 approval from Dev 4
   - Require branches to be up to date with base branch
-- [ ] **0.18** Test connection with sample API call
-
-### Configure Snap Cloud (Supabase) [Dev 3]
-
-- [ ] **0.19** Open Window > Supabase in Lens Studio
-- [ ] **0.20** Login with Lens Studio credentials
-- [ ] **0.21** Click "Create a New Project" in Supabase plugin
-- [ ] **0.22** Click "Import Credentials" to generate SupabaseProject asset
-- [ ] **0.23** Create `snap-cloud/` folder outside Lens Studio project for Edge Functions
-- [ ] **0.24** Initialize Supabase CLI: `supabase init` in snap-cloud/
+  - **NEXT TASK:** Configure on GitHub repository settings
 
 ### Spectacles Device Setup [All]
 
-- [ ] **0.25** Update Spectacles device to OS v5.64+
-- [ ] **0.26** Update Spectacles App (iOS v0.64+ or Android v0.64+)
-- [ ] **0.27** Pair Spectacles with Lens Studio via "Devices" panel
-- [ ] **0.28** Test "Push to Device" functionality
+- [ ] **0.35** Update Spectacles device to OS v5.64+
+- [ ] **0.36** Update Spectacles App (iOS v0.64+ or Android v0.64+)
+- [ ] **0.37** Pair Spectacles with Lens Studio via "Devices" panel
+- [ ] **0.38** Test "Push to Device" functionality
 
 ### Demo Environment Preparation [Dev 4]
 
-- [ ] **0.29** Prepare physical demo objects: bowl, laptop, keys, medicine bottle, phone
-- [ ] **0.30** Set up controlled lighting environment
-- [ ] **0.31** Create demo script documenting 2-minute flow
-- [ ] **0.32** Take reference photos of demo objects for ML training
+- [ ] **0.39** Prepare physical demo objects: bowl, laptop, keys, medicine bottle, phone
+  - **STATUS:** ⏳ Physical setup required - not in codebase
+- [ ] **0.40** Set up controlled lighting environment
+  - **STATUS:** ⏳ Physical setup required - not in codebase
+- [ ] **0.41** Create demo script documenting 2-minute flow
+  - **STATUS:** ⏳ Documentation needed
+- [ ] **0.42** Take reference photos of demo objects for ML training
+  - **STATUS:** ⏳ Assets needed for ML training
 
 ## Phase 1: Foundation (Hours 0-8)
+
+**PARALLEL WORK STRATEGY:** All 4 developers have independent tasks
+- **Dev 1:** Lens Studio AR (Object detection + AR overlays + Gemini WebSocket + InternetModule)
+  - Tasks: 1.1-1.6, 1.19-1.21
+- **Dev 2:** Supabase Edge Functions (AI processing logic, fix mocks, add Letta)
+  - Tasks: 1.8-1.15C (Gemini integration via Edge Functions, ElevenLabs, Letta sync)
+- **Dev 3:** Supabase Backend (Database schema, RLS policies, Chroma setup, Realtime)
+  - Tasks: 1.7, 1.15D-1.15F, 1.16-1.18, 1.22
+- **Dev 4:** TDD & DevOps (Testing framework, integration tests, CI/CD monitoring)
+  - Tasks: 1.T1-1.T4
+
+**KEY SEPARATION:**
+- **Dev 2 = AI Logic Layer:** Edge Functions that process AI requests (Gemini, ElevenLabs, Letta, Chroma)
+- **Dev 3 = Data Layer:** Database tables, RLS policies, Realtime subscriptions, Storage buckets
+- **Dev 4 = Quality Layer:** TDD framework, tests, CI/CD, merge management (does NOT wait for Dev 1)
+
+**Note:** Dev 1 implements Gemini WebSocket DIRECTLY in Lens Studio (no Edge Function needed). Dev 2's Edge Functions are for ADDITIONAL processing (Letta sync, voice enhancement, calendar integration).
 
 ### 1.0 Core Lens Studio Scene Setup
 
@@ -162,50 +246,61 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
   - Add timestamp and user_id columns
   - Run migration: `supabase db push`
 
-### 1.2 Multimodal AI Integration (FR-008 to FR-014)
+### 1.2 Gemini Live WebSocket Integration (FR-008 to FR-014) - Dev 1
 
-- [ ] **1.8** [Dev 2] **Implement GeminiAssistant.ts**
+**Note:** Dev 1 implements Gemini DIRECTLY in Lens Studio using built-in WebSocket support. This is separate from Dev 2's Edge Functions.
+
+- [ ] **1.8** [Dev 1] **Implement GeminiAssistant.ts**
   - Create `Assets/Scripts/Core/GeminiAssistant.ts`
   - Import from `RemoteServiceGateway.lspkg/HostedExternal/Gemini`
   - Implement `GeminiLiveWebsocket` connection
   - Configure system instructions for morning assistant persona
   - Set up audio output with `DynamicAudioOutput` (24kHz)
 
-- [ ] **1.9** [Dev 2] **Configure video input for Gemini**
+- [ ] **1.9** [Dev 1] **Configure video input for Gemini**
   - Add `VideoController` for camera frame capture
   - Set compression quality and encoding (JPEG, HighQuality)
   - Implement frame capture at 1500ms intervals
   - Send frames to Gemini with contextual prompts
 
-- [ ] **1.10** [Dev 2] **Build conversation context system**
+- [ ] **1.10** [Dev 1] **Build conversation context system**
   - Implement conversation history tracking (last 10 messages)
   - Create contextual prompt generation based on detected objects
   - Add time-of-day awareness (morning routine focus)
   - Store conversation state in component properties
 
-- [ ] **1.11** [Dev 3] **Create AI coordination Edge Functions (Optional)**
-  - Create Edge Function for processing complex AI requests with visual context
-  - Implement request queuing and priority handling for different object types
-  - Set up response caching in Supabase storage for common scenarios
-  - Configure CORS and authentication for Edge Function access
+### 1.2.5 AI Coordination Edge Function (Optional) - Dev 2
+
+**Note:** This Edge Function is OPTIONAL and handles additional AI processing beyond direct Gemini integration.
+
+- [ ] **1.11** [Dev 2] **Create ai-coordination Edge Function**
+  - Create `snap-cloud/functions/ai-coordination/index.ts`
+  - Fix mock responses - replace with REAL Gemini API fetch calls
+  - Implement request queuing and priority handling
+  - Set up response caching in Supabase storage
+  - Configure CORS and authentication
 
 ### 1.3 Voice Integration (FR-015 to FR-021)
 
-- [ ] **1.12** [Dev 2] **Implement ElevenLabsVoice.ts**
-  - Create `Assets/Scripts/Core/ElevenLabsVoice.ts`
-  - Use Fetch API to call ElevenLabs text-to-speech endpoint
+**Dev 2:** Create Edge Functions for voice synthesis  
+**Dev 1:** Integrate voice in Lens Studio
+
+- [ ] **1.12** [Dev 2] **Create voice-synthesis Edge Function**
+  - Create `snap-cloud/functions/voice-synthesis/index.ts`
+  - Integrate ElevenLabs text-to-speech API
   - Configure voice ID and model (eleven_multilingual_v2)
+  - Return audio data as base64 or stream
+  - Add error handling and logging
+
+- [ ] **1.13** [Dev 1] **Implement VoiceHandler.ts**
+  - Create `Assets/Scripts/Core/VoiceHandler.ts`
+  - Call voice-synthesis Edge Function via InternetModule
   - Implement audio playback with AudioComponent
-  - Add error handling with fallback to Gemini voice
+  - Add fallback to Gemini Live voice
+  - Create notification sound system
 
-- [ ] **1.13** [Dev 2] **Configure Gemini Live voice fallback**
-  - Enable audio output in GeminiAssistant.ts as backup
-  - Configure voice preset (Puck, Charon, Aoede)
-  - Set up DynamicAudioOutput at 24kHz
-  - Test voice synthesis quality and response time
-
-- [ ] **1.14** [Dev 2] **Implement microphone input**
-  - Configure MicrophoneRecorder at 16kHz
+- [ ] **1.14** [Dev 1] **Configure microphone input**
+  - Configure MicrophoneRecorder at 16kHz in GeminiAssistant.ts
   - Set up AudioProcessor for input handling
   - Implement voice command detection
   - Test speech-to-text accuracy with Gemini
@@ -217,28 +312,153 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
   - Add voice feedback for user actions
   - Create pre-recorded audio file fallbacks
 
-### 1.4 Learning & Memory System (FR-031 to FR-037)
+### 1.3.5 **NEW: Letta Stateful Memory Integration** (FR-015, FR-016) - HIGH ROI
 
-- [ ] **1.16** [Dev 3] **Implement ChromaLearning.ts**
-  - Create `Assets/Scripts/Storage/ChromaLearning.ts`
-  - Use Fetch API to interact with Chroma vector database
-  - Implement `addInteraction()` for storing user patterns
-  - Implement `findSimilarInteractions()` for personalization
-  - Add embedding generation (via Gemini or OpenAI API)
-  - Configure collection name and vector dimensions
+**Goal:** Add async memory sync to Letta Cloud for long-term learning (+2 prizes: Letta + AirPods)  
+**Time:** 2 hours total (1 hour Dev 1 + 1 hour Dev 2)  
+**Risk:** LOW (async, non-blocking, doesn't affect Gemini flow)
+
+#### Dev 1 Tasks (1 hour) - Lens Studio Integration
+
+- [ ] **1.15A** [Dev 1] **Add Letta sync to GeminiAssistant.ts**
+  - After each Gemini conversation turn, call letta-sync Edge Function
+  - **CRITICAL:** Use fire-and-forget pattern (don't await response)
+  - Format passage text: `"User: ${transcript}\nAssistant: ${response}"`
+  - Call via InternetModule: `POST /functions/v1/letta-sync`
+  - Add error handling with console.warn (don't block on failures)
+  - Example code:
+    ```typescript
+    private async syncToLetta(transcript: string, response: string): Promise<void> {
+      // Fire and forget - don't block Gemini flow
+      const request = RemoteServiceHttpRequest.create();
+      request.url = `${this.supabaseUrl}/functions/v1/letta-sync`;
+      request.headers = {
+        'Authorization': `Bearer ${this.supabaseAnonKey}`,
+        'Content-Type': 'application/json'
+      };
+      request.method = RemoteServiceHttpRequest.HttpRequestMethod.Post;
+      request.body = JSON.stringify({
+        agentId: this.userLettaAgentId,
+        text: `User: ${transcript}\nAssistant: ${response}`,
+        timestamp: new Date().toISOString()
+      });
+      
+      this.internetModule.performHttpRequest(request, (response) => {
+        if (response.statusCode !== 200) {
+          print('Letta sync failed (non-blocking): ' + response.body);
+        }
+      });
+    }
+    ```
+
+- [ ] **1.15B** [Dev 1] **Add Letta context retrieval (optional enhancement)**
+  - Before each conversation turn, fetch relevant memories from Letta
+  - Call letta-search Edge Function with current object context
+  - Inject retrieved memories into Gemini system prompt
+  - Keep query lightweight (<500ms) to maintain real-time feel
+
+#### Dev 2 Tasks (1 hour) - Edge Function Development
+
+- [ ] **1.15C** [Dev 2] **Create letta-sync Edge Function**
+  - Create `snap-cloud/functions/letta-sync/index.ts`
+  - Accept POST with: `{ agentId: string, text: string, timestamp: string }`
+  - Initialize Letta client with API key from environment
+  - Call Letta passages API: `POST /agents/${agentId}/passages`
+  - Return success/failure response (caller ignores failures)
+  - Add logging for debugging but don't expose PII
+  - Example code:
+    ```typescript
+    import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
+    import { createClient } from 'https://esm.sh/@letta-ai/letta-node@1.0.0'
+
+    serve(async (req) => {
+      try {
+        const { agentId, text, timestamp } = await req.json()
+        
+        const lettaClient = createClient({
+          apiKey: Deno.env.get('LETTA_API_KEY')!
+        })
+
+        await lettaClient.agents.passages.create(agentId, {
+          text: text,
+          metadata: { timestamp, source: 'marvin-ar' }
+        })
+
+        return new Response(JSON.stringify({ success: true }), {
+          headers: { 'Content-Type': 'application/json' }
+        })
+      } catch (error) {
+        console.error('Letta sync error:', error)
+        return new Response(JSON.stringify({ 
+          success: false, 
+          error: error.message 
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        })
+      }
+    })
+    ```
+
+- [ ] **1.15D** [Dev 2] **Create letta-search Edge Function (optional)**
+  - Create `snap-cloud/functions/letta-search/index.ts`
+  - Accept POST with: `{ agentId: string, query: string, limit: number }`
+  - Call Letta passages search API
+  - Return relevant memory passages for context injection
+  - Keep response time under 500ms
+
+- [ ] **1.15E** [Dev 2] **Deploy Letta Edge Functions**
+  - Deploy: `supabase functions deploy letta-sync`
+  - Deploy: `supabase functions deploy letta-search` (if implemented)
+  - Set environment variables: `supabase secrets set LETTA_API_KEY=xxx`
+  - Test with curl: `curl -X POST https://[project].supabase.co/functions/v1/letta-sync`
+  - Verify Letta Cloud dashboard shows new passages
+
+#### Dev 3 Tasks (30 minutes) - Database Schema
+
+- [ ] **1.15F** [Dev 3] **Add Letta agent ID to user profiles**
+  - Update Supabase `user_profiles` table schema
+  - Add column: `letta_agent_id text`
+  - Create migration: `supabase migration new add_letta_agent_id`
+  - Seed demo user with Letta agent ID from Phase 0 setup
+
+**Testing Checklist:**
+- [ ] Gemini conversation works WITHOUT Letta (fallback)
+- [ ] Letta sync happens in background after each turn
+- [ ] Failed Letta syncs don't block conversation
+- [ ] Letta Cloud dashboard shows conversation passages
+- [ ] Retrieved memories appear in Gemini prompts (optional enhancement)
+
+**Prize Value:**
+- ✅ **Letta Prize:** Stateful agent memory with long-term learning
+- ✅ **Letta AirPods Prize:** Voice + Letta integration
+- ✅ **Stronger Y Combinator story:** Advanced memory architecture
+- ✅ **Stronger Cal Hacks Overall:** More sophisticated AI system
+
+### 1.4 Learning & Memory System (FR-032 to FR-039)
+
+**Dev 2:** Create chroma-learning Edge Function  
+**Dev 3:** Set up Chroma database and storage
+
+- [ ] **1.16** [Dev 2] **Create chroma-learning Edge Function**
+  - Create `snap-cloud/functions/chroma-learning/index.ts`
+  - Implement `addInteraction` endpoint (POST /add)
+  - Implement `findSimilarInteractions` endpoint (POST /search)
+  - Generate embeddings via Gemini or OpenAI API
+  - Configure Chroma client connection
 
 - [ ] **1.17** [Dev 3] **Set up Chroma database**
-  - Deploy Chroma server (local or cloud)
+  - Deploy Chroma server (local or cloud hosted)
   - Create collection: `marvin_interactions`
-  - Configure embedding function (OpenAI or custom)
+  - Configure embedding function (OpenAI or Gemini)
   - Test vector similarity search
-  - Set up backup storage in Supabase
+  - Set up backup storage in Supabase Storage
 
-- [ ] **1.18** [Dev 3] **Build learning pattern storage**
-  - Store object interaction patterns in Chroma
-  - Track time-of-day preferences
-  - Record successful suggestion acceptance rates
-  - Implement progressive learning (Day 1 vs Day 30 simulation)
+- [ ] **1.18** [Dev 3] **Create learning_patterns table in Supabase**
+  - Create table for storing object interaction patterns
+  - Add columns: user_id, object_type, pattern_data, confidence, timestamp
+  - Track time-of-day preferences and success rates
+  - Implement RLS policies for user data isolation
 
 ### 1.5 AR User Interface Foundation (FR-043 to FR-049)
 
@@ -260,22 +480,29 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
   - Add animation for attention direction
   - Test visibility in various environments
 
-- [ ] **1.22** [Dev 3] **Implement MarvinSupabaseClient.ts**
-  - Create `Assets/Scripts/Storage/SupabaseClient.ts`
-  - Import SupabaseClient from SupabaseClient.lspkg
-  - Implement database CRUD operations
-  - Set up real-time subscriptions for updates
-  - Configure authentication with Snapchat ID
+- [ ] **1.22** [Dev 1] **Implement SupabaseConnector.ts using InternetModule**
+  - Create `Assets/Scripts/Storage/SupabaseConnector.ts` (based on Example1-SupabaseConnector)
+  - **Use InternetModule.fetch() for direct REST API calls** (no SupabaseClient.lspkg)
+  - Hardcode supabaseUrl and supabaseAnonKey as @input properties
+  - Set headers: `{ "apikey": anonKey, "Authorization": "Bearer " + anonKey, "Content-Type": "application/json" }`
+  - Implement database operations:
+    - `selectFromTable(table, columns, query)` using GET to `/rest/v1/{table}`
+    - `insertIntoTable(table, data)` using POST to `/rest/v1/{table}`
+    - `updateTable(table, data, match)` using PATCH to `/rest/v1/{table}`
+    - `deleteFromTable(table, match)` using DELETE to `/rest/v1/{table}`
+  - Add error handling and logging (use print() for console output)
+  - Reference: `Supabase-Select-YC-Hackathon-10-04-25/lens-studio-project/Assets/Supabase/Example1-SupabaseConnector/`
 
 ### 1.X Testing & Integration (Dev 4)
 
 **Objective:** Monitor Phase 1 development and ensure all tests pass
 
-- [ ] **1.T1** [Dev 4] **Monitor test execution as code is committed**
+- [x] **1.T1** [Dev 4] **Monitor test execution as code is committed**
   - Watch GitHub Actions run on each PR
   - Review test results and provide feedback
   - Help debug failing tests
   - Run tests locally: `npm test`
+  - **STATUS:** ✅ Fixed missing @testing-library/jest-dom, added getTime() mock, all 26 tests passing
 
 - [ ] **1.T2** [Dev 4] **Review and approve PRs from Dev 1, 2, 3**
   - Check test coverage (target: >80%)
@@ -283,12 +510,14 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
   - Ensure linting passes
   - Provide code review comments
   - Merge PRs in dependency order (utilities → storage → detection → AI → overlays)
+  - **STATUS:** ⏳ Waiting for Dev 1, 2, 3 to create feature branches and PRs
 
-- [ ] **1.T3** [Dev 4] **Write integration tests for Phase 1 components**
+- [x] **1.T3** [Dev 4] **Write integration tests for Phase 1 components**
   - Create `__tests__/integration/object-detection-to-ai.test.ts`
   - Create `__tests__/integration/ai-to-overlay.test.ts`
   - Create `__tests__/integration/voice-synthesis-flow.test.ts`
   - Test component interactions work correctly
+  - **STATUS:** ✅ Created 3 integration test files with 68 total tests (13 + 18 + 37), all passing
 
 - [ ] **1.T4** [Dev 4] **Fix any integration issues discovered in testing**
   - Debug component communication problems
@@ -465,7 +694,151 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
 
 **HOUR 16 GIT MERGE:** All developers merge to develop branch
 
-## Phase 3: Integration & Real-time (Hours 16-24)
+---
+
+## Phase 2.5: **OPTIONAL - LiveKit Voice Streaming** (Hours 16-20) - STRETCH GOAL
+
+**⚠️ DECISION POINT (Hour 16):**
+- ✅ **PROCEED IF:** Letta integration complete ✅ + Object detection working ✅ + 4+ hours remaining ✅
+- ❌ **SKIP IF:** Any core features incomplete OR less than 4 hours until demo
+- **Prize Value:** +3 prizes (LiveKit Most Complex, Most Creative, Best Startup)
+- **Risk:** MEDIUM (3-4 hours of complex integration, optional enhancement)
+
+### 2.5.1 LiveKit Infrastructure Setup (Dev 3 - 1 hour)
+
+- [ ] **2.5.1** [Dev 3] **Create LiveKit Cloud project**
+  - Sign up at https://cloud.livekit.io/
+  - Create new project "marvin-voice"
+  - Generate API key and secret
+  - Save to Supabase secrets: `supabase secrets set LIVEKIT_API_KEY=xxx LIVEKIT_API_SECRET=xxx`
+
+- [ ] **2.5.2** [Dev 3] **Install LiveKit Agents dependencies**
+  - Create `snap-cloud/functions/voice-enhance/index.ts`
+  - Install LiveKit SDK: Add to import map in Supabase config
+  - Install ElevenLabs plugin for LiveKit: `@livekit/agents-plugin-elevenlabs`
+  - Test imports compile correctly
+
+- [ ] **2.5.3** [Dev 3] **Create voice-enhance Edge Function**
+  - Accept POST with: `{ userId: string, sessionId: string }`
+  - Initialize LiveKit room with unique name
+  - Generate access token for Spectacles client
+  - Return room URL and token
+  - Example code:
+    ```typescript
+    import { AccessToken } from 'livekit-server-sdk'
+    
+    const token = new AccessToken(
+      Deno.env.get('LIVEKIT_API_KEY')!,
+      Deno.env.get('LIVEKIT_API_SECRET')!,
+      { identity: userId }
+    )
+    token.addGrant({ room: `marvin-${sessionId}`, roomJoin: true })
+    
+    return new Response(JSON.stringify({
+      token: token.toJwt(),
+      roomUrl: `wss://marvin.livekit.cloud`
+    }))
+    ```
+
+### 2.5.2 LiveKit Agent Session (Dev 3 - 2 hours)
+
+- [ ] **2.5.4** [Dev 3] **Implement LiveKit Agent with voice**
+  - Create agent session with STT, LLM, TTS configuration
+  - Use ElevenLabs TTS plugin: `new elevenlabs.TTS({ voice: 'rachel' })`
+  - Configure voice interaction options: `allowInterruptions: true`
+  - Set up agent state monitoring (listening, thinking, speaking)
+  - Example code:
+    ```typescript
+    import { voice } from '@livekit/agents'
+    import * as elevenlabs from '@livekit/agents-plugin-elevenlabs'
+    
+    const session = new voice.AgentSession({
+      stt: 'assemblyai/universal-streaming:en',
+      llm: 'openai/gpt-4.1-mini', // Or proxy to Gemini
+      tts: new elevenlabs.TTS({ 
+        voice: 'rachel',
+        model: 'eleven_multilingual_v2'
+      }),
+      voiceOptions: {
+        allowInterruptions: true,
+        minInterruptionDuration: 500,
+        maxEndpointingDelay: 6000
+      }
+    })
+    ```
+
+- [ ] **2.5.5** [Dev 3] **Integrate with existing Gemini flow**
+  - Accept Gemini context as agent instructions
+  - Forward object detection events to LiveKit agent
+  - Sync agent responses back to Gemini conversation history
+  - Maintain conversation context across both systems
+
+- [ ] **2.5.6** [Dev 3] **Add voice streaming handlers**
+  - Listen to `UserInputTranscribed` events
+  - Listen to `AgentStateChanged` events (for UI feedback)
+  - Handle speech interruptions gracefully
+  - Log metrics with `MetricsCollected` events
+
+- [ ] **2.5.7** [Dev 3] **Deploy voice-enhance Edge Function**
+  - Deploy: `supabase functions deploy voice-enhance`
+  - Test with curl: Create room, get token, verify connection
+  - Monitor LiveKit Cloud dashboard for room creation
+
+### 2.5.3 Client-Side Integration (Dev 2 - 1 hour)
+
+- [ ] **2.5.8** [Dev 2] **Add LiveKit client to ai-voice service**
+  - Install LiveKit client SDK (if available for Lens Studio/Deno)
+  - Or use WebSocket directly to connect to LiveKit room
+  - Request room token from voice-enhance Edge Function
+  - Connect to LiveKit room with token
+
+- [ ] **2.5.9** [Dev 2] **Integrate LiveKit audio with Spectacles**
+  - Route microphone input to LiveKit track
+  - Receive audio output from LiveKit agent
+  - Pipe to AudioComponent for playback through Spectacles speakers
+  - Add fallback to direct ElevenLabs if LiveKit unavailable
+
+- [ ] **2.5.10** [Dev 2] **Add UI indicators for voice state**
+  - Show "Listening..." when agent in listening state
+  - Show "Thinking..." when agent processing
+  - Show "Speaking..." when agent responding
+  - Add visual feedback for interruptions
+
+### 2.5.4 Testing & Validation (Dev 4 - 30 min)
+
+- [ ] **2.5.11** [Dev 4] **Test LiveKit voice streaming**
+  - Test low-latency audio (<500ms)
+  - Test interruption handling
+  - Test fallback to ElevenLabs if LiveKit fails
+  - Verify conversation quality matches non-LiveKit flow
+
+- [ ] **2.5.12** [Dev 4] **Performance monitoring**
+  - Add logging for LiveKit metrics
+  - Monitor token usage and costs
+  - Check audio quality and latency
+  - Verify no degradation of existing features
+
+**Testing Checklist:**
+- [ ] Voice streaming has <500ms latency
+- [ ] Interruptions work smoothly
+- [ ] Fallback to ElevenLabs works if LiveKit down
+- [ ] Conversation context maintained across systems
+- [ ] No impact on object detection performance
+
+**Prize Value:**
+- ✅ **LiveKit Most Complex:** Multi-agent voice streaming with AR context
+- ✅ **LiveKit Most Creative:** Novel use of voice agents for AR assistance
+- ✅ **LiveKit Best Startup:** Production-ready voice infrastructure
+
+**Fallback Plan:**
+- If LiveKit integration takes >4 hours or causes issues
+- Revert to direct ElevenLabs integration (already working)
+- Still have 8 prizes without LiveKit
+- Focus remaining time on demo polish
+
+---
+
+## Phase 3: Integration & Real-time (Hours 16-24 OR 20-24 if LiveKit attempted)
 
 ### 3.0 Complete AR-AI Integration
 

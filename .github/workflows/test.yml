@@ -7,12 +7,47 @@ on:
     branches: [main, develop]
 
 jobs:
-  test:
+  test-root:
+    name: Root Integration Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm install
+        env:
+          NODE_ENV: test
+        
+      - name: Run root-level integration tests
+        run: npm run test:root
+        env:
+          NODE_ENV: test
+        
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage/lcov.info
+          flags: root-integration
+          name: codecov-root
+          fail_ci_if_error: false
+        continue-on-error: true
+
+  test-workspaces:
+    name: Test ${{ matrix.workspace }}
     runs-on: ubuntu-latest
     
     strategy:
+      fail-fast: false
       matrix:
-        workspace: [ai-voice]
+        workspace: [ai-voice, ar-core]
     
     steps:
       - name: Checkout code
@@ -61,8 +96,48 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          file: ./coverage/coverage-final.json
-          flags: unittests
-          name: codecov-umbrella
+          file: ./${{ matrix.workspace }}/coverage/lcov.info
+          flags: ${{ matrix.workspace }}
+          name: codecov-${{ matrix.workspace }}
           fail_ci_if_error: false
+        continue-on-error: true
+
+  test-supabase-edge-functions:
+    name: Test Supabase Edge Functions
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+      
+      - name: Check if Edge Functions exist
+        id: check-functions
+        run: |
+          if [ -d "snap-cloud/functions" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Lint Edge Functions
+        if: steps.check-functions.outputs.exists == 'true'
+        run: deno lint
+        working-directory: snap-cloud/functions
+        continue-on-error: true
+      
+      - name: Type check Edge Functions
+        if: steps.check-functions.outputs.exists == 'true'
+        run: deno check **/*.ts
+        working-directory: snap-cloud/functions
+        continue-on-error: true
+      
+      - name: Test Edge Functions
+        if: steps.check-functions.outputs.exists == 'true'
+        run: deno test --allow-all
+        working-directory: snap-cloud/functions
         continue-on-error: true

@@ -6,62 +6,191 @@ A revolutionary AR-powered morning assistant built for Snap Spectacles that tran
 
 **Timeline:** 36-Hour MLH Hackathon  
 **Team Size:** 4 Developers  
-**Target Platform:** Snap Spectacles  
+**Target Platform:** Snap Spectacles (2024)  
+**Architecture:** Supabase-Focused Integration
 
 ### Core Features
 - **Real-time Object Recognition** - Identifies 5 demo objects (bowl, laptop, keys, medicine, phone)
-- **Multimodal AI Processing** - Gemini API for visual understanding and natural language
-- **Voice Synthesis & Conversation** - ElevenLabs + Vapi for natural interactions
-- **Adaptive Learning** - Chroma vector embeddings for personalized assistance
-- **AR Overlays** - Contextual information displayed in real-world space
+- **Gemini Live WebSocket** - Direct real-time visual understanding and natural language processing
+- **Voice Synthesis** - ElevenLabs Conversational AI Platform for natural voice interactions
+- **Adaptive Learning** - Letta Cloud for stateful memory + Chroma vector embeddings
+- **AR Overlays** - Contextual information displayed in real-world space with <100ms latency
 
 ## 🏗️ Architecture
 
-This is a monorepo with 4 main components, each owned by a different developer:
+This is a Lens Studio project with Supabase Edge Functions backend:
 
 ```
-marvin-ar-assistant/
-├── lens-studio/          # Dev 1: AR Core (Snap Spectacles + Object Detection)
-├── ai-processing/        # Dev 2: AI & Voice (Gemini + ElevenLabs + Vapi)
-├── supabase/            # Dev 3: Backend (Database + Edge Functions + Realtime)
-├── devops/              # Dev 4: Integration & DevOps (Testing + CI/CD + Demo)
-├── shared/              # Common types and utilities
-└── docs/                # Documentation
+marvin/
+├── marvin-main/              # Dev 1: Lens Studio (AR + Gemini WebSocket + InternetModule)
+│   └── Assets/Scripts/       # TypeScript components for Spectacles
+├── snap-cloud/               # Dev 2: Supabase Edge Functions (AI processing)
+│   └── functions/            # ai-coordination, letta-sync, voice-synthesis
+├── supabase/                 # Dev 3: Supabase Backend (Database + Realtime + Storage)
+│   └── migrations/           # Database schema and RLS policies
+├── __tests__/                # Dev 4: Integration Tests (TDD framework)
+└── docs/                     # API documentation
 ```
+
+### Developer Responsibilities
+
+| Developer | Focus | Key Deliverables |
+|-----------|-------|------------------|
+| **Dev 1** | Lens Studio AR | Object detection, AR overlays, Gemini WebSocket, InternetModule HTTP |
+| **Dev 2** | Edge Functions | Fix mocks, add Letta/ElevenLabs/Chroma integration |
+| **Dev 3** | Supabase Backend | Database schema, RLS policies, Realtime, Storage |
+| **Dev 4** | TDD & DevOps | Testing framework, integration tests, CI/CD, merges |
+
+## 📚 Documentation
+
+### Essential Documents
+- **[prd.md](prd.md)** - Complete Product Requirements Document with system architecture
+- **[tasklist.md](tasklist.md)** - Detailed task breakdown by developer (36-hour timeline)
+- **[INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md)** - Step-by-step integration instructions
+- **[ARCHITECTURE_UPDATED.md](ARCHITECTURE_UPDATED.md)** - System architecture deep dive
+
+### API References
+- **[docs/snap.md](docs/snap.md)** - Snap Spectacles API reference
+- **[docs/gemini.md](docs/gemini.md)** - Gemini Live API integration guide
+- **[docs/elevenlabs.md](docs/elevenlabs.md)** - ElevenLabs voice synthesis
+- **[docs/chroma.md](docs/chroma.md)** - Chroma vector database
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Lens Studio 5.15.0+
+- Git with LFS: `brew install git-lfs && git lfs install`
+- Node.js 20 LTS
+- Supabase CLI: `npm install -g supabase`
+- Spectacles (2024) device with OS v5.64+
+
+### Installation
+
+**⚠️ IMPORTANT: Must clone with Git LFS (do not download ZIP)**
 
 ```bash
-npm i supabase --save-dev
+# Install Git LFS first
+brew install git-lfs
+git lfs install
+
+# Clone repository
+git clone https://github.com/amogharyan/marvin.git
+cd marvin
+
+# Install dependencies
+npm install
+
+# Initialize Supabase
+cd snap-cloud
+supabase init
+supabase start
 ```
 
-To install the beta release channel:
+### Setup by Developer
+
+**Dev 1: Lens Studio**
+```bash
+# Open Lens Studio project
+open marvin-main/Marvin.esproj
+
+# Install required packages in Lens Studio:
+# - Remote Service Gateway Token Generator
+# - SpectaclesInteractionKit.lspkg
+# - SupabaseClient.lspkg (from Supabase example)
+# - Internet Module.internetModule (from Supabase example)
+
+# Set Device Type to "Spectacles (2024)" in Preview Panel
+```
+
+**Dev 2: Edge Functions**
+```bash
+cd snap-cloud
+
+# Create Edge Functions
+supabase functions new ai-coordination
+supabase functions new letta-sync
+supabase functions new voice-synthesis
+
+# Set secrets
+supabase secrets set GEMINI_API_KEY=your_key_here
+supabase secrets set ELEVENLABS_API_KEY=your_key_here
+supabase secrets set LETTA_API_KEY=your_key_here
+
+# Deploy
+supabase functions deploy
+```
+
+**Dev 3: Database**
+```bash
+cd snap-cloud
+
+# Create and run migrations
+supabase migration new initial_schema
+# Edit migration file, then:
+supabase db push
+
+# Set up Realtime
+# (See INTEGRATION_GUIDE.md for detailed schema)
+```
+
+**Dev 4: Testing**
+```bash
+# Install test dependencies
+npm install --save-dev jest ts-jest @types/jest
+
+# Run tests
+npm test
+
+# Set up CI/CD
+# (GitHub Actions workflows already in .github/workflows/)
+```
+
+## 🎯 Development Workflow
+
+### Phase 1: Foundation (Hours 0-8)
+All developers work in parallel:
+- Dev 1: Object detection + AR overlays + Gemini WebSocket
+- Dev 2: Create Edge Functions structure + fix mocks
+- Dev 3: Database schema + RLS policies
+- Dev 4: Write failing tests (TDD)
+
+**Hour 8 Checkpoint:** All devs merge to `develop` branch
+
+### Phase 2: Integration (Hours 8-16)
+- Dev 1: Add InternetModule HTTP calls to Edge Functions
+- Dev 2: Integrate real APIs (Gemini, ElevenLabs, Letta, Chroma)
+- Dev 3: Realtime subscriptions + Storage buckets
+- Dev 4: Integration testing
+
+**Hour 16 Checkpoint:** Full integration working end-to-end
+
+### Phase 3: Demo Polish (Hours 16-36)
+- Hours 16-24: Advanced features + demo optimization
+- Hours 24-30: Testing + refinement + rehearsal
+- Hours 30-36: Final preparation + backup systems
+
+See **[tasklist.md](tasklist.md)** for complete hour-by-hour breakdown.
+
+## 🧪 Testing
 
 ```bash
-npm i supabase@beta --save-dev
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run integration tests
+npm run test:integration
+
+# Check TypeScript compilation
+npm run type-check
+
+# Lint code
+npm run lint
 ```
 
-When installing with yarn 4, you need to disable experimental fetch with the following nodejs config.
-
-```
-NODE_OPTIONS=--no-experimental-fetch yarn add supabase
-```
-
-> **Note**
-For Bun versions below v1.0.17, you must add `supabase` as a [trusted dependency](https://bun.sh/guides/install/trusted) before running `bun add -D supabase`.
-
-<details>
-  <summary><b>macOS</b></summary>
-
-  Available via [Homebrew](https://brew.sh). To install:
-
-  ```sh
-  brew install supabase/tap/supabase
-  ```
-
-  To install the beta release channel:
-  
-  ```sh
-  brew install supabase/tap/supabase-beta
-  brew link --overwrite supabase-beta
+## 📦 Project Structure
   ```
   
   To upgrade:

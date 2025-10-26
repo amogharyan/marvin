@@ -1,5 +1,16 @@
 // Core types for Dev 2 AI & Voice Integration
 
+import { 
+  Priority, 
+  ReminderFrequency, 
+  ConversationRole, 
+  LearningStage,
+  IntentType,
+  ContextType,
+  VoiceDefaults,
+  VolumeLevel
+} from './enums';
+
 export interface DemoObject {
   id: string;
   name: string;
@@ -17,6 +28,7 @@ export interface Vector3 {
 
 export interface AIResponse {
   content: string;
+  response?: string; // Backward compatibility alias for content
   confidence: number;
   context: string;
   suggested_actions?: string[];
@@ -44,7 +56,7 @@ export interface PersonalizedSuggestion {
   confidence: number;
   context: string;
   reasoning: string;
-  priority: 'low' | 'medium' | 'high';
+  priority: Priority;
 }
 
 export interface VoiceRequest {
@@ -69,7 +81,7 @@ export interface ConversationContext {
 }
 
 export interface ChatMessage {
-  role: 'user' | 'assistant' | 'system';
+  role: ConversationRole;
   content: string;
   timestamp: Date | string | number; // Allow flexible timestamp types
   object_context?: string;
@@ -84,7 +96,7 @@ export interface UserPreferences {
   interaction_preferences: {
     proactive_assistance: boolean;
     detailed_explanations: boolean;
-    reminder_frequency: 'low' | 'medium' | 'high';
+    reminder_frequency: ReminderFrequency;
   };
   routine_patterns: {
     typical_wake_time: string;
@@ -119,6 +131,26 @@ export interface GeminiResponse {
   text: string;
   confidence: number | undefined; // Can be undefined when confidence cannot be determined
   safety_ratings: any[];
+}
+
+// Conversational AI Response for Phase 3
+export interface ConversationalAIResponse {
+  text: string;
+  audioUrl?: string;
+  confidence: number;
+  intent: IntentType;
+  entities: Record<string, any>;
+  suggestedActions: string[];
+  learningInsights: {
+    stage: LearningStage;
+    personalizationLevel: number;
+    nextMilestone: string;
+  };
+  context: {
+    objectType?: string;
+    timeOfDay: string;
+    interactionType: string;
+  };
 }
 
 // Demo Objects Configuration

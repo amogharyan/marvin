@@ -75,9 +75,11 @@ An AR-powered personal assistant that follows you through your morning routine, 
 	 - Intelligent timing for proactive vs reactive assistance
 
 2. **Implement Advanced Multimodal AI**
-	 - Deploy Gemini API for visual understanding and natural language processing
+	 - Deploy Gemini Live WebSocket for real-time visual understanding and natural language processing
 	 - Voice-first interactions through ElevenLabs Conversational AI Platform
-	 - Real-time conversation with contextual memory through Chroma
+	 - Real-time conversation with contextual memory through Chroma vector embeddings
+	 - Stateful agent memory through Letta Cloud for long-term learning
+	 - Optional professional voice streaming through LiveKit Agents
 
 3. **Create Seamless AR Experience**
 	 - Native Snap Spectacles object detection and spatial tracking
@@ -144,43 +146,47 @@ An AR-powered personal assistant that follows you through your morning routine, 
 
 ### 4.2 Multimodal AI Integration (Priority: Critical)
 
-**FR-008:** System MUST integrate Gemini API for visual understanding and natural language processing  
-**FR-009:** System MUST process visual context from Spectacles camera feed  
+**FR-008:** System MUST integrate Gemini Live WebSocket for real-time visual understanding and natural language processing  
+**FR-009:** System MUST process visual context from Spectacles camera feed through Gemini streaming API  
 **FR-010:** System MUST generate contextual responses based on object interaction  
 **FR-011:** System MUST maintain conversation context across multiple object interactions  
 **FR-012:** System MUST support both voice input and visual analysis simultaneously  
 **FR-013:** System MUST provide intelligent suggestions based on time of day and user patterns  
-**FR-014:** System MUST process requests in <2 seconds for real-time interaction  
+**FR-014:** System MUST process requests in <2 seconds for real-time interaction
+**FR-015:** System MUST integrate Letta Cloud for stateful agent memory and long-term learning
+**FR-016:** System MUST sync conversation context to Letta asynchronously without blocking Gemini responses  
 
 ### 4.3 Voice Integration (Priority: Critical)
 
-**FR-015:** System MUST integrate ElevenLabs for natural voice synthesis  
-**FR-016:** System MUST integrate ElevenLabs Conversational AI Platform for advanced conversational AI capabilities  
-**FR-017:** System MUST support hands-free voice commands while using Spectacles  
-**FR-018:** System MUST provide audio feedback through Spectacles speakers  
-**FR-019:** System MUST handle ambient noise in demo hall environment  
-**FR-020:** System MUST support both English voice input and output  
-**FR-021:** System MUST provide voice confirmation for critical actions (medicine reminders)  
+**FR-017:** System MUST integrate ElevenLabs for natural voice synthesis  
+**FR-018:** System MUST integrate ElevenLabs Conversational AI Platform for advanced conversational AI capabilities  
+**FR-019:** System SHOULD optionally integrate LiveKit Agents for professional voice streaming (stretch goal)
+**FR-020:** System MUST support hands-free voice commands while using Spectacles  
+**FR-021:** System MUST provide audio feedback through Spectacles speakers  
+**FR-022:** System MUST handle ambient noise in demo hall environment  
+**FR-023:** System MUST support both English voice input and output  
+**FR-024:** System MUST provide voice confirmation for critical actions (medicine reminders)  
 
 ### 4.4 Object-Specific Intelligence (Priority: High)
 
-**FR-022:** System MUST provide medication reminders when medicine bottle is detected  
-**FR-023:** System MUST display nutrition information when breakfast bowl is recognized  
-**FR-024:** System MUST show calendar briefing when laptop interaction is detected  
-**FR-025:** System MUST guide to key location when departure preparation is initiated  
-**FR-026:** System MUST provide phone integration context when device is recognized  
-**FR-027:** System MUST adapt responses based on time of day and routine patterns  
-**FR-028:** System MUST track object usage patterns for learning optimization  
+**FR-025:** System MUST provide medication reminders when medicine bottle is detected  
+**FR-026:** System MUST display nutrition information when breakfast bowl is recognized  
+**FR-027:** System MUST show calendar briefing when laptop interaction is detected  
+**FR-028:** System MUST guide to key location when departure preparation is initiated  
+**FR-029:** System MUST provide phone integration context when device is recognized  
+**FR-030:** System MUST adapt responses based on time of day and routine patterns  
+**FR-031:** System MUST track object usage patterns for learning optimization  
 
 ### 4.5 Contextual Memory & Learning (Priority: High)
 
-**FR-029:** System MUST integrate Chroma vector database for contextual memory storage  
-**FR-030:** System MUST store user preferences and routine patterns  
-**FR-031:** System MUST learn object placement patterns (keys location, routine order)  
-**FR-032:** System MUST provide increasingly personalized suggestions over time  
-**FR-033:** System MUST maintain conversation history for context continuity  
-**FR-034:** System MUST simulate "Day 1 vs Day 30" learning progression for demo  
-**FR-035:** System MUST store health data, calendar patterns, and food preferences  
+**FR-032:** System MUST integrate Chroma vector database for contextual memory storage  
+**FR-033:** System MUST integrate Letta Cloud for stateful agent memory and long-term learning patterns
+**FR-034:** System MUST store user preferences and routine patterns  
+**FR-035:** System MUST learn object placement patterns (keys location, routine order)  
+**FR-036:** System MUST provide increasingly personalized suggestions over time  
+**FR-037:** System MUST maintain conversation history for context continuity  
+**FR-038:** System MUST simulate "Day 1 vs Day 30" learning progression for demo  
+**FR-039:** System MUST store health data, calendar patterns, and food preferences  
 
 ### 4.6 Calendar & Health Integration (Priority: High)
 
@@ -295,77 +301,105 @@ const GlassCard = styled.div`
 - Proof generation: Progressive wave animation
 - Success states: Confetti or particle burst
 
-### User Flow Architecture
-
-```mermaid
-graph LR
-		A[Landing] --> B{User Type}
-		B --> C[Patient Dashboard]
-		B --> D[Doctor Portal]
-		B --> E[Researcher Portal]
-		C --> F[Upload Genome]
-		F --> G[Encrypt & Pin to IPFS]
-		G --> H[Create On-chain Commitment]
-		H --> I[Request Proof Generation]
-		I --> J[Proof Generated]
-		J --> K[Share Proof with Doctor/Researcher]
-		K --> L[On-chain Verification]
-		K --> M[Aggregate Data (Research)]
-```
 
 ---
 
-#### System Architecture
+#### System Architecture (Supabase-Direct Integration via InternetModule)
+
+**IMPORTANT: This project uses InternetModule (experimental API) to bypass Snap Cloud**
+- Supabase URL and anon key are hardcoded in Lens Studio
+- Direct REST API calls to Supabase using InternetModule.fetch()
+- No SupabaseClient.lspkg needed - simpler and more direct
+- Based on Supabase-Select-YC-Hackathon framework
+
 ```
-┌──────────────────────────────────────────────┐
-│              Snap Spectacles                 │
-│         Lens Studio + TypeScript              │
-│                  Dev 1                       │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐   │
-│  │ Object   │ │    AR    │ │ Gesture  │   │
-│  │Detection │ │ Overlays │ │ Handler  │   │
-│  └──────────┘ └──────────┘ └──────────┘   │
-└──────────────────────────────────────────────┘
-											│
-											▼
-┌──────────────────────────────────────────────┐
-│         AI & Voice Processing                │
-│     Gemini + ElevenLabs Conversational AI Platform               │
-│                  Dev 2                       │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐   │
-│  │  Visual  │ │  Voice   │ │ Context  │   │
-│  │    AI    │ │Synthesis │ │ Memory   │   │
-│  └──────────┘ └──────────┘ └──────────┘   │
-└──────────────────────────────────────────────┘
-											│
-											▼
-┌──────────────────────────────────────────────┐
-│              Supabase Services               │
-│    Database + Edge Functions + Realtime     │
-│                  Dev 3                       │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐   │
-│  │   Edge   │ │  Realtime│ │PostgreSQL│   │
-│  │Functions │ │  Subscr. │ │ Database │   │
-│  │          │ │          │ │          │   │
-│  └──────────┘ └──────────┘ └──────────┘   │
-└──────────────────────────────────────────────┘
-				 │              │              │
-┌──────────────────────────────────────────────┐
-│            CI/CD Pipeline                    │
-│     GitHub Actions + Testing + Deploy       │
-│                  Dev 4                       │
-└──────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────┐
+│              Snap Spectacles (AR Frontend)                    │
+│         Lens Studio + TypeScript - Dev 1                      │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐                     │
+│  │ Object   │ │    AR    │ │ Gesture  │                     │
+│  │Detection │ │ Overlays │ │ Handler  │                     │
+│  └──────────┘ └──────────┘ └──────────┘                     │
+└───────────────────────────────────────────────────────────────┘
+              │                      │                      │
+              ▼                      ▼                      ▼
+┌───────────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐
+│ Gemini Live WebSocket │  │ InternetModule       │  │  InternetModule      │
+│   (Primary AI)        │  │ Direct Supabase REST │  │  (Realtime via SSE)  │
+│      Dev 1            │  │      Dev 1           │  │       Dev 1          │
+│  ┌────────────────┐   │  │  ┌──────────────┐   │  │  ┌──────────────┐   │
+│  │ Vision + Voice │   │  │  │   fetch() to │   │  │  │   Database   │   │
+│  │   Streaming    │   │  │  │   REST API   │   │  │  │ Read/Write   │   │
+│  │  <2s Response  │   │  │  │   /rest/v1/  │   │  │  │ Direct HTTP  │   │
+│  └────────────────┘   │  │  └──────────────┘   │  │  └──────────────┘   │
+└───────────────────────┘  └──────────────────────┘  └──────────────────────┘
+              │                      │                      │
+              │   Hardcoded: supabaseUrl + supabaseAnonKey
+              │   Headers: { apikey, Authorization, Content-Type }
+              │                      │                      │
+              └──────────────────────┼──────────────────────┘
+                                     ▼
+┌───────────────────────────────────────────────────────────────┐
+│           Supabase Edge Functions (Dev 2)                     │
+│         Deno TypeScript - AI Processing Layer                 │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐       │
+│  │ai-coord  │ │letta-sync│ │ voice-   │ │ chroma-  │       │
+│  │ination   │ │ (NEW)    │ │ enhance  │ │ learning │       │
+│  │          │ │          │ │ (OPT)    │ │          │       │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘       │
+└───────────────────────────────────────────────────────────────┘
+              │                      │                      │
+              ▼                      ▼                      ▼
+┌───────────────────────────────────────────────────────────────┐
+│        Supabase Backend Services (Dev 3)                      │
+│       Database + Storage + Realtime + Auth                    │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐       │
+│  │PostgreSQL│ │  Storage │ │ Realtime │ │   Auth   │       │
+│  │   Tables │ │   Bucket │ │ Channels │ │  Policies│       │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘       │
+└───────────────────────────────────────────────────────────────┘
+              │
+              ▼
+┌───────────────────────────────────────────────────────────────┐
+│        External APIs (Called from Edge Functions)             │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐       │
+│  │ElevenLabs│ │  Chroma  │ │  Letta   │ │ LiveKit  │       │
+│  │   Voice  │ │ Learning │ │  Memory  │ │  (OPT)   │       │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘       │
+└───────────────────────────────────────────────────────────────┘
+              │
+              ▼
+┌───────────────────────────────────────────────────────────────┐
+│            CI/CD Pipeline (Dev 4)                             │
+│     TDD + Integration Testing + Merge Management              │
+└───────────────────────────────────────────────────────────────┘
+
+KEY ARCHITECTURAL DECISIONS:
+✅ Dev 1: Lens Studio AR + Gemini WebSocket + InternetModule for direct Supabase
+✅ Dev 1: NO SupabaseClient.lspkg - use InternetModule.fetch() with hardcoded credentials
+✅ Dev 2: Supabase Edge Functions (AI coordination, Letta sync, voice enhancement)
+✅ Dev 3: Supabase backend (database, storage, realtime via Server-Sent Events)
+✅ Dev 4: TDD framework + continuous integration + merge management
+✅ Separation: Dev 2 handles AI logic, Dev 3 handles data persistence
+```
 
 ### Team Structure and Responsibilities
 
 | Role | Developer | Primary Responsibilities | Key Deliverables |
 |------|-----------|-------------------------|------------------|
-| **AR Core Developer** | Dev 1 | Snap Spectacles integration, object detection, spatial tracking | Lens Studio project, object recognition, AR overlays |
-| **AI & Voice Integration** | Dev 2 | Gemini API, ElevenLabs Conversational AI Platform, conversational logic | Voice processing, AI responses, multimodal understanding |
-| **Supabase Integration** | Dev 3 | Database design, Edge Functions, Realtime subscriptions, external API coordination | Schema design, Edge Functions, real-time data sync |
-| **Frontend Dashboard & Integration** | Dev 4 | Web dashboard, system integration, testing, demo orchestration | Admin interface, integration testing, demo scripts, backup systems |
+| **AR Core Developer** | Dev 1 | Lens Studio integration, object detection, spatial tracking, AR overlays, Gemini WebSocket, **InternetModule for direct Supabase REST API calls** (no SupabaseClient.lspkg) | Lens Studio project, object recognition, gesture handling, AR UI, Gemini integration, Supabase connector using InternetModule.fetch() |
+| **AI Edge Functions** | Dev 2 | Supabase Edge Functions development, fix mock responses, integrate real APIs (Gemini, ElevenLabs, Chroma, Letta, LiveKit) | ai-coordination, letta-sync, voice-enhance, chroma-learning Edge Functions |
+| **Database & Backend** | Dev 3 | Supabase database schema, Realtime subscriptions, Storage buckets, Row Level Security policies, authentication | Database tables, RLS policies, Realtime channels, storage configuration |
+| **DevOps & Integration** | Dev 4 | TDD framework, integration testing, CI/CD pipeline, merge management, demo orchestration | Test suites, integration tests, GitHub Actions workflows, merge strategy |
 
-### Architecture Decisions (Continuous Integration Focus)
+### Architecture Decisions (Supabase-Direct via InternetModule)
+
+**CRITICAL: Using InternetModule (Experimental API) - No Snap Cloud**
+- Based on **Supabase-Select-YC-Hackathon-10-04-25** reference framework
+- Hardcode Supabase URL and anon key in Lens Studio scripts
+- Use `internetModule.fetch()` for direct REST API calls to Supabase
+- Headers: `{ "apikey": anonKey, "Authorization": "Bearer " + anonKey, "Content-Type": "application/json" }`
+- Example from reference: `Example1-SupabaseConnector/SupabaseConnector.ts`
 
 #### System Architecture
 ```
@@ -374,37 +408,45 @@ graph LR
 │         Lens Studio + TypeScript              │
 │                  Dev 1                       │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐   │
-│  │ Object   │ │    AR    │ │ Gesture  │   │
-│  │Detection │ │ Overlays │ │ Handler  │   │
+│  │ Object   │ │    AR    │ │ Gemini   │   │
+│  │Detection │ │ Overlays │ │ WebSocket│   │
+│  │          │ │          │ │          │   │
+│  ├──────────┤ ├──────────┤ ├──────────┤   │
+│  │ Internet │ │ Internet │ │ Internet │   │
+│  │ Module   │ │ Module   │ │ Module   │   │
+│  │ Supabase │ │ Realtime │ │ Edge Fn  │   │
+│  │   REST   │ │ via SSE  │ │  Calls   │   │
 │  └──────────┘ └──────────┘ └──────────┘   │
 └──────────────────────────────────────────────┘
-											│
-											▼
+          │ Direct HTTP (No Snap Cloud)
+          │ Hardcoded: supabaseUrl + anonKey
+          ▼
 ┌──────────────────────────────────────────────┐
-│         AI & Voice Processing                │
-│     Gemini + ElevenLabs Conversational AI Platform               │
+│         Supabase Edge Functions              │
+│              Deno TypeScript                 │
 │                  Dev 2                       │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐   │
-│  │  Visual  │ │  Voice   │ │ Context  │   │
-│  │    AI    │ │Synthesis │ │ Memory   │   │
+│  │    AI    │ │  Letta   │ │ Voice    │   │
+│  │Coordination│ │  Sync  │ │ Enhance  │   │
+│  │          │ │  (NEW)   │ │  (OPT)   │   │
 │  └──────────┘ └──────────┘ └──────────┘   │
 └──────────────────────────────────────────────┘
-											│
-											▼
+                      │
+                      ▼
 ┌──────────────────────────────────────────────┐
-│              Backend Services                │
-│         Node.js + Express + TypeScript       │
+│              Supabase Backend                │
+│      Database + Storage + Realtime           │
 │                  Dev 3                       │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐   │
-│  │ Calendar │ │  Chroma  │ │  Health  │   │
-│  │    API   │ │ Vector   │ │   Data   │   │
-│  │          │ │   DB     │ │          │   │
+│  │PostgreSQL│ │  Storage │ │ Realtime │   │
+│  │  Schema  │ │  Buckets │ │ Channels │   │
+│  │   + RLS  │ │          │ │          │   │
 │  └──────────┘ └──────────┘ └──────────┘   │
 └──────────────────────────────────────────────┘
-				 │              │              │
+                 │              
 ┌──────────────────────────────────────────────┐
 │            CI/CD Pipeline                    │
-│     GitHub Actions + Testing + Deploy       │
+│     TDD + Testing + Merge Management         │
 │                  Dev 4                       │
 └──────────────────────────────────────────────┘
 ```
@@ -414,40 +456,43 @@ graph LR
 #### Merge Schedule (Tight Integration)
 ```
 Hour 0-6:   Core Foundation
-├── Dev 1: Basic Lens Studio setup + object detection
-├── Dev 2: Gemini API integration + basic voice
-├── Dev 3: Backend API structure + Chroma setup
-└── Dev 4: CI/CD pipeline + testing framework
+├── Dev 1: Lens Studio setup + object detection + Gemini WebSocket + InternetModule Supabase connector
+├── Dev 2: Create Edge Functions structure + fix ai-coordination mocks
+├── Dev 3: Supabase schema + tables + RLS policies
+└── Dev 4: TDD framework + write failing tests for all components
 
 Hour 6-12:  Feature Integration  
-├── Merge #1: Object detection + basic AR overlays
-├── Dev 2: Voice synthesis + conversational logic
-├── Dev 3: Calendar integration + health data
-└── Dev 4: Integration testing + error handling
+├── Merge #1: Object detection + basic AR overlays (Dev 1)
+├── Dev 1: Add InternetModule calls to Edge Functions
+├── Dev 2: Implement letta-sync Edge Function + ElevenLabs integration
+├── Dev 3: Realtime subscriptions + Storage buckets
+└── Dev 4: Integration testing + verify Lens ↔ Supabase communication
 
 Hour 12-18: Advanced Features
-├── Merge #2: Voice + AI + backend data flow
+├── Merge #2: Full Supabase integration (Dev 1 + Dev 2 + Dev 3)
 ├── Dev 1: Gesture recognition + advanced AR UI
-├── Dev 2: Context memory + learning simulation
-└── Dev 3: External API integrations
+├── Dev 2: Chroma vector storage + learning patterns
+├── Dev 3: Calendar sync + health data processing
+└── Dev 4: End-to-end testing + performance monitoring
 
 Hour 18-24: Demo Polish
-├── Merge #3: Full feature integration
-├── All: Demo script optimization
-├── Dev 4: Performance tuning + reliability
-└── Merge #4: Demo-ready version
+├── Merge #3: All features integrated
+├── Dev 1: Demo script optimization + AR polish
+├── Dev 2: Response time optimization + fallbacks
+├── Dev 3: Data persistence verification
+└── Dev 4: Demo reliability testing + error handling
 
 Hour 24-30: Testing & Refinement
-├── End-to-end testing in demo environment
-├── Edge case handling + fallback systems
-├── Demo rehearsal + timing optimization
-└── Merge #5: Final tested version
+├── All: End-to-end testing in demo environment
+├── Dev 4: Edge case handling + fallback systems
+├── All: Demo rehearsal + timing optimization
+└── Merge #4: Final tested version
 
 Hour 30-36: Demo Preparation
-├── Final demo environment setup
-├── Backup systems + contingency plans
-├── Demo presentation preparation
-└── Final deployment + go-live
+├── Dev 1: Final AR calibration + device setup
+├── Dev 2: API key verification + rate limit checks
+├── Dev 3: Database seed data + backup verification
+└── Dev 4: Final deployment + go-live preparation
 ```
 
 ### Technology Stack
@@ -457,33 +502,36 @@ Hour 30-36: Demo Preparation
 // Snap Spectacles + Lens Studio
 {
 	"platform": "Snap Spectacles",
-	"development": "Lens Studio 5.13+",
+	"development": "Lens Studio 5.15+",
 	"language": "TypeScript",
+	"ai_integration": "Gemini Live WebSocket (built-in)",
+	"http_client": "InternetModule (RemoteServiceHttpRequest)",
 	"apis": ["Object Detection", "Spatial Anchors", "Hand Tracking"],
 	"rendering": "ARCore + Spectacles Display"
 }
 ```
 
-#### AI & Voice (Dev 2)  
+#### AI Processing (Dev 2)  
 ```typescript
 {
-	"multimodal": "Gemini API",
-	"voice_synthesis": "ElevenLabs API",
-	"conversational_ai": "ElevenLabs Conversational AI Platform", 
-	"processing": "Real-time streaming",
-	"context": "Conversation history + visual analysis"
+	"runtime": "Supabase Edge Functions (Deno)",
+	"ai": "Gemini API (fetch from Edge Functions)",
+	"voice": "ElevenLabs Conversational AI Platform",
+	"memory": "Letta Cloud (stateful agent)",
+	"learning": "Chroma vector embeddings",
+	"optional": "LiveKit Agents (voice streaming)",
+	"processing": "Real-time with <2s response"
 }
 ```
 
-#### Backend (Dev 3)
+#### Backend Infrastructure (Dev 3)
 ```typescript
 {
-	"runtime": "Node.js 20 LTS",
-	"framework": "Express + TypeScript",
-	"vector_db": "Chroma",
-	"cache": "Redis",
-	"integrations": ["Google Calendar", "Health APIs"],
-	"websocket": "Socket.io for real-time updates"
+	"database": "Supabase PostgreSQL",
+	"storage": "Supabase Storage buckets",
+	"realtime": "Supabase Realtime subscriptions",
+	"auth": "Supabase Auth + RLS policies",
+	"integrations": ["Google Calendar", "Health APIs"]
 }
 ```
 
@@ -491,9 +539,9 @@ Hour 30-36: Demo Preparation
 ```typescript
 {
 	"ci_cd": "GitHub Actions",
-	"testing": "Jest + Playwright",
-	"monitoring": "Real-time health checks",
-	"deployment": "Docker + Cloud hosting",
+	"testing": "Jest + TypeScript",
+	"integration": "Continuous merge management",
+	"monitoring": "Supabase logs + health checks",
 	"backup": "Automated fallback systems"
 }
 ```
@@ -579,6 +627,133 @@ const learning_stages = {
   day_30: "Predictive assistance + optimized routine"
 };
 ```
+
+---
+
+## 7.5 Prize Integration Strategy (14-Hour Timeline)
+
+### Prize Eligibility Matrix
+
+| Prize Track | Technology Required | Integration Status | Estimated Hours | Priority |
+|------------|---------------------|-------------------|-----------------|----------|
+| **Snap Spectacles** | Native AR + Object Detection | ✅ CORE (Dev 1) | 6 hours | CRITICAL |
+| **Claude (Anthropic)** | MCP Tools (Sequential Thinking + Context7) | ✅ DEV TOOLING | 0 hours | COMPLETE |
+| **Google Gemini** | Gemini Live WebSocket | ✅ CORE (Dev 2) | 4 hours | CRITICAL |
+| **ElevenLabs** | Conversational AI Platform | ✅ CORE (Dev 2) | 3 hours | CRITICAL |
+| **Chroma** | Vector embeddings + learning | ✅ PHASE 3 (Dev 2) | 2 hours | CRITICAL |
+| **Y Combinator** | Strong startup story + tech | 🟡 ENHANCED | 0 hours | AUTO |
+| **Cal Hacks Overall** | Best overall project | 🟡 ENHANCED | 0 hours | AUTO |
+| **Letta** | Stateful agent memory | 🔵 NEW (Dev 2 + Dev 3) | 2 hours | HIGH VALUE |
+| **Letta AirPods** | Voice + Letta integration | 🔵 NEW (bonus from above) | 0 hours | BONUS |
+| **LiveKit Most Complex** | LiveKit Agents voice streaming | 🟢 OPTIONAL (Dev 3) | 3-4 hours | MEDIUM |
+| **LiveKit Most Creative** | Creative voice streaming use | 🟢 OPTIONAL (bonus from above) | 0 hours | BONUS |
+| **LiveKit Best Startup** | Production-ready voice infra | 🟢 OPTIONAL (bonus from above) | 0 hours | BONUS |
+
+**Total Prize Count:**
+- **Base (Current)**: 5 prizes (Snap, Claude, Gemini, ElevenLabs, Chroma)
+- **After Letta (2 hours)**: 8 prizes (+Y Combinator, +Cal Hacks, +Letta + AirPods)
+- **After LiveKit (3-4 hours, optional)**: 11 prizes (+3 LiveKit tracks)
+
+### Minimal Change Implementation Strategy
+
+**PHILOSOPHY: Add services AROUND working Gemini WebSocket, don't replace it**
+
+#### Phase 1: Letta Integration (2 hours - HIGH ROI)
+**Dev 2 Tasks (1 hour):**
+- Add async Letta Cloud client to ai-voice service
+- After each Gemini conversation turn, sync to Letta passages API
+- Non-blocking: Don't wait for Letta response
+
+**Dev 3 Tasks (1 hour):**
+- Create `letta-sync` Supabase Edge Function
+- Route: POST /functions/v1/letta-sync
+- Accept conversation transcript, call Letta Cloud API
+- Store Letta agent ID in Supabase database
+
+**Integration Pattern:**
+```typescript
+// In Dev 2 ai-voice service (async, non-blocking)
+async syncToLetta(transcript: string, response: string): Promise<void> {
+  // Don't await - fire and forget
+  fetch('https://[supabase-url]/functions/v1/letta-sync', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${SUPABASE_KEY}` },
+    body: JSON.stringify({ 
+      text: `User: ${transcript}\nAssistant: ${response}`,
+      agentId: user.lettaAgentId 
+    })
+  }).catch(err => console.warn('Letta sync failed:', err));
+}
+```
+
+**Value Proposition:**
+- +3 prizes (Letta, AirPods, stronger YC/Cal Hacks story)
+- 2 hours of LOW RISK work (async, doesn't break existing flow)
+- Demonstrates advanced stateful agent memory
+- Differentiates from basic chatbots
+
+#### Phase 2: LiveKit Integration (3-4 hours - OPTIONAL STRETCH)
+**Only attempt if:**
+1. Letta integration complete and tested (Hour 10)
+2. Object detection working (Hour 8)
+3. 4+ hours remaining until demo
+4. Team consensus to add complexity
+
+**Dev 3 Tasks (3-4 hours):**
+- Create `voice-enhance` Supabase Edge Function
+- Integrate LiveKit Cloud SDK
+- Create LiveKit room for voice sessions
+- Connect ElevenLabs TTS to LiveKit pipeline
+- Route Spectacles audio through LiveKit agent session
+
+**Integration Pattern:**
+```typescript
+// In voice-enhance Edge Function
+import { voice } from '@livekit/agents';
+import * as elevenlabs from '@livekit/agents-plugin-elevenlabs';
+
+const session = new voice.AgentSession({
+  stt: 'assemblyai/universal-streaming:en',
+  llm: 'openai/gpt-4.1-mini', // Or proxy to Gemini
+  tts: new elevenlabs.TTS({ voice: 'rachel' }),
+  voiceOptions: { allowInterruptions: true }
+});
+
+await session.start({ agent, room });
+```
+
+**Value Proposition:**
+- +3 prizes (LiveKit Most Complex, Most Creative, Best Startup)
+- Professional voice streaming infrastructure
+- Demonstrates production-ready architecture
+- Risk: 3-4 hours of complex integration
+
+**DECISION FRAMEWORK:**
+- If Hour 10: Letta done, object detection done → PROCEED with LiveKit
+- If Hour 10: Any issues → SKIP LiveKit, focus on demo polish
+- Fallback: Still have 8 prizes without LiveKit
+
+### Technology Justification for Judges
+
+**Claude (Anthropic):**
+- MCP tools used DURING DEVELOPMENT (Sequential Thinking, Context7)
+- Not runtime dependency - developer productivity tool
+- Demonstrates intelligent AI-assisted coding workflow
+
+**Gemini Live WebSocket:**
+- Real-time streaming is BETTER than HTTP for AR assistant
+- <2s response time critical for natural interaction
+- Multimodal vision + voice in single stream
+
+**Letta vs Chroma:**
+- **Chroma**: Vector embeddings for semantic similarity search
+- **Letta**: Stateful agent memory with core memory blocks
+- COMPLEMENTARY: Chroma finds similar past interactions, Letta maintains agent state
+
+**LiveKit (Optional):**
+- Professional voice streaming infrastructure
+- Low-latency audio for production quality
+- Demonstrates scalability to multi-user, multi-room scenarios
 
 ---
 
