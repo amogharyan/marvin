@@ -107,13 +107,13 @@ export class ServiceOrchestrator {
         syntheticARData,
         letta
       ] = await Promise.allSettled([
-        this.voiceProcessingService.healthCheck?.() || Promise.resolve(true),
-        this.voiceCommandParsingService.healthCheck?.() || Promise.resolve(true),
+        this.voiceProcessingService.healthCheck(),
+        this.voiceCommandParsingService.healthCheck(),
         this.contextMemoryService.healthCheck(),
         this.chromaService.healthCheck(),
         this.learningService.healthCheck(),
         this.enhancedElevenLabsService.healthCheck(),
-        this.syntheticARDataService.healthCheck?.() || Promise.resolve(true),
+        this.syntheticARDataService.healthCheck(),
         this.lettaService.healthCheck()
       ]);
 
