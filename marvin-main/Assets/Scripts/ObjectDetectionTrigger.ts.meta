@@ -26,26 +26,37 @@
   ExportUid: 00000000-0000-0000-0000-000000000000
   PackagePolicy: CanBeUnpacked
   ScriptInputsHidden:
+    animationDuration: false
+    autoHideAfterSeconds: false
     customObjectCooldown: false
     customObjectEnabled: false
+    customObjectImage: false
+    customObjectImageContainer: false
     customObjectMinConfidence: false
     customObjectPrompt: false
     customObjectTriggerOncePerSession: false
     customObjectType: false
     detectionManager: false
+    imagePopupEnabled: false
     laptopCooldown: false
     laptopDetectionEnabled: false
+    laptopImage: false
+    laptopImageContainer: false
     laptopMinConfidence: false
     laptopPrompt: false
     laptopTriggerOncePerSession: false
     marvinAssistant: false
     personCooldown: false
     personDetectionEnabled: false
+    personImage: false
+    personImageContainer: false
     personMinConfidence: false
     personPrompt: false
     personTriggerOncePerSession: false
     phoneCooldown: false
     phoneDetectionEnabled: false
+    phoneImage: false
+    phoneImageContainer: false
     phoneMinConfidence: false
     phonePrompt: false
     phoneTriggerOncePerSession: false
@@ -60,64 +71,88 @@
   DefaultScriptInputs:
     - marvinAssistant: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
       detectionManager: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+      imagePopupEnabled: true
+      animationDuration: 0.500000
+      autoHideAfterSeconds: !<float> 5.000000
       laptopDetectionEnabled: true
       laptopTriggerOncePerSession: true
       laptopMinConfidence: 0.700000
       laptopPrompt: "I see you're on your laptop! Would you like me to pull up your calendar for today?"
+      laptopImageContainer: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      laptopImage: !<reference.Texture> 00000000-0000-0000-0000-000000000000
       laptopCooldown: !<float> 30.000000
       personDetectionEnabled: false
       personTriggerOncePerSession: false
       personMinConfidence: 0.800000
       personPrompt: "Hello! I see you there. How can I assist you today?"
+      personImageContainer: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      personImage: !<reference.Texture> 00000000-0000-0000-0000-000000000000
       personCooldown: !<float> 60.000000
       phoneDetectionEnabled: false
       phoneTriggerOncePerSession: false
       phoneMinConfidence: 0.700000
       phonePrompt: "I notice you have your phone. Would you like me to help you stay focused on your work?"
+      phoneImageContainer: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      phoneImage: !<reference.Texture> 00000000-0000-0000-0000-000000000000
       phoneCooldown: !<float> 45.000000
       customObjectEnabled: false
       customObjectTriggerOncePerSession: false
       customObjectType: cup
       customObjectMinConfidence: 0.700000
       customObjectPrompt: I see a cup nearby. Staying hydrated is important!
+      customObjectImageContainer: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      customObjectImage: !<reference.Texture> 00000000-0000-0000-0000-000000000000
       customObjectCooldown: !<float> 60.000000
   ScriptTypes:
     -
       {}
   InputLines:
     - '// @ui {"widget":"separator"}'
-    - '// @ui {"widget":"label", "label":"Object Detection → Gemini Bridge"}'
+    - '// @ui {"widget":"label", "label":"🎯 Object Detection → Gemini + Image Popup"}'
     - '// @ui {"widget":"separator"}'
     - '// @ui {"widget":"group_start", "label":"Components"}'
     - // @input AssignableType marvinAssistant
     - // @input AssignableType_1 detectionManager
     - '// @ui {"widget":"group_end"}'
-    - '// @ui {"widget":"group_start", "label":"Laptop Detection Rule"}'
+    - '// @ui {"widget":"group_start", "label":"Image Popup Settings"}'
+    - '// @input bool imagePopupEnabled = true {"hint":"Enable image popup feature"}'
+    - '// @input float animationDuration = 0.5 {"hint":"Animation duration in seconds"}'
+    - '// @input float autoHideAfterSeconds {"hint":"Auto-hide image after X seconds (0 = never)"}'
+    - '// @ui {"widget":"group_end"}'
+    - '// @ui {"widget":"group_start", "label":"💻 Laptop Detection Rule"}'
     - // @input bool laptopDetectionEnabled = true
     - "// @input bool laptopTriggerOncePerSession = true {\"hint\":\"Only trigger once per session (won't repeat even after cooldown)\"}"
     - '// @input float laptopMinConfidence = 0.7 {"hint":"Minimum confidence to trigger (0.0-1.0)"}'
     - "// @input string laptopPrompt = \"I see you're on your laptop! Would you like me to pull up your calendar for today?\" {\"hint\":\"What Gemini should say when laptop detected\", \"widget\":\"text_area\"}"
+    - '// @input SceneObject laptopImageContainer {"hint":"Image container for laptop (SceneObject with Image component)"}'
+    - '// @input Asset.Texture laptopImage {"hint":"Image to show when laptop is detected", "showIf":"laptopImageContainer"}'
     - '// @input float laptopCooldown = 30 {"hint":"Cooldown between laptop detections (seconds, ignored if trigger once is enabled)"}'
     - '// @ui {"widget":"group_end"}'
-    - '// @ui {"widget":"group_start", "label":"Person Detection Rule"}'
+    - '// @ui {"widget":"group_start", "label":"👤 Person Detection Rule"}'
     - // @input bool personDetectionEnabled
     - // @input bool personTriggerOncePerSession
     - // @input float personMinConfidence = 0.8
     - '// @input string personPrompt = "Hello! I see you there. How can I assist you today?" {"widget":"text_area"}'
+    - '// @input SceneObject personImageContainer {"hint":"Image container for person (SceneObject with Image component)"}'
+    - '// @input Asset.Texture personImage {"hint":"Image to show when person is detected", "showIf":"personImageContainer"}'
     - // @input float personCooldown = 60
     - '// @ui {"widget":"group_end"}'
-    - '// @ui {"widget":"group_start", "label":"Phone Detection Rule"}'
+    - '// @ui {"widget":"group_start", "label":"📱 Phone Detection Rule"}'
     - // @input bool phoneDetectionEnabled
     - // @input bool phoneTriggerOncePerSession
     - // @input float phoneMinConfidence = 0.7
     - '// @input string phonePrompt = "I notice you have your phone. Would you like me to help you stay focused on your work?" {"widget":"text_area"}'
+    - '// @input SceneObject phoneImageContainer {"hint":"Image container for phone (SceneObject with Image component)"}'
+    - '// @input Asset.Texture phoneImage {"hint":"Image to show when phone is detected", "showIf":"phoneImageContainer"}'
     - // @input float phoneCooldown = 45
     - '// @ui {"widget":"group_end"}'
-    - '// @ui {"widget":"group_start", "label":"Custom Detection Rules"}'
+    - '// @ui {"widget":"group_start", "label":"✨ Custom Detection Rules"}'
     - "// @input bool customObjectEnabled {\"hint\":\"Enable custom object detection (e.g., 'cup', 'book')\"}"
     - // @input bool customObjectTriggerOncePerSession
     - "// @input string customObjectType = \"cup\" {\"hint\":\"Object class name (e.g., 'cup', 'book', 'chair')\"}"
     - // @input float customObjectMinConfidence = 0.7
     - '// @input string customObjectPrompt = "I see a cup nearby. Staying hydrated is important!" {"widget":"text_area"}'
+    - '// @input SceneObject customObjectImageContainer {"hint":"Image container for custom object (SceneObject with Image component)"}'
+    - '// @input Asset.Texture customObjectImage {"hint":"Image to show when custom object is detected", "showIf":"customObjectImageContainer"}'
     - // @input float customObjectCooldown = 60
     - '// @ui {"widget":"group_end"}'

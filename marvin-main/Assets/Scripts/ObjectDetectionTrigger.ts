@@ -2,25 +2,27 @@ import { MarvinAssistant } from "./MarvinAssistant";
 import { RemoteObjectDetectionManager, YOLODetection } from "./RemoteObjectDetectionManager";
 
 /**
- * Detection rule for triggering Gemini based on YOLO detections
+ * Detection rule for triggering Gemini and Image Popup based on YOLO detections
  */
 export interface DetectionRule {
   objectType: string;
   minConfidence: number;
   geminiPrompt: string;
+  imageTexture: Texture | null;
+  imageContainer: SceneObject | null;
   enabled: boolean;
   cooldownSeconds: number; // Prevent spam
   triggerOncePerSession: boolean; // Only trigger once, then never again until restart
 }
 
 /**
- * Bridges YOLO object detection with Gemini AI responses
- * When specific objects are detected, triggers Gemini to respond
+ * Bridges YOLO object detection with Gemini AI responses and Image Popups
+ * When specific objects are detected, triggers Gemini to respond AND shows custom images
  */
 @component
 export class ObjectDetectionTrigger extends BaseScriptComponent {
   @ui.separator
-  @ui.label("Object Detection → Gemini Bridge")
+  @ui.label("🎯 Object Detection → Gemini + Image Popup")
   @ui.separator
 
   @ui.group_start("Components")
@@ -31,7 +33,21 @@ export class ObjectDetectionTrigger extends BaseScriptComponent {
   detectionManager: RemoteObjectDetectionManager;
   @ui.group_end
 
-  @ui.group_start("Laptop Detection Rule")
+  @ui.group_start("Image Popup Settings")
+  @input
+  @hint("Enable image popup feature")
+  imagePopupEnabled: boolean = true;
+
+  @input
+  @hint("Animation duration in seconds")
+  animationDuration: number = 0.5;
+
+  @input
+  @hint("Auto-hide image after X seconds (0 = never)")
+  autoHideAfterSeconds: number = 0;
+  @ui.group_end
+
+  @ui.group_start("💻 Laptop Detection Rule")
   @input
   laptopDetectionEnabled: boolean = true;
 
@@ -49,11 +65,22 @@ export class ObjectDetectionTrigger extends BaseScriptComponent {
   laptopPrompt: string = "I see you're on your laptop! Would you like me to pull up your calendar for today?";
 
   @input
+  @hint("Image container for laptop (SceneObject with Image component)")
+  @allowUndefined
+  laptopImageContainer: SceneObject;
+
+  @input
+  @showIf("laptopImageContainer")
+  @hint("Image to show when laptop is detected")
+  @allowUndefined
+  laptopImage: Texture;
+
+  @input
   @hint("Cooldown between laptop detections (seconds, ignored if trigger once is enabled)")
   laptopCooldown: number = 30;
   @ui.group_end
 
-  @ui.group_start("Person Detection Rule")
+  @ui.group_start("👤 Person Detection Rule")
   @input
   personDetectionEnabled: boolean = false;
 
@@ -68,10 +95,21 @@ export class ObjectDetectionTrigger extends BaseScriptComponent {
   personPrompt: string = "Hello! I see you there. How can I assist you today?";
 
   @input
+  @hint("Image container for person (SceneObject with Image component)")
+  @allowUndefined
+  personImageContainer: SceneObject;
+
+  @input
+  @showIf("personImageContainer")
+  @hint("Image to show when person is detected")
+  @allowUndefined
+  personImage: Texture;
+
+  @input
   personCooldown: number = 60;
   @ui.group_end
 
-  @ui.group_start("Phone Detection Rule")
+  @ui.group_start("📱 Phone Detection Rule")
   @input
   phoneDetectionEnabled: boolean = false;
 
@@ -86,10 +124,21 @@ export class ObjectDetectionTrigger extends BaseScriptComponent {
   phonePrompt: string = "I notice you have your phone. Would you like me to help you stay focused on your work?";
 
   @input
+  @hint("Image container for phone (SceneObject with Image component)")
+  @allowUndefined
+  phoneImageContainer: SceneObject;
+
+  @input
+  @showIf("phoneImageContainer")
+  @hint("Image to show when phone is detected")
+  @allowUndefined
+  phoneImage: Texture;
+
+  @input
   phoneCooldown: number = 45;
   @ui.group_end
 
-  @ui.group_start("Custom Detection Rules")
+  @ui.group_start("✨ Custom Detection Rules")
   @input
   @hint("Enable custom object detection (e.g., 'cup', 'book')")
   customObjectEnabled: boolean = false;
@@ -109,6 +158,17 @@ export class ObjectDetectionTrigger extends BaseScriptComponent {
   customObjectPrompt: string = "I see a cup nearby. Staying hydrated is important!";
 
   @input
+  @hint("Image container for custom object (SceneObject with Image component)")
+  @allowUndefined
+  customObjectImageContainer: SceneObject;
+
+  @input
+  @showIf("customObjectImageContainer")
+  @hint("Image to show when custom object is detected")
+  @allowUndefined
+  customObjectImage: Texture;
+
+  @input
   customObjectCooldown: number = 60;
   @ui.group_end
 
@@ -117,6 +177,14 @@ export class ObjectDetectionTrigger extends BaseScriptComponent {
   // Track which objects have been triggered this session
   private triggeredThisSession: Set<string> = new Set();
   private isListening: boolean = false;
+
+  // Image popup state - per object type
+  private imageComponents: Map<string, Image> = new Map();
+  private imageContainers: Map<string, SceneObject> = new Map();
+  private originalScales: Map<string, vec3> = new Map();
+  private visibleImages: Set<string> = new Set();
+  private currentAnimations: Map<string, SceneEvent> = new Map();
+  private autoHideEvents: Map<string, SceneEvent> = new Map();
 
   onAwake() {
     this.createEvent("OnStartEvent").bind(() => {
@@ -137,13 +205,68 @@ export class ObjectDetectionTrigger extends BaseScriptComponent {
       return;
     }
 
+    // Set up image popups for each object type
+    print(`[DETECTION TRIGGER] 🖼️ Image popup enabled: ${this.imagePopupEnabled}`);
+
+    if (this.imagePopupEnabled) {
+      // Initialize laptop container
+      if (this.laptopImageContainer) {
+        this.initializeImageContainer("laptop", this.laptopImageContainer);
+      }
+
+      // Initialize person container
+      if (this.personImageContainer) {
+        this.initializeImageContainer("person", this.personImageContainer);
+      }
+
+      // Initialize phone container
+      if (this.phoneImageContainer) {
+        this.initializeImageContainer("cell phone", this.phoneImageContainer);
+      }
+
+      // Initialize custom object container
+      if (this.customObjectImageContainer) {
+        this.initializeImageContainer(this.customObjectType.toLowerCase(), this.customObjectImageContainer);
+      }
+
+      print(`[DETECTION TRIGGER] ✅ Image popup system initialized`);
+      print(`[DETECTION TRIGGER] 📊 Auto-hide: ${this.autoHideAfterSeconds}s`);
+      print(`[DETECTION TRIGGER] 📊 Animation duration: ${this.animationDuration}s`);
+    }
+
     // Subscribe to YOLO detection events
     this.marvinAssistant.yoloDetectionCompleteEvent.add((result) => {
       this.handleDetections(result.detections);
     });
 
-    print("[DETECTION TRIGGER] ✅ Ready to trigger Gemini based on detections");
+    print("[DETECTION TRIGGER] ✅ Ready to trigger Gemini + Image Popups");
     this.printActiveRules();
+  }
+
+  /**
+   * Initialize an image container for a specific object type
+   */
+  private initializeImageContainer(objectType: string, container: SceneObject) {
+    const imageComponent = container.getComponent("Component.Image") as Image;
+
+    if (!imageComponent) {
+      print(`[DETECTION TRIGGER] ⚠️ WARNING: No Image component on ${objectType} container!`);
+      return;
+    }
+
+    // Store the components
+    this.imageContainers.set(objectType, container);
+    this.imageComponents.set(objectType, imageComponent);
+
+    // Save original scale
+    const transform = container.getTransform();
+    const originalScale = transform.getLocalScale();
+    this.originalScales.set(objectType, originalScale);
+
+    // Hide initially
+    container.enabled = false;
+
+    print(`[DETECTION TRIGGER] ✅ Initialized ${objectType} image container (scale: ${originalScale.x}, ${originalScale.y}, ${originalScale.z})`);
   }
 
   private printActiveRules() {
@@ -184,6 +307,8 @@ export class ObjectDetectionTrigger extends BaseScriptComponent {
         objectType: "laptop",
         minConfidence: this.laptopMinConfidence,
         geminiPrompt: this.laptopPrompt,
+        imageTexture: this.laptopImage,
+        imageContainer: this.laptopImageContainer,
         enabled: true,
         cooldownSeconds: this.laptopCooldown,
         triggerOncePerSession: this.laptopTriggerOncePerSession,
@@ -195,6 +320,8 @@ export class ObjectDetectionTrigger extends BaseScriptComponent {
         objectType: "person",
         minConfidence: this.personMinConfidence,
         geminiPrompt: this.personPrompt,
+        imageTexture: this.personImage,
+        imageContainer: this.personImageContainer,
         enabled: true,
         cooldownSeconds: this.personCooldown,
         triggerOncePerSession: this.personTriggerOncePerSession,
@@ -206,6 +333,8 @@ export class ObjectDetectionTrigger extends BaseScriptComponent {
         objectType: "cell phone",
         minConfidence: this.phoneMinConfidence,
         geminiPrompt: this.phonePrompt,
+        imageTexture: this.phoneImage,
+        imageContainer: this.phoneImageContainer,
         enabled: true,
         cooldownSeconds: this.phoneCooldown,
         triggerOncePerSession: this.phoneTriggerOncePerSession,
@@ -217,6 +346,8 @@ export class ObjectDetectionTrigger extends BaseScriptComponent {
         objectType: this.customObjectType.toLowerCase(),
         minConfidence: this.customObjectMinConfidence,
         geminiPrompt: this.customObjectPrompt,
+        imageTexture: this.customObjectImage,
+        imageContainer: this.customObjectImageContainer,
         enabled: true,
         cooldownSeconds: this.customObjectCooldown,
         triggerOncePerSession: this.customObjectTriggerOncePerSession,
@@ -275,7 +406,7 @@ export class ObjectDetectionTrigger extends BaseScriptComponent {
   }
 
   /**
-   * Trigger Gemini with a detection-based prompt
+   * Trigger Gemini with a detection-based prompt and show image popup
    */
   private triggerGemini(detection: YOLODetection, rule: DetectionRule) {
     print("[DETECTION TRIGGER] ========================================");
@@ -290,7 +421,7 @@ export class ObjectDetectionTrigger extends BaseScriptComponent {
       print(`[DETECTION TRIGGER] Mode: REPEATING (cooldown: ${rule.cooldownSeconds}s)`);
     }
 
-    print(`[DETECTION TRIGGER] Triggering Gemini...`);
+    print(`[DETECTION TRIGGER] Triggering Gemini + Image Popup...`);
     print("[DETECTION TRIGGER] ========================================");
 
     // Update last trigger time
@@ -304,8 +435,182 @@ export class ObjectDetectionTrigger extends BaseScriptComponent {
 
     // Send prompt to Gemini
     this.marvinAssistant.sendClientMessage(rule.geminiPrompt);
-
     print(`[DETECTION TRIGGER] ✅ Sent to Gemini: "${rule.geminiPrompt.substring(0, 50)}..."`);
+
+    // Show image popup if enabled and container/image are assigned
+    if (this.imagePopupEnabled && rule.imageContainer && rule.imageTexture) {
+      this.showImageForObject(rule.objectType, rule.imageTexture);
+      print(`[DETECTION TRIGGER] 🖼️ Showing image for ${detection.class_name}`);
+    } else if (this.imagePopupEnabled && !rule.imageContainer) {
+      print(`[DETECTION TRIGGER] ⚠️ No image container assigned for ${detection.class_name}`);
+    } else if (this.imagePopupEnabled && !rule.imageTexture) {
+      print(`[DETECTION TRIGGER] ⚠️ No image texture assigned for ${detection.class_name}`);
+    }
+  }
+
+  /**
+   * Show image popup with animation for a specific object type
+   */
+  private showImageForObject(objectType: string, texture: Texture) {
+    print(`[DETECTION TRIGGER] 📸 showImageForObject called for: ${objectType}`);
+
+    const container = this.imageContainers.get(objectType);
+    const imageComponent = this.imageComponents.get(objectType);
+    const originalScale = this.originalScales.get(objectType);
+
+    if (!container || !imageComponent) {
+      print(`[DETECTION TRIGGER] ❌ Cannot show image - missing components for ${objectType}!`);
+      return;
+    }
+
+    // Cancel any existing animation for this object
+    const existingAnimation = this.currentAnimations.get(objectType);
+    if (existingAnimation) {
+      existingAnimation.enabled = false;
+      this.currentAnimations.delete(objectType);
+    }
+
+    const existingAutoHide = this.autoHideEvents.get(objectType);
+    if (existingAutoHide) {
+      existingAutoHide.enabled = false;
+      this.autoHideEvents.delete(objectType);
+    }
+
+    // Set the texture
+    print(`[DETECTION TRIGGER] 🎨 Setting texture on ${objectType} image component...`);
+    imageComponent.mainPass.baseTex = texture;
+
+    // Enable container
+    print(`[DETECTION TRIGGER] 👁️ Enabling ${objectType} image container...`);
+    container.enabled = true;
+    this.visibleImages.add(objectType);
+
+    // Animate scale - preserve original scale from scene
+    const transform = container.getTransform();
+
+    const startScale = originalScale
+      ? new vec3(
+          originalScale.x * 0.1,
+          originalScale.y * 0.1,
+          originalScale.z * 0.1
+        )
+      : new vec3(0.1, 0.1, 0.1);
+
+    const endScale = originalScale || new vec3(1, 1, 1);
+
+    print(`[DETECTION TRIGGER] 📏 Starting scale animation for ${objectType} from ${startScale.x} to ${endScale.x}...`);
+    transform.setLocalScale(startScale);
+    this.animateScaleForObject(objectType, transform, startScale, endScale, this.animationDuration);
+
+    // Set up auto-hide if configured
+    print(`[DETECTION TRIGGER] 🔍 Checking auto-hide... autoHideAfterSeconds = ${this.autoHideAfterSeconds}`);
+    if (this.autoHideAfterSeconds > 0) {
+      print(`[DETECTION TRIGGER] ⏲️ Auto-hide IS ENABLED for ${objectType} - scheduling for ${this.autoHideAfterSeconds}s`);
+      this.scheduleAutoHideForObject(objectType);
+    } else {
+      print(`[DETECTION TRIGGER] ⏲️⏲️⏲️ Auto-hide DISABLED for ${objectType} (value is ${this.autoHideAfterSeconds})`);
+    }
+
+    print(`[DETECTION TRIGGER] ✅ Image popup for ${objectType} setup complete!`);
+  }
+
+  /**
+   * Hide image popup with animation for a specific object type
+   */
+  public hideImageForObject(objectType: string) {
+    const container = this.imageContainers.get(objectType);
+    const originalScale = this.originalScales.get(objectType);
+
+    if (!this.visibleImages.has(objectType) || !container) return;
+
+    // Cancel auto-hide event
+    const existingAutoHide = this.autoHideEvents.get(objectType);
+    if (existingAutoHide) {
+      existingAutoHide.enabled = false;
+      this.autoHideEvents.delete(objectType);
+    }
+
+    // Cancel any existing animation
+    const existingAnimation = this.currentAnimations.get(objectType);
+    if (existingAnimation) {
+      existingAnimation.enabled = false;
+      this.currentAnimations.delete(objectType);
+    }
+
+    const transform = container.getTransform();
+    const startScale = transform.getLocalScale();
+
+    // Use original scale for end animation
+    const endScale = originalScale
+      ? new vec3(
+          originalScale.x * 0.1,
+          originalScale.y * 0.1,
+          originalScale.z * 0.1
+        )
+      : new vec3(0.1, 0.1, 0.1);
+
+    print(`[DETECTION TRIGGER] 🔽 Hiding ${objectType} image - animating from ${startScale.x} to ${endScale.x}...`);
+
+    this.animateScaleForObject(objectType, transform, startScale, endScale, this.animationDuration, () => {
+      container.enabled = false;
+      this.visibleImages.delete(objectType);
+      print(`[DETECTION TRIGGER] ✅ ${objectType} image hidden`);
+    });
+  }
+
+  /**
+   * Animate scale over time for a specific object type
+   */
+  private animateScaleForObject(
+    objectType: string,
+    transform: Transform,
+    startScale: vec3,
+    endScale: vec3,
+    duration: number,
+    onComplete?: () => void
+  ) {
+    let elapsed = 0;
+
+    const updateEvent = this.createEvent("UpdateEvent");
+    this.currentAnimations.set(objectType, updateEvent);
+
+    updateEvent.bind(() => {
+      elapsed += getDeltaTime();
+      const t = Math.min(elapsed / duration, 1.0);
+
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - t, 3);
+
+      const currentScale = vec3.lerp(startScale, endScale, eased);
+      transform.setLocalScale(currentScale);
+
+      if (t >= 1.0) {
+        updateEvent.enabled = false;
+        this.currentAnimations.delete(objectType);
+        if (onComplete) onComplete();
+      }
+    });
+  }
+
+  /**
+   * Schedule auto-hide for a specific object type
+   */
+  private scheduleAutoHideForObject(objectType: string) {
+    print(`[DETECTION TRIGGER] ⏲️⏲️⏲️ scheduleAutoHideForObject called for ${objectType}! Timer: ${this.autoHideAfterSeconds}s`);
+
+    const existingEvent = this.autoHideEvents.get(objectType);
+    if (existingEvent) {
+      existingEvent.enabled = false;
+    }
+
+    const delayEvent = this.createEvent("DelayedCallbackEvent") as DelayedCallbackEvent;
+    this.autoHideEvents.set(objectType, delayEvent);
+    delayEvent.bind(() => {
+      print(`[DETECTION TRIGGER] ⏰⏰⏰ AUTO-HIDING ${objectType} IMAGE NOW!`);
+      this.hideImageForObject(objectType);
+    });
+    delayEvent.reset(this.autoHideAfterSeconds);
+    print(`[DETECTION TRIGGER] ⏲️ Auto-hide event for ${objectType} scheduled for ${this.autoHideAfterSeconds} seconds from now`);
   }
 
   /**
@@ -340,6 +645,31 @@ export class ObjectDetectionTrigger extends BaseScriptComponent {
     this.triggeredThisSession.clear();
     this.lastTriggerTimes.clear();
     print("[DETECTION TRIGGER] ✅ Session reset - all rules can trigger again");
+  }
+
+  /**
+   * Hide all visible images
+   */
+  public hideAllImages() {
+    const visibleTypes = Array.from(this.visibleImages);
+    visibleTypes.forEach(objectType => {
+      this.hideImageForObject(objectType);
+    });
+    print(`[DETECTION TRIGGER] ✅ Hiding all ${visibleTypes.length} visible images`);
+  }
+
+  /**
+   * Check if any images are currently visible
+   */
+  public hasVisibleImages(): boolean {
+    return this.visibleImages.size > 0;
+  }
+
+  /**
+   * Get list of currently visible image types
+   */
+  public getVisibleImageTypes(): string[] {
+    return Array.from(this.visibleImages);
   }
 
   /**
