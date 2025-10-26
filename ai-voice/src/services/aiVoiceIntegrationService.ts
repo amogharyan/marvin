@@ -6,6 +6,7 @@ import { AIResponse, ConversationContext, DemoObject } from '../types';
 import { ServiceOrchestrator } from './aiVoiceIntegration/serviceOrchestrator';
 import { RequestProcessor, VoiceRequest, MultimodalRequest, VisualRequest } from './aiVoiceIntegration/requestProcessor';
 import { AsyncService } from '../utils/asyncServiceUtils';
+import type { LettaSearchResult } from './lettaService';
 
 export class AIVoiceIntegrationService extends AsyncService {
   private serviceOrchestrator: ServiceOrchestrator;
@@ -319,6 +320,8 @@ export class AIVoiceIntegrationService extends AsyncService {
     response: string, 
     metadata?: Record<string, any>
   ): Promise<void> {
+    await this.ensureInitialized();
+    
     try {
       const passage = {
         text: `User: ${transcript}\nAssistant: ${response}`,
@@ -345,6 +348,8 @@ export class AIVoiceIntegrationService extends AsyncService {
    * @param objectContext - Current object context for relevant memories
    */
   public async getLettaContext(agentId: string, objectContext?: string): Promise<string> {
+    await this.ensureInitialized();
+    
     try {
       return await this.serviceOrchestrator.lettaService.getConversationContext(agentId, objectContext);
     } catch (error) {
@@ -363,12 +368,14 @@ export class AIVoiceIntegrationService extends AsyncService {
     agentId: string, 
     query: string, 
     limit: number = 5
-  ): Promise<any> {
+  ): Promise<LettaSearchResult> {
+    await this.ensureInitialized();
+    
     try {
       return await this.serviceOrchestrator.lettaService.searchPassages(agentId, query, limit);
     } catch (error) {
       errorLog('Failed to search Letta passages:', error);
-      return { passages: [] };
+      return { passages: [] } as LettaSearchResult;
     }
   }
 
