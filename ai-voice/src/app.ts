@@ -311,6 +311,50 @@ app.post('/api/letta/search', createEndpoint(
   ['agentId', 'query']
 ));
 
+// ==================== PHASE 2 SPECIALIZED ENDPOINTS ====================
+
+// Health reminder endpoint
+app.post('/api/health-reminder', createEndpoint(
+  (req) => ensureServiceInitialized().processHealthReminder(
+    req.body.voiceText,
+    req.body.imageData,
+    req.body.currentTime
+  ),
+  ['voiceText'],
+  'Health Reminder'
+));
+
+// Nutrition analysis endpoint
+app.post('/api/nutrition-analysis', createEndpoint(
+  (req) => ensureServiceInitialized().processNutritionAnalysis(
+    req.body.voiceText,
+    req.body.imageData,
+    req.body.mimeType || 'image/jpeg'
+  ),
+  ['voiceText', 'imageData'],
+  'Nutrition Analysis'
+));
+
+// Productivity intelligence endpoint
+app.post('/api/productivity-intelligence', createEndpoint(
+  (req) => ensureServiceInitialized().processProductivityIntelligence(
+    req.body.voiceText,
+    req.body.currentTime
+  ),
+  ['voiceText'],
+  'Productivity Intelligence'
+));
+
+// Departure intelligence endpoint
+app.post('/api/departure-intelligence', createEndpoint(
+  (req) => ensureServiceInitialized().processDepartureIntelligence(
+    req.body.voiceText,
+    req.body.currentTime
+  ),
+  ['voiceText'],
+  'Departure Intelligence'
+));
+
 // Error handling middleware
 app.use((error: any, req: any, res: any, next: any) => {
   console.error('Unhandled error:', error);
@@ -344,6 +388,12 @@ async function startServer() {
     console.log(`   POST /api/proactive-assistance - Generate proactive help`);
     console.log(`   POST /api/synthesize-voice - Voice synthesis`);
     console.log(`   GET  /api/demo/objects - Demo objects for testing`);
+    console.log('');
+    console.log('🎯 Phase 2 Specialized Endpoints:');
+    console.log(`   POST /api/health-reminder - Health reminder logic`);
+    console.log(`   POST /api/nutrition-analysis - Nutrition analysis`);
+    console.log(`   POST /api/productivity-intelligence - Productivity intelligence`);
+    console.log(`   POST /api/departure-intelligence - Departure intelligence`);
     console.log('');
     console.log('🧠 Phase 3 Endpoints (Learning & Personalization):');
     console.log(`   POST /api/conversational-ai - Advanced conversational AI with learning`);

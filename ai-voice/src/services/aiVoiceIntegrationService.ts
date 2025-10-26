@@ -379,6 +379,159 @@ export class AIVoiceIntegrationService extends AsyncService {
     }
   }
 
+  // ===== PHASE 2 SPECIALIZED METHODS =====
+
+  /**
+   * Process health reminders with medication timing logic
+   * @param voiceText - User's voice input
+   * @param imageData - Optional image of medicine bottle
+   * @param currentTime - Optional current time override
+   */
+  public async processHealthReminder(
+    voiceText: string,
+    imageData?: string,
+    currentTime?: string
+  ): Promise<AIResponse> {
+    this.ensureInitialized();
+    
+    try {
+      const geminiResponse = await this.serviceOrchestrator.geminiService.processHealthReminder(
+        voiceText,
+        imageData,
+        currentTime
+      );
+
+      // Convert Gemini response to AIResponse format
+      return {
+        content: geminiResponse.text,
+        suggested_actions: [],
+        confidence: geminiResponse.confidence || 0.8,
+        context: 'health_reminder',
+        voice_enabled: false
+      };
+    } catch (error) {
+      errorLog('Health reminder processing failed:', error);
+      return {
+        content: 'I had trouble processing your health reminder request. Please try again.',
+        suggested_actions: ['Try asking about medication timing'],
+        confidence: 0.5,
+        context: 'health_reminder',
+        voice_enabled: false
+      };
+    }
+  }
+
+  /**
+   * Process nutrition analysis with food visual analysis
+   * @param voiceText - User's voice input
+   * @param imageData - Image of food/breakfast
+   * @param mimeType - Image MIME type
+   */
+  public async processNutritionAnalysis(
+    voiceText: string,
+    imageData: string,
+    mimeType: string = 'image/jpeg'
+  ): Promise<AIResponse> {
+    this.ensureInitialized();
+    
+    try {
+      const geminiResponse = await this.serviceOrchestrator.geminiService.processNutritionAnalysis(
+        voiceText,
+        imageData,
+        mimeType
+      );
+
+      return {
+        content: geminiResponse.text,
+        suggested_actions: ['Get recipe suggestions', 'View nutritional breakdown'],
+        confidence: geminiResponse.confidence || 0.8,
+        context: 'nutrition_analysis',
+        voice_enabled: false
+      };
+    } catch (error) {
+      errorLog('Nutrition analysis failed:', error);
+      return {
+        content: 'I had trouble analyzing the nutrition information. Please try again.',
+        suggested_actions: ['Try taking another photo', 'Ask for recipe suggestions'],
+        confidence: 0.5,
+        context: 'nutrition_analysis',
+        voice_enabled: false
+      };
+    }
+  }
+
+  /**
+   * Process productivity intelligence and task management
+   * @param voiceText - User's voice input
+   * @param currentTime - Optional current time override
+   */
+  public async processProductivityIntelligence(
+    voiceText: string,
+    currentTime?: string
+  ): Promise<AIResponse> {
+    this.ensureInitialized();
+    
+    try {
+      const geminiResponse = await this.serviceOrchestrator.geminiService.processProductivityIntelligence(
+        voiceText,
+        currentTime
+      );
+
+      return {
+        content: geminiResponse.text,
+        suggested_actions: ['View task list', 'Set priorities', 'Get daily briefing'],
+        confidence: geminiResponse.confidence || 0.8,
+        context: 'productivity_intelligence',
+        voice_enabled: false
+      };
+    } catch (error) {
+      errorLog('Productivity intelligence failed:', error);
+      return {
+        content: 'I had trouble processing your productivity request. Please try again.',
+        suggested_actions: ['Try asking about your tasks', 'Get daily priorities'],
+        confidence: 0.5,
+        context: 'productivity_intelligence',
+        voice_enabled: false
+      };
+    }
+  }
+
+  /**
+   * Process departure intelligence with time-based suggestions
+   * @param voiceText - User's voice input
+   * @param currentTime - Optional current time override
+   */
+  public async processDepartureIntelligence(
+    voiceText: string,
+    currentTime?: string
+  ): Promise<AIResponse> {
+    this.ensureInitialized();
+    
+    try {
+      const geminiResponse = await this.serviceOrchestrator.geminiService.processDepartureIntelligence(
+        voiceText,
+        currentTime
+      );
+
+      return {
+        content: geminiResponse.text,
+        suggested_actions: ['Check departure checklist', 'Get commute time', 'Prepare to leave'],
+        confidence: geminiResponse.confidence || 0.8,
+        context: 'departure_intelligence',
+        voice_enabled: false
+      };
+    } catch (error) {
+      errorLog('Departure intelligence failed:', error);
+      return {
+        content: 'I had trouble processing your departure request. Please try again.',
+        suggested_actions: ['Check what to bring', 'Get travel time'],
+        confidence: 0.5,
+        context: 'departure_intelligence',
+        voice_enabled: false
+      };
+    }
+  }
+
   /**
    * Shutdown all services gracefully
    */

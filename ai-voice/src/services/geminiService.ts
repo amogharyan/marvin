@@ -273,7 +273,7 @@ CORE CAPABILITIES:
 ASSISTANCE AREAS:
 - Medicine reminders and health tracking
 - Nutrition analysis and recipe suggestions  
-- Calendar management and meeting preparation
+- Task management and meeting preparation
 - Object location and departure assistance
 - Device integration and connectivity help
 
@@ -290,6 +290,187 @@ CURRENT CONTEXT:
 - Time: ${currentTime.toLocaleTimeString()}
 - Time of Day: ${timeOfDay}
 - Processing Mode: Multimodal (Visual + Voice + Context)`;
+  }
+
+  /**
+   * Process health reminder request with medication timing logic
+   */
+  async processHealthReminder(
+    voiceText: string,
+    imageData?: string,
+    currentTime?: string
+  ): Promise<GeminiResponse> {
+    try {
+      const prompt = `You are a health assistant helping with medication reminders. 
+
+Current Time: ${currentTime || new Date().toLocaleTimeString()}
+
+User Request: "${voiceText}"
+
+${imageData ? 'Visual Context: Medicine bottle detected' : ''}
+
+Provide:
+1. Medication schedule analysis based on time of day
+2. Time-based reminder logic (morning/evening/dose timing)
+3. Voice confirmation for health actions
+4. Context about medication timing and importance
+
+Keep response concise and actionable.`;
+      
+      const parts: any[] = [{ text: prompt }];
+      if (imageData) {
+        parts.push({ inlineData: { data: imageData, mimeType: 'image/jpeg' } });
+      }
+
+      const result = await this.model.generateContent({
+        contents: [{ role: "user", parts }]
+      });
+
+      const response = await result.response;
+      const text = response.text();
+
+      return {
+        text: text,
+        confidence: this.calculateConfidence(response),
+        safety_ratings: response.candidates?.[0]?.safetyRatings || []
+      };
+    } catch (error) {
+      errorLog('Health reminder processing error', error);
+      throw new Error(`Health reminder processing failed: ${error}`);
+    }
+  }
+
+  /**
+   * Process nutrition analysis with food visual analysis
+   */
+  async processNutritionAnalysis(
+    voiceText: string,
+    imageData: string,
+    mimeType: string = 'image/jpeg'
+  ): Promise<GeminiResponse> {
+    try {
+      const prompt = `Analyze this breakfast meal and provide nutritional insights.
+
+User Request: "${voiceText}"
+
+Provide:
+1. Visual analysis of food items (calorie estimation)
+2. Macronutrient breakdown (carbs, protein, fats)
+3. Healthy recipe suggestions if applicable
+4. Nutritional advice based on the visual analysis
+
+Be specific and actionable.`;
+      
+      const result = await this.model.generateContent({
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { text: prompt },
+              { inlineData: { data: imageData, mimeType: mimeType } }
+            ]
+          }
+        ]
+      });
+
+      const response = await result.response;
+      const text = response.text();
+
+      return {
+        text: text,
+        confidence: this.calculateConfidence(response),
+        safety_ratings: response.candidates?.[0]?.safetyRatings || []
+      };
+    } catch (error) {
+      errorLog('Nutrition analysis error', error);
+      throw new Error(`Nutrition analysis failed: ${error}`);
+    }
+  }
+
+  /**
+   * Process productivity and task management intelligence
+   */
+  async processProductivityIntelligence(
+    voiceText: string,
+    currentTime?: string
+  ): Promise<GeminiResponse> {
+    try {
+      const currentTimeStr = currentTime || new Date().toLocaleTimeString();
+      const hour = new Date().getHours();
+      const isMorning = hour < 12;
+      
+      const prompt = `You are a productivity assistant helping with task management and priorities.
+
+Current Time: ${currentTimeStr}
+Time of Day: ${isMorning ? 'Morning' : 'Afternoon'}
+
+User Request: "${voiceText}"
+
+Provide:
+1. Task preparation prompts and checklist
+2. Daily briefing generation based on priorities
+3. Priority management logic for tasks
+4. Daily schedule overview with time-based urgency
+
+Be proactive and help the user stay organized.`;
+      
+      const result = await this.model.generateContent(prompt);
+
+      const response = await result.response;
+      const text = response.text();
+
+      return {
+        text: text,
+        confidence: this.calculateConfidence(response),
+        safety_ratings: response.candidates?.[0]?.safetyRatings || []
+      };
+    } catch (error) {
+      errorLog('Productivity intelligence error', error);
+      throw new Error(`Productivity intelligence processing failed: ${error}`);
+    }
+  }
+
+  /**
+   * Process departure intelligence with time-based suggestions
+   */
+  async processDepartureIntelligence(
+    voiceText: string,
+    currentTime?: string
+  ): Promise<GeminiResponse> {
+    try {
+      const currentTimeStr = currentTime || new Date().toLocaleTimeString();
+      const hour = new Date().getHours();
+      const isRushHour = (hour >= 7 && hour <= 9) || (hour >= 17 && hour <= 19);
+      
+      const prompt = `You are a departure assistant helping with morning routine and leaving on time.
+
+Current Time: ${currentTimeStr}
+Rush Hour: ${isRushHour ? 'Yes - Extra traffic expected' : 'No'}
+
+User Request: "${voiceText}"
+
+Provide:
+1. Departure preparation checklist based on time
+2. Time-based departure suggestions
+3. Commute time estimation logic (consider rush hour)
+4. Checklist generation for what to bring/do before leaving
+
+Focus on helping the user leave on time and prepared.`;
+      
+      const result = await this.model.generateContent(prompt);
+
+      const response = await result.response;
+      const text = response.text();
+
+      return {
+        text: text,
+        confidence: this.calculateConfidence(response),
+        safety_ratings: response.candidates?.[0]?.safetyRatings || []
+      };
+    } catch (error) {
+      errorLog('Departure intelligence error', error);
+      throw new Error(`Departure intelligence processing failed: ${error}`);
+    }
   }
 
   /**
