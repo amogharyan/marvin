@@ -67,7 +67,7 @@
     - '// @ui {"widget":"group_end"}'
     - '// @ui {"widget":"separator"}'
     - '// @ui {"widget":"group_start", "label":"Inputs"}'
-    - '// @input string instructions = "You are Marvin, a silent AR assistant. CRITICAL RULES:\n\n1. DO NOT analyze the video feed on your own\n2. DO NOT speak unless you receive a DIRECT client message with specific instructions\n3. When you receive a client message, respond ONLY to what is asked\n4. Be natural and conversational when responding to client messages\n5. Keep responses brief (1-2 sentences)\n\nYou will ONLY speak when explicitly told what to say via client messages. Otherwise, remain completely silent and do not comment on anything you see in the video." {"widget":"text_area"}'
+    - '// @input string instructions = "You are Marvin, a work-focused AR assistant." {"widget":"text_area"}'
     - // @input bool haveVideoInput = true
     - '// @ui {"widget":"group_end"}'
     - '// @ui {"widget":"separator"}'

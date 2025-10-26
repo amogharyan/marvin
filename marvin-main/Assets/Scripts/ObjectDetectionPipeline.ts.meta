@@ -1,0 +1,122 @@
+- !<AssetImportMetadata/7d26f6bc-ed47-4fd2-a9b7-f20e33d657f3>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> f30e2d17-e8d0-410b-8fd1-1aa27065377c
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> f30e2d17-e8d0-410b-8fd1-1aa27065377c
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> e289e8ad-63fd-4c6b-9a9c-1235383aa859
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/e289e8ad-63fd-4c6b-9a9c-1235383aa859>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: 3c2be8a0-8443-4aeb-9290-bbf754f8a83c
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    cameraCapture: false
+    confidenceThreshold: false
+    continuousMode: false
+    detectionInterval: false
+    hfApiToken: false
+    hfSpaceUrl: false
+    initialDelay: false
+    laptopDetectionEnabled: false
+    laptopMinConfidence: false
+    laptopPrompt: false
+    laptopTriggerOnce: false
+    marvinAssistant: false
+    modelSize: false
+    personDetectionEnabled: false
+    personMinConfidence: false
+    personPrompt: false
+    personTriggerOnce: false
+    phoneDetectionEnabled: false
+    phoneMinConfidence: false
+    phonePrompt: false
+    phoneTriggerOnce: false
+    pinholeCapture: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - marvinAssistant: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
+      cameraCapture: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+      pinholeCapture: !<MappingBased.AssignableType_2> 00000000-0000-0000-0000-000000000000
+      hfApiToken: ""
+      hfSpaceUrl: "https://agrancini-sc-simultaneous-segmented-depth-prediction.hf.space"
+      modelSize: Medium - Balanced performance and accuracy
+      confidenceThreshold: 0.700000
+      continuousMode: true
+      detectionInterval: !<float> 10.000000
+      initialDelay: !<float> 5.000000
+      laptopDetectionEnabled: true
+      laptopMinConfidence: 0.700000
+      laptopPrompt: "I see you're on your laptop! Would you like me to pull up your calendar for today?"
+      laptopTriggerOnce: true
+      personDetectionEnabled: false
+      personMinConfidence: 0.800000
+      personPrompt: "Hello! I see you there. How can I assist you today?"
+      personTriggerOnce: false
+      phoneDetectionEnabled: false
+      phoneMinConfidence: 0.700000
+      phonePrompt: "I notice you have your phone. Would you like me to help you stay focused?"
+      phoneTriggerOnce: false
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"label", "label":"🔄 Simplified Object Detection Pipeline"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"group_start", "label":"Core Components"}'
+    - // @input AssignableType marvinAssistant
+    - // @input AssignableType_1 cameraCapture
+    - // @input AssignableType_2 pinholeCapture
+    - '// @ui {"widget":"group_end"}'
+    - '// @ui {"widget":"group_start", "label":"API Configuration"}'
+    - // @input string hfApiToken
+    - '// @input string hfSpaceUrl = "https://agrancini-sc-simultaneous-segmented-depth-prediction.hf.space"'
+    - '// @input string modelSize = "Medium - Balanced performance and accuracy" {"widget":"combobox", "values":[{"label":"Small - Better performance", "value":"Small - Better performance and less accuracy"}, {"label":"Medium - Balanced", "value":"Medium - Balanced performance and accuracy"}, {"label":"Large - High accuracy", "value":"Large - Slow performance and high accuracy"}]}'
+    - // @input float confidenceThreshold = 0.7
+    - '// @ui {"widget":"group_end"}'
+    - '// @ui {"widget":"group_start", "label":"Detection Settings"}'
+    - '// @input bool continuousMode = true {"hint":"Enable continuous detection"}'
+    - '// @input float detectionInterval = 10 {"hint":"Seconds between detections"}'
+    - '// @input float initialDelay = 5 {"hint":"Delay before first detection (seconds)"}'
+    - '// @ui {"widget":"group_end"}'
+    - '// @ui {"widget":"group_start", "label":"Laptop Detection"}'
+    - // @input bool laptopDetectionEnabled = true
+    - // @input float laptopMinConfidence = 0.7
+    - "// @input string laptopPrompt = \"I see you're on your laptop! Would you like me to pull up your calendar for today?\" {\"widget\":\"text_area\"}"
+    - // @input bool laptopTriggerOnce = true
+    - '// @ui {"widget":"group_end"}'
+    - '// @ui {"widget":"group_start", "label":"Person Detection"}'
+    - // @input bool personDetectionEnabled
+    - // @input float personMinConfidence = 0.8
+    - '// @input string personPrompt = "Hello! I see you there. How can I assist you today?" {"widget":"text_area"}'
+    - // @input bool personTriggerOnce
+    - '// @ui {"widget":"group_end"}'
+    - '// @ui {"widget":"group_start", "label":"Phone Detection"}'
+    - // @input bool phoneDetectionEnabled
+    - // @input float phoneMinConfidence = 0.7
+    - '// @input string phonePrompt = "I notice you have your phone. Would you like me to help you stay focused?" {"widget":"text_area"}'
+    - // @input bool phoneTriggerOnce
+    - '// @ui {"widget":"group_end"}'
