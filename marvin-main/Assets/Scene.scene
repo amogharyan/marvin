@@ -26,6 +26,8 @@
     - !<own> add8b2d8-7f51-4ec6-a05d-cb227e291ab5
     - !<own> 05921466-7de6-42dd-991d-9e3cc5f181cc
     - !<own> c8a43eb3-ae6c-447b-8d95-282e1bdf3c39
+    - !<own> b431c32a-be4c-4964-ac5b-32ae37141122
+    - !<own> b0359127-b0a3-41fb-b0b1-de34339b40e7
     - !<own> b43896f8-fdb6-4058-a019-fbe57101d15c
   layers: !<Layers/267ee9a7-aff2-4f9d-9a49-f71214747d03>
     userLayers:
@@ -804,18 +806,10 @@
     laptopTriggerOncePerSession: true
     laptopMinConfidence: true
     laptopCooldown: true
-    personDetectionEnabled: true
-    personTriggerOncePerSession: true
-    personMinConfidence: true
-    personPrompt: true
-    personImageContainer: true
-    personImage: true
-    personCooldown: true
-    phoneMinConfidence: true
-    phonePrompt: true
-    phoneImageContainer: true
-    phoneImage: true
-    phoneCooldown: true
+    bowlMinConfidence: true
+    bowlCooldown: true
+    bookMinConfidence: true
+    bookCooldown: true
     customObjectEnabled: true
     customObjectTriggerOncePerSession: true
     customObjectType: true
@@ -832,28 +826,28 @@
       detectionManager: !<MappingBased.AssignableType_1> 2227b1a2-d383-40cd-9ab9-f6ab9923948b
       imagePopupEnabled: true
       animationDuration: 0.500000
-      autoHideAfterSeconds: !<float> 0.000000
+      autoHideAfterSeconds: !<float> 15.000000
       laptopDetectionEnabled: true
       laptopTriggerOncePerSession: true
       laptopMinConfidence: 0.700000
-      laptopPrompt: "Say this to the user: I see you've started working on your laptop! Here's your calendar for today!"
+      laptopPrompt: "Say this to the user: I see you've started working on your laptop! Here's your calendar for today! You have a team standup in 15 minutes and coffee with hannah at 11:15"
       laptopImageContainer: !<reference.SceneObject> b43896f8-fdb6-4058-a019-fbe57101d15c
       laptopImage: !<reference.Texture> ab9eede2-f8cd-4f83-8376-a531b4d44301
       laptopCooldown: !<float> 30.000000
-      personDetectionEnabled: false
-      personTriggerOncePerSession: false
-      personMinConfidence: 0.800000
-      personPrompt: "Hello! I see you there. How can I assist you today?"
-      personImageContainer: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
-      personImage: !<reference.Texture> 00000000-0000-0000-0000-000000000000
-      personCooldown: !<float> 60.000000
-      phoneDetectionEnabled: true
-      phoneTriggerOncePerSession: true
-      phoneMinConfidence: 0.700000
-      phonePrompt: "I notice you have your phone. Would you like me to help you stay focused on your work?"
-      phoneImageContainer: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
-      phoneImage: !<reference.Texture> 00000000-0000-0000-0000-000000000000
-      phoneCooldown: !<float> 45.000000
+      bowlDetectionEnabled: true
+      bowlTriggerOncePerSession: true
+      bowlMinConfidence: 0.700000
+      bowlPrompt: "Tell the user: I see you're having cereal, here are some of the macros of it. It's high in carbs so consider adding more protein to your lunch today."
+      bowlImageContainer: !<reference.SceneObject> b0359127-b0a3-41fb-b0b1-de34339b40e7
+      bowlImage: !<reference.Texture> 72f9412d-4795-4c12-98e1-9ff9b6c1b384
+      bowlCooldown: !<float> 60.000000
+      bookDetectionEnabled: true
+      bookTriggerOncePerSession: true
+      bookMinConfidence: 0.700000
+      bookPrompt: "Tell the user: I see you're reading a book, remember to leave for work in the next 10 minutes to avoid being late for work, as traffic is worse than average today."
+      bookImageContainer: !<reference.SceneObject> b431c32a-be4c-4964-ac5b-32ae37141122
+      bookImage: !<reference.Texture> 1031b44d-1631-4074-8294-925050507fd6
+      bookCooldown: !<float> 45.000000
       customObjectEnabled: false
       customObjectTriggerOncePerSession: false
       customObjectType: cup
@@ -1330,6 +1324,21 @@
     - !<own> 298f274e-575f-40f7-a4f3-e4eaeaaecd67
   Components:
     []
+- !<SceneObject/1c260170-5dd4-4e97-99e4-f90a34249683>
+  PrefabRemaps:
+    []
+  Name: macros
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 9bcc59ed-d636-4f3b-bb2f-407e920ff767
 - !<ColliderComponent/1eeb47b6-2df4-417c-85c0-93eefeab8eb9>
   PrefabRemaps:
     []
@@ -1506,16 +1515,15 @@
   Enabled: true
   ScriptAsset: !<reference> 556d51d2-abf9-439d-aee8-b667c1c7f78c
   ScriptInputsDefault:
-    modelSize: true
     confidenceThreshold: true
     distanceThreshold: true
   ScriptTypesDefault:
     {}
   ScriptInputs:
     "":
-      hfApiToken: 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
+      hfApiToken: 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
       hfSpaceUrl: "https://applea12x-simultaneous-segmented-depth-prediction.hf.space"
-      modelSize: Medium - Balanced performance and accuracy
+      modelSize: Small - Better performance and less accuracy
       confidenceThreshold: 0.500000
       distanceThreshold: !<float> 10.000000
       detectionPrefab: !<reference.ObjectPrefab> 34558c10-7f16-47a0-babc-aba68210fadb
@@ -2916,6 +2924,25 @@
   ShadowDensity: 1.000000
   Materials:
     - !<reference> f9d1b8a7-bddc-4edd-b054-90edeaeb1008
+  FlipX: false
+  FlipY: false
+  RotationAngle: 0
+  Pivot: {x: 0.000000, y: 0.000000}
+  ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
+- !<Image/3dfc0142-a493-4f85-8788-cb526e670d07>
+  PrefabRemaps:
+    []
+  Name: Image
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Fit
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 06cd458b-03de-4237-b4c5-29373d8c286b
   FlipX: false
   FlipY: false
   RotationAngle: 0
@@ -6730,6 +6757,25 @@
     []
   Components:
     - !<own> 43ce73ea-b24d-4d88-88f0-b225b7f7bab6
+- !<Image/9bcc59ed-d636-4f3b-bb2f-407e920ff767>
+  PrefabRemaps:
+    []
+  Name: Image
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Fit
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> a2f3a122-f5e5-4bd1-bf14-bbe9b63e1a4a
+  FlipX: false
+  FlipY: false
+  RotationAngle: 0
+  Pivot: {x: 0.000000, y: 0.000000}
+  ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
 - !<SceneObject/9c5baefc-3527-4f9c-ac4d-51e1cdaf8c9f>
   PrefabRemaps:
     []
@@ -7485,6 +7531,21 @@
   MaxDistance: 100.000000
   EnableDirectivityEffect: false
   EnablePositionEffect: false
+- !<SceneObject/b0359127-b0a3-41fb-b0b1-de34339b40e7>
+  PrefabRemaps:
+    []
+  Name: ImageMacros
+  Enabled: false
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: -70.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 30.000000, y: 30.000000, z: 32.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 1c260170-5dd4-4e97-99e4-f90a34249683
+  Components:
+    - !<own> 3dfc0142-a493-4f85-8788-cb526e670d07
 - !<SceneObject/b06df000-f295-44ab-852c-13e2273c34d7>
   PrefabRemaps:
     []
@@ -7753,6 +7814,21 @@
   ScriptTypes:
     "":
       {}
+- !<SceneObject/b431c32a-be4c-4964-ac5b-32ae37141122>
+  PrefabRemaps:
+    []
+  Name: ImageCommute
+  Enabled: false
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: -70.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 30.000000, y: 30.000000, z: 32.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> f2242e4d-dde1-4183-bd61-946b368ca6ce
+  Components:
+    - !<own> e6303b49-8724-4377-8d72-1f15248a32ce
 - !<SceneObject/b43896f8-fdb6-4058-a019-fbe57101d15c>
   PrefabRemaps:
     []
@@ -10163,6 +10239,25 @@
     - !<own> 7e21254a-b32b-4815-a071-879538aa3a51
   Components:
     []
+- !<Image/e175c785-9a88-4fa5-a89e-bd2ddaf0d748>
+  PrefabRemaps:
+    []
+  Name: Image
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Fit
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> d61cd2e2-6fa8-4dd7-a7e2-71f65bb7b7bd
+  FlipX: false
+  FlipY: false
+  RotationAngle: 0
+  Pivot: {x: 0.000000, y: 0.000000}
+  ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
 - !<SceneObject/e1c330dd-cf96-4076-86ec-8b3625cb7a61>
   PrefabRemaps:
     []
@@ -10239,6 +10334,25 @@
     - !<own> ca95f722-96dd-4b65-9ba1-264ffb221ca8
   Components:
     []
+- !<Image/e6303b49-8724-4377-8d72-1f15248a32ce>
+  PrefabRemaps:
+    []
+  Name: Image
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Fit
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 06cd458b-03de-4237-b4c5-29373d8c286b
+  FlipX: false
+  FlipY: false
+  RotationAngle: 0
+  Pivot: {x: 0.000000, y: 0.000000}
+  ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
 - !<SceneObject/e67355a4-c26a-4bfc-b712-56f879b0f199>
   PrefabRemaps:
     []
@@ -10610,6 +10724,21 @@
   ForceCompound: false
   Intangible: false
   ShowCollider: false
+- !<SceneObject/f2242e4d-dde1-4183-bd61-946b368ca6ce>
+  PrefabRemaps:
+    []
+  Name: commute
+  Enabled: false
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> e175c785-9a88-4fa5-a89e-bd2ddaf0d748
 - !<ScriptComponent/f2662b8b-a5d6-4658-b034-2f4bc70b7637>
   PrefabRemaps:
     []

@@ -80,62 +80,62 @@ export class ObjectDetectionTrigger extends BaseScriptComponent {
   laptopCooldown: number = 30;
   @ui.group_end
 
-  @ui.group_start("👤 Person Detection Rule")
+  @ui.group_start("🥣 Bowl Detection Rule")
   @input
-  personDetectionEnabled: boolean = false;
+  bowlDetectionEnabled: boolean = false;
 
   @input
-  personTriggerOncePerSession: boolean = false;
+  bowlTriggerOncePerSession: boolean = false;
 
   @input
-  personMinConfidence: number = 0.8;
+  bowlMinConfidence: number = 0.7;
 
   @input
   @widget(new TextAreaWidget())
-  personPrompt: string = "Hello! I see you there. How can I assist you today?";
+  bowlPrompt: string = "I see a bowl nearby. Are you having a meal?";
 
   @input
-  @hint("Image container for person (SceneObject with Image component)")
+  @hint("Image container for bowl (SceneObject with Image component)")
   @allowUndefined
-  personImageContainer: SceneObject;
+  bowlImageContainer: SceneObject;
 
   @input
-  @showIf("personImageContainer")
-  @hint("Image to show when person is detected")
+  @showIf("bowlImageContainer")
+  @hint("Image to show when bowl is detected")
   @allowUndefined
-  personImage: Texture;
+  bowlImage: Texture;
 
   @input
-  personCooldown: number = 60;
+  bowlCooldown: number = 60;
   @ui.group_end
 
-  @ui.group_start("📱 Phone Detection Rule")
+  @ui.group_start("📚 Book Detection Rule")
   @input
-  phoneDetectionEnabled: boolean = false;
+  bookDetectionEnabled: boolean = false;
 
   @input
-  phoneTriggerOncePerSession: boolean = false;
+  bookTriggerOncePerSession: boolean = false;
 
   @input
-  phoneMinConfidence: number = 0.7;
+  bookMinConfidence: number = 0.7;
 
   @input
   @widget(new TextAreaWidget())
-  phonePrompt: string = "I notice you have your phone. Would you like me to help you stay focused on your work?";
+  bookPrompt: string = "I see a book nearby. What are you reading?";
 
   @input
-  @hint("Image container for phone (SceneObject with Image component)")
+  @hint("Image container for book (SceneObject with Image component)")
   @allowUndefined
-  phoneImageContainer: SceneObject;
+  bookImageContainer: SceneObject;
 
   @input
-  @showIf("phoneImageContainer")
-  @hint("Image to show when phone is detected")
+  @showIf("bookImageContainer")
+  @hint("Image to show when book is detected")
   @allowUndefined
-  phoneImage: Texture;
+  bookImage: Texture;
 
   @input
-  phoneCooldown: number = 45;
+  bookCooldown: number = 45;
   @ui.group_end
 
   @ui.group_start("✨ Custom Detection Rules")
@@ -214,14 +214,14 @@ export class ObjectDetectionTrigger extends BaseScriptComponent {
         this.initializeImageContainer("laptop", this.laptopImageContainer);
       }
 
-      // Initialize person container
-      if (this.personImageContainer) {
-        this.initializeImageContainer("person", this.personImageContainer);
+      // Initialize bowl container
+      if (this.bowlImageContainer) {
+        this.initializeImageContainer("bowl", this.bowlImageContainer);
       }
 
-      // Initialize phone container
-      if (this.phoneImageContainer) {
-        this.initializeImageContainer("cell phone", this.phoneImageContainer);
+      // Initialize book container
+      if (this.bookImageContainer) {
+        this.initializeImageContainer("book", this.bookImageContainer);
       }
 
       // Initialize custom object container
@@ -276,12 +276,12 @@ export class ObjectDetectionTrigger extends BaseScriptComponent {
       print(`[DETECTION TRIGGER]   💻 LAPTOP (confidence ≥ ${(this.laptopMinConfidence * 100).toFixed(0)}%)`);
     }
 
-    if (this.personDetectionEnabled) {
-      print(`[DETECTION TRIGGER]   👤 PERSON (confidence ≥ ${(this.personMinConfidence * 100).toFixed(0)}%)`);
+    if (this.bowlDetectionEnabled) {
+      print(`[DETECTION TRIGGER]   🥣 BOWL (confidence ≥ ${(this.bowlMinConfidence * 100).toFixed(0)}%)`);
     }
 
-    if (this.phoneDetectionEnabled) {
-      print(`[DETECTION TRIGGER]   📱 PHONE (confidence ≥ ${(this.phoneMinConfidence * 100).toFixed(0)}%)`);
+    if (this.bookDetectionEnabled) {
+      print(`[DETECTION TRIGGER]   📚 BOOK (confidence ≥ ${(this.bookMinConfidence * 100).toFixed(0)}%)`);
     }
 
     if (this.customObjectEnabled) {
@@ -315,29 +315,29 @@ export class ObjectDetectionTrigger extends BaseScriptComponent {
       });
     }
 
-    if (this.personDetectionEnabled) {
+    if (this.bowlDetectionEnabled) {
       rules.push({
-        objectType: "person",
-        minConfidence: this.personMinConfidence,
-        geminiPrompt: this.personPrompt,
-        imageTexture: this.personImage,
-        imageContainer: this.personImageContainer,
+        objectType: "bowl",
+        minConfidence: this.bowlMinConfidence,
+        geminiPrompt: this.bowlPrompt,
+        imageTexture: this.bowlImage,
+        imageContainer: this.bowlImageContainer,
         enabled: true,
-        cooldownSeconds: this.personCooldown,
-        triggerOncePerSession: this.personTriggerOncePerSession,
+        cooldownSeconds: this.bowlCooldown,
+        triggerOncePerSession: this.bowlTriggerOncePerSession,
       });
     }
 
-    if (this.phoneDetectionEnabled) {
+    if (this.bookDetectionEnabled) {
       rules.push({
-        objectType: "cell phone",
-        minConfidence: this.phoneMinConfidence,
-        geminiPrompt: this.phonePrompt,
-        imageTexture: this.phoneImage,
-        imageContainer: this.phoneImageContainer,
+        objectType: "book",
+        minConfidence: this.bookMinConfidence,
+        geminiPrompt: this.bookPrompt,
+        imageTexture: this.bookImage,
+        imageContainer: this.bookImageContainer,
         enabled: true,
-        cooldownSeconds: this.phoneCooldown,
-        triggerOncePerSession: this.phoneTriggerOncePerSession,
+        cooldownSeconds: this.bookCooldown,
+        triggerOncePerSession: this.bookTriggerOncePerSession,
       });
     }
 
@@ -682,8 +682,8 @@ export class ObjectDetectionTrigger extends BaseScriptComponent {
     // Find the rule for this object type
     let cooldown = 30; // default
     if (objectType.toLowerCase() === "laptop") cooldown = this.laptopCooldown;
-    if (objectType.toLowerCase() === "person") cooldown = this.personCooldown;
-    if (objectType.toLowerCase() === "cell phone") cooldown = this.phoneCooldown;
+    if (objectType.toLowerCase() === "bowl") cooldown = this.bowlCooldown;
+    if (objectType.toLowerCase() === "book") cooldown = this.bookCooldown;
     if (objectType.toLowerCase() === this.customObjectType.toLowerCase())
       cooldown = this.customObjectCooldown;
 

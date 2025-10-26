@@ -28,6 +28,20 @@
   ScriptInputsHidden:
     animationDuration: false
     autoHideAfterSeconds: false
+    bookCooldown: false
+    bookDetectionEnabled: false
+    bookImage: false
+    bookImageContainer: false
+    bookMinConfidence: false
+    bookPrompt: false
+    bookTriggerOncePerSession: false
+    bowlCooldown: false
+    bowlDetectionEnabled: false
+    bowlImage: false
+    bowlImageContainer: false
+    bowlMinConfidence: false
+    bowlPrompt: false
+    bowlTriggerOncePerSession: false
     customObjectCooldown: false
     customObjectEnabled: false
     customObjectImage: false
@@ -46,20 +60,6 @@
     laptopPrompt: false
     laptopTriggerOncePerSession: false
     marvinAssistant: false
-    personCooldown: false
-    personDetectionEnabled: false
-    personImage: false
-    personImageContainer: false
-    personMinConfidence: false
-    personPrompt: false
-    personTriggerOncePerSession: false
-    phoneCooldown: false
-    phoneDetectionEnabled: false
-    phoneImage: false
-    phoneImageContainer: false
-    phoneMinConfidence: false
-    phonePrompt: false
-    phoneTriggerOncePerSession: false
   ScriptTypesHidden:
     {}
   ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
@@ -81,20 +81,20 @@
       laptopImageContainer: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
       laptopImage: !<reference.Texture> 00000000-0000-0000-0000-000000000000
       laptopCooldown: !<float> 30.000000
-      personDetectionEnabled: false
-      personTriggerOncePerSession: false
-      personMinConfidence: 0.800000
-      personPrompt: "Hello! I see you there. How can I assist you today?"
-      personImageContainer: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
-      personImage: !<reference.Texture> 00000000-0000-0000-0000-000000000000
-      personCooldown: !<float> 60.000000
-      phoneDetectionEnabled: false
-      phoneTriggerOncePerSession: false
-      phoneMinConfidence: 0.700000
-      phonePrompt: "I notice you have your phone. Would you like me to help you stay focused on your work?"
-      phoneImageContainer: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
-      phoneImage: !<reference.Texture> 00000000-0000-0000-0000-000000000000
-      phoneCooldown: !<float> 45.000000
+      bowlDetectionEnabled: false
+      bowlTriggerOncePerSession: false
+      bowlMinConfidence: 0.700000
+      bowlPrompt: "I see a bowl nearby. Are you having a meal?"
+      bowlImageContainer: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      bowlImage: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      bowlCooldown: !<float> 60.000000
+      bookDetectionEnabled: false
+      bookTriggerOncePerSession: false
+      bookMinConfidence: 0.700000
+      bookPrompt: "I see a book nearby. What are you reading?"
+      bookImageContainer: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      bookImage: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      bookCooldown: !<float> 45.000000
       customObjectEnabled: false
       customObjectTriggerOncePerSession: false
       customObjectType: cup
@@ -128,23 +128,23 @@
     - '// @input Asset.Texture laptopImage {"hint":"Image to show when laptop is detected", "showIf":"laptopImageContainer"}'
     - '// @input float laptopCooldown = 30 {"hint":"Cooldown between laptop detections (seconds, ignored if trigger once is enabled)"}'
     - '// @ui {"widget":"group_end"}'
-    - '// @ui {"widget":"group_start", "label":"👤 Person Detection Rule"}'
-    - // @input bool personDetectionEnabled
-    - // @input bool personTriggerOncePerSession
-    - // @input float personMinConfidence = 0.8
-    - '// @input string personPrompt = "Hello! I see you there. How can I assist you today?" {"widget":"text_area"}'
-    - '// @input SceneObject personImageContainer {"hint":"Image container for person (SceneObject with Image component)"}'
-    - '// @input Asset.Texture personImage {"hint":"Image to show when person is detected", "showIf":"personImageContainer"}'
-    - // @input float personCooldown = 60
+    - '// @ui {"widget":"group_start", "label":"🥣 Bowl Detection Rule"}'
+    - // @input bool bowlDetectionEnabled
+    - // @input bool bowlTriggerOncePerSession
+    - // @input float bowlMinConfidence = 0.7
+    - '// @input string bowlPrompt = "I see a bowl nearby. Are you having a meal?" {"widget":"text_area"}'
+    - '// @input SceneObject bowlImageContainer {"hint":"Image container for bowl (SceneObject with Image component)"}'
+    - '// @input Asset.Texture bowlImage {"hint":"Image to show when bowl is detected", "showIf":"bowlImageContainer"}'
+    - // @input float bowlCooldown = 60
     - '// @ui {"widget":"group_end"}'
-    - '// @ui {"widget":"group_start", "label":"📱 Phone Detection Rule"}'
-    - // @input bool phoneDetectionEnabled
-    - // @input bool phoneTriggerOncePerSession
-    - // @input float phoneMinConfidence = 0.7
-    - '// @input string phonePrompt = "I notice you have your phone. Would you like me to help you stay focused on your work?" {"widget":"text_area"}'
-    - '// @input SceneObject phoneImageContainer {"hint":"Image container for phone (SceneObject with Image component)"}'
-    - '// @input Asset.Texture phoneImage {"hint":"Image to show when phone is detected", "showIf":"phoneImageContainer"}'
-    - // @input float phoneCooldown = 45
+    - '// @ui {"widget":"group_start", "label":"📚 Book Detection Rule"}'
+    - // @input bool bookDetectionEnabled
+    - // @input bool bookTriggerOncePerSession
+    - // @input float bookMinConfidence = 0.7
+    - '// @input string bookPrompt = "I see a book nearby. What are you reading?" {"widget":"text_area"}'
+    - '// @input SceneObject bookImageContainer {"hint":"Image container for book (SceneObject with Image component)"}'
+    - '// @input Asset.Texture bookImage {"hint":"Image to show when book is detected", "showIf":"bookImageContainer"}'
+    - // @input float bookCooldown = 45
     - '// @ui {"widget":"group_end"}'
     - '// @ui {"widget":"group_start", "label":"✨ Custom Detection Rules"}'
     - "// @input bool customObjectEnabled {\"hint\":\"Enable custom object detection (e.g., 'cup', 'book')\"}"
