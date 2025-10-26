@@ -1,0 +1,85 @@
+- !<AssetImportMetadata/79c0b49d-df5d-4634-b730-40069d6318ac>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 5afb453b-3d19-4d20-84b0-b350642bf6d0
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 5afb453b-3d19-4d20-84b0-b350642bf6d0
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> e2a559f3-2b95-4f47-8847-53bfc5488c18
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/e2a559f3-2b95-4f47-8847-53bfc5488c18>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: 3dff2e85-1c47-421a-8860-4fa2f00f955a
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    arOverlay: false
+    breadboardAROverlay: false
+    breadboardAssistant: false
+    hintText: false
+    hintTitle: false
+    marvinAssistant: false
+    showObjectLabels: false
+    showRelationshipLines: false
+    sphereController: false
+    startStopButton: false
+    statusText: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - marvinAssistant: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
+      breadboardAssistant: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+      arOverlay: !<MappingBased.AssignableType_2> 00000000-0000-0000-0000-000000000000
+      breadboardAROverlay: !<MappingBased.AssignableType_3> 00000000-0000-0000-0000-000000000000
+      sphereController: !<MappingBased.AssignableType_4> 00000000-0000-0000-0000-000000000000
+      startStopButton: !<MappingBased.AssignableType_5> 00000000-0000-0000-0000-000000000000
+      hintTitle: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      hintText: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      statusText: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      showObjectLabels: true
+      showRelationshipLines: true
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"label", "label":"Marvin Object Recognition - Main UI Controller"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"group_start", "label":"Core Components"}'
+    - // @input AssignableType marvinAssistant
+    - // @input AssignableType_1 breadboardAssistant
+    - // @input AssignableType_2 arOverlay
+    - // @input AssignableType_3 breadboardAROverlay
+    - // @input AssignableType_4 sphereController
+    - '// @ui {"widget":"group_end"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"group_start", "label":"UI Elements"}'
+    - // @input AssignableType_5 startStopButton
+    - // @input Component.Text hintTitle
+    - // @input Component.Text hintText
+    - // @input Component.Text statusText
+    - '// @ui {"widget":"group_end"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"group_start", "label":"Recognition Settings"}'
+    - // @input bool showObjectLabels = true
+    - // @input bool showRelationshipLines = true
+    - '// @ui {"widget":"group_end"}'

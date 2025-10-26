@@ -9,6 +9,7 @@
     "snap-cloud"
   ],
   "scripts": {
+    "test": "npm run test:all",
     "install:all": "npm install && npm run install:ai-voice && npm run install:ar-core && npm run install:snap-cloud",
     "install:ai-voice": "cd ai-voice && npm install",
     "install:ar-core": "cd ar-core && npm install",
