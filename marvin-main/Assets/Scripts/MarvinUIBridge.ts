@@ -2,6 +2,8 @@ import { PinchButton } from "SpectaclesInteractionKit.lspkg/Components/UI/PinchB
 import { MarvinAssistant } from "./MarvinAssistant";
 import { AROverlay } from "./AROverlay";
 import { SphereController } from "./SphereController";
+import { ContextualAssistant } from "./ContextualAssistant";
+import { VideoAnalysisHelper } from "./VideoAnalysisHelper";
 import { LSTween } from "LSTween.lspkg/LSTween";
 import Easing from "LSTween.lspkg/TweenJS/Easing";
 import Event from "SpectaclesInteractionKit.lspkg/Utils/Event";
@@ -39,6 +41,12 @@ export class MarvinUIBridge extends BaseScriptComponent {
 
   @input
   private sphereController: SphereController;
+
+  @input
+  private contextualAssistant: ContextualAssistant;
+
+  @input
+  private videoAnalysisHelper: VideoAnalysisHelper;
   @ui.group_end
   @ui.separator
   @ui.group_start("UI Elements")
@@ -108,8 +116,8 @@ export class MarvinUIBridge extends BaseScriptComponent {
 
     // Initialize text content
     this.hintTitle.text = "Go!";
-    this.hintText.text = "Press button to start/stop object recognition";
-    this.statusText.text = "Ready for Relay";
+    this.hintText.text = "Look at objects for contextual help";
+    this.statusText.text = "Ready for Marvin";
 
     // Update button text
     this.updateButtonText();
@@ -142,6 +150,13 @@ export class MarvinUIBridge extends BaseScriptComponent {
     this.sphereController.isActivatedEvent.add((isActivated) => {
       this.onSphereActivated(isActivated);
     });
+
+    // Connect to contextual assistant for proactive recommendations
+    if (this.contextualAssistant) {
+      this.contextualAssistant.contextualRecommendationEvent.add((recommendation) => {
+        this.onContextualRecommendation(recommendation);
+      });
+    }
   }
 
   private startAnalysis() {
@@ -164,6 +179,12 @@ export class MarvinUIBridge extends BaseScriptComponent {
     this.marvinAssistant.createGeminiLiveSession();
     this.marvinAssistant.startAnalysis();
 
+    // Start periodic video analysis
+    if (this.videoAnalysisHelper) {
+      this.videoAnalysisHelper.startAnalysis();
+      print("[UI] Started VideoAnalysisHelper for periodic scene analysis");
+    }
+
     // Update UI for Marvin analysis mode
     this.updateStatusText("Ask me a question!");
     
@@ -182,6 +203,13 @@ export class MarvinUIBridge extends BaseScriptComponent {
   private stopAnalysis() {
     this.isAnalysisActive = false;
     this.marvinAssistant.stopAnalysis();
+
+    // Stop periodic video analysis
+    if (this.videoAnalysisHelper) {
+      this.videoAnalysisHelper.stopAnalysis();
+      print("[UI] Stopped VideoAnalysisHelper");
+    }
+
     this.updateUIState(UIState.Initial);
     this.updateStatusText("Analysis stopped");
     
@@ -235,9 +263,42 @@ export class MarvinUIBridge extends BaseScriptComponent {
       this.arOverlay.showComponentLabel(component);
     }
 
+    // Trigger contextual recommendations if enabled
+    if (this.contextualAssistant && component.position) {
+      this.contextualAssistant.onObjectDetected(
+        component.type,
+        component.position,
+        component.confidence || 0.9
+      );
+    }
+
     // Check if we have enough objects for analysis
     if (this.detectedComponentsCount >= 3) {
       this.performCircuitTopologyAnalysis();
+    }
+  }
+
+  private onContextualRecommendation(recommendation: any) {
+    // Display proactive contextual recommendation
+    print(`Contextual: ${recommendation.message}`);
+
+    // Update UI with contextual message
+    this.updateStatusText(recommendation.message);
+
+    // Show with special styling for high priority
+    if (recommendation.priority === "high") {
+      this.hintTitle.text = "Important!";
+      this.hintText.text = recommendation.message;
+      this.hintText.sceneObject.enabled = true;
+      this.hintTitle.sceneObject.enabled = true;
+
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        if (!this.isAnalysisActive) {
+          this.hintText.sceneObject.enabled = false;
+          this.hintTitle.sceneObject.enabled = false;
+        }
+      }, 5000);
     }
   }
 

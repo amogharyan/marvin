@@ -1,0 +1,62 @@
+- !<AssetImportMetadata/77d2a618-35b1-4cc0-bf17-278667fef4dd>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> a620cc2f-07a8-4e67-9fb6-27d6753c2ecc
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> a620cc2f-07a8-4e67-9fb6-27d6753c2ecc
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> c84da182-d91e-4312-aafe-fa9df00cc52a
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/c84da182-d91e-4312-aafe-fa9df00cc52a>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: aaf485b6-7878-4060-a641-1eeaaec7989d
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    breakfastButton: false
+    contextualAssistant: false
+    keysButton: false
+    laptopButton: false
+    medicineButton: false
+    phoneButton: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - contextualAssistant: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
+      laptopButton: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+      medicineButton: !<MappingBased.AssignableType_2> 00000000-0000-0000-0000-000000000000
+      keysButton: !<MappingBased.AssignableType_3> 00000000-0000-0000-0000-000000000000
+      breakfastButton: !<MappingBased.AssignableType_4> 00000000-0000-0000-0000-000000000000
+      phoneButton: !<MappingBased.AssignableType_5> 00000000-0000-0000-0000-000000000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"label", "label":"Manual Contextual Trigger - For Testing"}'
+    - '// @ui {"widget":"separator"}'
+    - // @input AssignableType contextualAssistant
+    - // @input AssignableType_1 laptopButton
+    - // @input AssignableType_2 medicineButton
+    - // @input AssignableType_3 keysButton
+    - // @input AssignableType_4 breakfastButton
+    - // @input AssignableType_5 phoneButton

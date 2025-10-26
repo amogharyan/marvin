@@ -1,0 +1,67 @@
+- !<AssetImportMetadata/4f0e3348-5a93-4d24-9590-bd80e4ae05ca>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> d8735a5c-51c2-4b3a-b44e-62d21eb7a5c3
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> d8735a5c-51c2-4b3a-b44e-62d21eb7a5c3
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 181254de-7bfe-4fa0-a3ad-5e4bb174a9fd
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/181254de-7bfe-4fa0-a3ad-5e4bb174a9fd>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: 4ca61b7b-76d0-45e8-892a-5742935302cf
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    camera: false
+    cooldownPeriod: false
+    enableProactiveMode: false
+    marvinAssistant: false
+    minConfidence: false
+    proximityDistance: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - marvinAssistant: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
+      camera: !<reference.Camera> 00000000-0000-0000-0000-000000000000
+      proximityDistance: 0.500000
+      cooldownPeriod: !<float> 30000.000000
+      minConfidence: 0.700000
+      enableProactiveMode: true
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"label", "label":"Marvin Contextual Awareness System"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"group_start", "label":"Core Components"}'
+    - // @input AssignableType marvinAssistant
+    - // @input Component.Camera camera
+    - '// @ui {"widget":"group_end"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"group_start", "label":"Proximity Settings"}'
+    - '// @input float proximityDistance = 0.5 {"hint":"Distance in meters to trigger contextual awareness"}'
+    - '// @input float cooldownPeriod = 30000 {"hint":"Cooldown between recommendations (ms)"}'
+    - '// @input float minConfidence = 0.7 {"hint":"Minimum confidence for object detection"}'
+    - '// @input bool enableProactiveMode = true {"hint":"Enable automatic proactive recommendations"}'
+    - '// @ui {"widget":"group_end"}'

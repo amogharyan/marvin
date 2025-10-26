@@ -9,7 +9,9 @@
     - !<own> 362d712d-3aa2-470c-8b9d-9b6467c32954
     - !<own> 96d0b561-304a-429a-a6e4-8e8867fcf17c
     - !<own> ad99ea71-2b03-479d-85f4-d77a6b399445
+    - !<own> ba6cc979-e30b-4432-a0bc-e330c93331f6
     - !<own> bbbe070b-b297-4624-a319-c6839b2d4919
+    - !<own> 24658d9e-69b8-4fff-9ead-2797a2d7680f
     - !<own> dc835c8f-6d13-4547-9e46-3924d04c24bd
     - !<own> 6ab9e2ec-c483-48d6-8e59-5a126e8a1551
     - !<own> a46e7340-3fc9-48db-a35e-0816511d30a9
@@ -871,6 +873,21 @@
     - !<own> c0b69a6c-7f52-4120-8f1b-127745189a17
   Components:
     - !<own> 14154c3c-441b-4dd0-9d39-57709ce5d3c8
+- !<SceneObject/24658d9e-69b8-4fff-9ead-2797a2d7680f>
+  PrefabRemaps:
+    []
+  Name: ContextualAssistant
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 5ab040cf-3ba2-4f2c-a0bb-0bedf61956f9
 - !<SceneObject/25a5160c-dd09-4e72-9e5d-156e2f82f869>
   PrefabRemaps:
     []
@@ -2815,6 +2832,30 @@
     - !<own> 7b9dfe62-758d-4b65-9bbc-c0398a87bf61
   Components:
     []
+- !<ScriptComponent/5ab040cf-3ba2-4f2c-a0bb-0bedf61956f9>
+  PrefabRemaps:
+    []
+  Name: ContextualAssistant
+  Enabled: true
+  ScriptAsset: !<reference> d8735a5c-51c2-4b3a-b44e-62d21eb7a5c3
+  ScriptInputsDefault:
+    proximityDistance: true
+    cooldownPeriod: true
+    minConfidence: true
+    enableProactiveMode: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      marvinAssistant: !<MappingBased.AssignableType> cfc7e98d-a72e-4dfb-b300-c86cc00bf654
+      camera: !<reference.Camera> 00000000-0000-0065-0000-000000000065
+      proximityDistance: 0.500000
+      cooldownPeriod: !<float> 30000.000000
+      minConfidence: 0.700000
+      enableProactiveMode: true
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/5abc1ef4-db66-4606-9d44-d1596f8d9818>
   PrefabRemaps:
     []
@@ -3344,6 +3385,25 @@
     Fingers_length: 0.000000
     Thumb_inflate: 0.000000
     Thumb_length: 0.000000
+- !<ScriptComponent/74366e4f-1511-4d13-b870-a57a59e686a6>
+  PrefabRemaps:
+    []
+  Name: VideoAnalysisHelper
+  Enabled: true
+  ScriptAsset: !<reference> 245c59ea-2659-43d5-8f63-9428db58054e
+  ScriptInputsDefault:
+    analysisInterval: true
+    enableAutoAnalysis: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      marvinAssistant: !<MappingBased.AssignableType> cfc7e98d-a72e-4dfb-b300-c86cc00bf654
+      analysisInterval: !<float> 5.000000
+      enableAutoAnalysis: true
+  ScriptTypes:
+    "":
+      {}
 - !<Text/7591d592-0166-495f-a2c0-0baa10bca25b>
   PrefabRemaps:
     []
@@ -4028,7 +4088,9 @@
       arOverlay: !<MappingBased.AssignableType_2> 2c6ec376-7e3b-47c9-a4b3-9a4794b53592
       breadboardAROverlay: !<MappingBased.AssignableType_3> 2c6ec376-7e3b-47c9-a4b3-9a4794b53592
       sphereController: !<MappingBased.AssignableType_4> 65c0f761-d132-4011-9db4-7793c56dfea0
-      startStopButton: !<MappingBased.AssignableType_5> f473ba0f-0bcc-44d4-964a-19bb6cccd34a
+      contextualAssistant: !<MappingBased.AssignableType_5> 5ab040cf-3ba2-4f2c-a0bb-0bedf61956f9
+      videoAnalysisHelper: !<MappingBased.AssignableType_6> 74366e4f-1511-4d13-b870-a57a59e686a6
+      startStopButton: !<MappingBased.AssignableType_7> f473ba0f-0bcc-44d4-964a-19bb6cccd34a
       hintTitle: !<reference.Text> 679aa029-99e5-46ab-9d75-2f06437050fc
       hintText: !<reference.Text> ba710944-8232-4a06-b997-0837303f3da1
       statusText: !<reference.Text> 7591d592-0166-495f-a2c0-0baa10bca25b
@@ -5189,6 +5251,21 @@
   BlendNormals: false
   BlendShapes:
     {}
+- !<SceneObject/ba6cc979-e30b-4432-a0bc-e330c93331f6>
+  PrefabRemaps:
+    []
+  Name: VideoAnalysisHelper
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 74366e4f-1511-4d13-b870-a57a59e686a6
 - !<Text/ba710944-8232-4a06-b997-0837303f3da1>
   PrefabRemaps:
     []

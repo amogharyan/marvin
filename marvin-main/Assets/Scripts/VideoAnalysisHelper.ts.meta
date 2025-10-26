@@ -1,0 +1,53 @@
+- !<AssetImportMetadata/49b3f001-a44f-4539-9e25-2543c572b175>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 245c59ea-2659-43d5-8f63-9428db58054e
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 245c59ea-2659-43d5-8f63-9428db58054e
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> dccce56f-ebc4-48fc-8e87-4c3a30a6a717
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/dccce56f-ebc4-48fc-8e87-4c3a30a6a717>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: b71d90a2-5981-4656-a597-e73fa60fd1d3
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    analysisInterval: false
+    enableAutoAnalysis: false
+    marvinAssistant: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - marvinAssistant: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
+      analysisInterval: !<float> 5.000000
+      enableAutoAnalysis: true
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"label", "label":"Video Analysis Helper - Triggers Gemini to analyze video"}'
+    - '// @ui {"widget":"separator"}'
+    - // @input AssignableType marvinAssistant
+    - '// @input float analysisInterval = 5 {"hint":"Seconds between analysis requests"}'
+    - '// @input bool enableAutoAnalysis {"hint":"Enable automatic periodic analysis - DEPRECATED: Use object-specific prompts instead"}'
