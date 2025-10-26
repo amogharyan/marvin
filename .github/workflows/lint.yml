@@ -25,30 +25,25 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: ${{ matrix.workspace }}/package-lock.json
           
       - name: Install dependencies
-        run: npm ci
-        working-directory: ${{ matrix.workspace }}
+        run: npm install
         env:
           NODE_ENV: test
           
       - name: Run ESLint
-        run: npm run lint
-        working-directory: ${{ matrix.workspace }}
+        run: npm run lint:${{ matrix.workspace }}
         continue-on-error: false
         env:
           NODE_ENV: test
         
       - name: TypeScript type check
-        run: npm run type-check
-        working-directory: ${{ matrix.workspace }}
+        run: npm run type-check:${{ matrix.workspace }}
         env:
           NODE_ENV: test
         
       - name: Check formatting
-        run: npx prettier --check "**/*.{ts,tsx,js,jsx,json,md}"
-        working-directory: ${{ matrix.workspace }}
+        run: npx prettier --check "${{ matrix.workspace }}/**/*.{ts,tsx,js,jsx,json,md}"
         continue-on-error: true
         env:
           NODE_ENV: test

@@ -12,6 +12,7 @@
     "test:coverage": "jest --coverage",
     "lint": "eslint tests/**/*.ts || echo 'No TypeScript files to lint'",
     "lint:fix": "eslint tests/**/*.ts --fix || echo 'No TypeScript files to lint'",
+    "type-check": "tsc --noEmit",
     "clean": "node -e \"const fs = require('fs'); if (fs.existsSync('dist')) fs.rmSync('dist', { recursive: true, force: true });\"",
     "prebuild": "npm run clean",
     "setup-lens-studio": "./setup-lens-studio.sh"
