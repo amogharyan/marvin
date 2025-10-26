@@ -303,6 +303,7 @@ describe('ContextMemoryService', () => {
 
       const initialContext = createMockConversationContext({
         user_id: userId,
+        session_id: sessionId,
         conversation_history: initialMessages
       });
 
@@ -315,6 +316,7 @@ describe('ContextMemoryService', () => {
 
       const updatedContext = createMockConversationContext({
         user_id: userId,
+        session_id: sessionId,
         conversation_history: additionalMessages
       });
 
@@ -334,20 +336,21 @@ describe('ContextMemoryService', () => {
       const sessionId = testUtils.createSessionId();
       const userId = testUtils.createUserId();
       
-      const context = createMockConversationContext({
-        user_id: userId,
-        conversation_history: []
-      });
-
       const message = {
         role: ConversationRole.USER,
         content: 'Test message',
         timestamp: new Date()
       };
 
+      const context = createMockConversationContext({
+        user_id: userId,
+        session_id: sessionId,
+        conversation_history: [message]
+      });
+
       // Act
       await service.storeConversationContext(context);
-      await service.storeConversationContext(context); // Same message again
+      await service.storeConversationContext(context); // Same context again
 
       // Assert
       const retrieved = service.getEnhancedConversationContext(sessionId);
@@ -362,11 +365,13 @@ describe('ContextMemoryService', () => {
       
       const context1 = createMockConversationContext({
         user_id: userId,
+        session_id: sessionId,
         conversation_history: []
       });
 
       const context2 = createMockConversationContext({
         user_id: userId,
+        session_id: sessionId,
         conversation_history: []
       });
 
@@ -386,12 +391,14 @@ describe('ContextMemoryService', () => {
       // Create context with undefined user_preferences
       const contextWithUndefinedPrefs = createMockConversationContext({
         user_id: userId,
+        session_id: sessionId,
         user_preferences: undefined
       });
 
       // Create context with partial user_preferences
       const contextWithPartialPrefs = createMockConversationContext({
         user_id: userId,
+        session_id: sessionId,
         user_preferences: {
           voice_settings: {
             preferred_voice: 'custom_voice',
@@ -429,6 +436,7 @@ describe('ContextMemoryService', () => {
       // Create context with partially undefined nested properties
       const contextWithPartialNested = createMockConversationContext({
         user_id: userId,
+        session_id: sessionId,
         user_preferences: {
           voice_settings: {
             preferred_voice: 'test_voice',
@@ -763,7 +771,7 @@ describe('ContextMemoryService', () => {
 
       // Assert
       const afterCleanup = service.getEnhancedConversationContext(sessionId);
-      expect(afterCleanup).toBeNull();
+      expect(afterCleanup).toBeUndefined();
     });
 
     it('should remove learning patterns by userId when removing conversation context', async () => {
@@ -796,7 +804,7 @@ describe('ContextMemoryService', () => {
 
       // Verify conversation context is also removed
       const contextAfter = service.getEnhancedConversationContext(sessionId);
-      expect(contextAfter).toBeNull();
+      expect(contextAfter).toBeUndefined();
     });
 
     it('should handle missing context gracefully when removing conversation context', async () => {

@@ -304,6 +304,74 @@ export class AIVoiceIntegrationService extends AsyncService {
     return this.serviceOrchestrator.contextMemoryService.getObjectInteractionHistory(userId);
   }
 
+  // ===== LETTA INTEGRATION METHODS =====
+
+  /**
+   * Sync conversation to Letta Cloud (non-blocking)
+   * @param agentId - The Letta agent ID
+   * @param transcript - User's voice transcript
+   * @param response - AI assistant's response
+   * @param metadata - Additional metadata for the conversation
+   */
+  public async syncToLetta(
+    agentId: string, 
+    transcript: string, 
+    response: string, 
+    metadata?: Record<string, any>
+  ): Promise<void> {
+    try {
+      const passage = {
+        text: `User: ${transcript}\nAssistant: ${response}`,
+        metadata: {
+          timestamp: new Date().toISOString(),
+          source: 'marvin-ar',
+          ...metadata
+        }
+      };
+
+      // Fire and forget - don't block the main conversation flow
+      this.serviceOrchestrator.lettaService.syncPassage(agentId, passage)
+        .catch(error => {
+          errorLog('Letta sync failed (non-blocking):', error);
+        });
+    } catch (error) {
+      errorLog('Failed to prepare Letta sync:', error);
+    }
+  }
+
+  /**
+   * Get conversation context from Letta
+   * @param agentId - The Letta agent ID
+   * @param objectContext - Current object context for relevant memories
+   */
+  public async getLettaContext(agentId: string, objectContext?: string): Promise<string> {
+    try {
+      return await this.serviceOrchestrator.lettaService.getConversationContext(agentId, objectContext);
+    } catch (error) {
+      errorLog('Failed to get Letta context:', error);
+      return '';
+    }
+  }
+
+  /**
+   * Search Letta passages for relevant information
+   * @param agentId - The Letta agent ID
+   * @param query - Search query
+   * @param limit - Maximum number of results
+   */
+  public async searchLettaPassages(
+    agentId: string, 
+    query: string, 
+    limit: number = 5
+  ): Promise<any> {
+    try {
+      return await this.serviceOrchestrator.lettaService.searchPassages(agentId, query, limit);
+    } catch (error) {
+      errorLog('Failed to search Letta passages:', error);
+      return { passages: [] };
+    }
+  }
+
   /**
    * Shutdown all services gracefully
    */

@@ -51,6 +51,7 @@
   "homepage": "https://github.com/amogharyan/marvin#readme",
   "dependencies": {
     "@chroma-core/default-embed": "^0.1.8",
+    "@letta-ai/letta-client": "^0.0.68665",
     "chromadb": "^3.0.17"
   }
 }

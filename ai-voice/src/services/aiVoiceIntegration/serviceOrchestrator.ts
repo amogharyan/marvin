@@ -10,6 +10,7 @@ import { ChromaService } from '../chromaService';
 import { LearningSimulationService } from '../learningSimulationService';
 import { EnhancedElevenLabsService } from '../enhancedElevenLabsService';
 import { SyntheticARDataService } from '../syntheticARDataService';
+import { LettaService } from '../lettaService';
 import { secureLog, safeLog, errorLog } from '../../utils/secureLogger';
 
 export interface ServiceHealthStatus {
@@ -22,6 +23,7 @@ export interface ServiceHealthStatus {
   learningSimulation: boolean;
   enhancedElevenLabs: boolean;
   syntheticARData: boolean;
+  letta: boolean;
 }
 
 export class ServiceOrchestrator {
@@ -37,6 +39,7 @@ export class ServiceOrchestrator {
   public readonly learningService: LearningSimulationService;
   public readonly enhancedElevenLabsService: EnhancedElevenLabsService;
   public readonly syntheticARDataService: SyntheticARDataService;
+  public readonly lettaService: LettaService;
 
   private isInitialized: boolean = false;
 
@@ -53,6 +56,7 @@ export class ServiceOrchestrator {
     this.learningService = new LearningSimulationService(this.chromaService);
     this.enhancedElevenLabsService = new EnhancedElevenLabsService(this.chromaService, this.learningService);
     this.syntheticARDataService = new SyntheticARDataService(this.chromaService, this.learningService);
+    this.lettaService = new LettaService();
     
     safeLog('🎯 Service Orchestrator initialized');
   }
@@ -76,6 +80,10 @@ export class ServiceOrchestrator {
       await this.syntheticARDataService.initialize();
       secureLog('✅ Synthetic AR Data service initialized');
 
+      // Initialize Letta service
+      await this.lettaService.initialize();
+      secureLog('✅ Letta service initialized');
+
       this.isInitialized = true;
       secureLog('🎉 All Phase 3 services initialized successfully');
     } catch (error) {
@@ -96,7 +104,8 @@ export class ServiceOrchestrator {
         chroma,
         learningSimulation,
         enhancedElevenLabs,
-        syntheticARData
+        syntheticARData,
+        letta
       ] = await Promise.allSettled([
         this.voiceProcessingService.healthCheck?.() || Promise.resolve(true),
         this.voiceCommandParsingService.healthCheck?.() || Promise.resolve(true),
@@ -104,7 +113,8 @@ export class ServiceOrchestrator {
         this.chromaService.healthCheck(),
         this.learningService.healthCheck(),
         this.enhancedElevenLabsService.healthCheck(),
-        this.syntheticARDataService.healthCheck?.() || Promise.resolve(true)
+        this.syntheticARDataService.healthCheck?.() || Promise.resolve(true),
+        this.lettaService.healthCheck()
       ]);
 
       return {
@@ -116,7 +126,8 @@ export class ServiceOrchestrator {
         chroma: chroma.status === 'fulfilled' && chroma.value === true,
         learningSimulation: learningSimulation.status === 'fulfilled' && learningSimulation.value === true,
         enhancedElevenLabs: enhancedElevenLabs.status === 'fulfilled' && enhancedElevenLabs.value === true,
-        syntheticARData: syntheticARData.status === 'fulfilled' && syntheticARData.value === true
+        syntheticARData: syntheticARData.status === 'fulfilled' && syntheticARData.value === true,
+        letta: letta.status === 'fulfilled' && letta.value === true
       };
     } catch (error) {
       errorLog('Failed to get service health status:', error);
@@ -129,7 +140,8 @@ export class ServiceOrchestrator {
         chroma: false,
         learningSimulation: false,
         enhancedElevenLabs: false,
-        syntheticARData: false
+        syntheticARData: false,
+        letta: false
       };
     }
   }

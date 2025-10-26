@@ -70,6 +70,11 @@ export class ContextMemoryService {
    * Remove conversation context
    */
   public removeConversationContext(sessionId: string): boolean {
+    const context = this.memoryManager.getConversationContext(sessionId);
+    if (context) {
+      // Remove learning patterns by userId
+      this.learningPatterns.delete(context.user_id);
+    }
     return this.memoryManager.removeConversationContext(sessionId);
   }
 
@@ -232,6 +237,7 @@ export class ContextMemoryService {
       
       // Clean up test data
       this.removeConversationContext(testSessionId);
+      this.memoryManager.removeUserPreferences(testUserId);
       
       return retrieved !== undefined;
     } catch (error) {

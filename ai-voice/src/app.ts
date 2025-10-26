@@ -29,6 +29,13 @@ async function initializeService() {
   }
 }
 
+// For testing, initialize service immediately if in test environment
+if (process.env.NODE_ENV === 'test') {
+  initializeService().catch(error => {
+    console.error('❌ Failed to initialize service for testing:', error);
+  });
+}
+
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -198,6 +205,22 @@ app.get('/api/synthetic-data/summary', createGetEndpoint(
   'Synthetic Data Summary'
 ));
 
+// Letta Integration Endpoints (Phase 3)
+app.post('/api/letta/sync', createEndpoint(
+  (req) => aiVoiceService.syncToLetta(req.body.agentId, req.body.transcript, req.body.response, req.body.metadata),
+  ['agentId', 'transcript', 'response']
+));
+
+app.post('/api/letta/context', createEndpoint(
+  (req) => aiVoiceService.getLettaContext(req.body.agentId, req.body.objectContext),
+  ['agentId']
+));
+
+app.post('/api/letta/search', createEndpoint(
+  (req) => aiVoiceService.searchLettaPassages(req.body.agentId, req.body.query, req.body.limit || 5),
+  ['agentId', 'query']
+));
+
 // Error handling middleware
 app.use((error: any, req: any, res: any, next: any) => {
   console.error('Unhandled error:', error);
@@ -239,12 +262,18 @@ async function startServer() {
     console.log(`   POST /api/simulate-demo-progression - Simulate demo learning progression`);
     console.log(`   GET  /api/synthetic-data/summary - Get synthetic AR data summary`);
     console.log('');
+    console.log('🧠 Letta Integration Endpoints (Phase 3):');
+    console.log(`   POST /api/letta/sync - Sync conversation to Letta Cloud`);
+    console.log(`   POST /api/letta/context - Get conversation context from Letta`);
+    console.log(`   POST /api/letta/search - Search Letta passages`);
+    console.log('');
     console.log('🎯 Phase 3 Features:');
     console.log(`   ✅ Chroma Vector Database Integration`);
     console.log(`   ✅ Learning Simulation System (Day 1 vs Day 30)`);
     console.log(`   ✅ Enhanced ElevenLabs Conversational AI Platform`);
     console.log(`   ✅ Personalized Suggestion Algorithms`);
     console.log(`   ✅ Contextual Memory & Pattern Recognition`);
+    console.log(`   ✅ Letta Cloud Stateful Agent Memory`);
     console.log('');
     console.log('🎯 Phase 2 Features:');
     console.log(`   ✅ Advanced multimodal processing (visual + voice + context)`);

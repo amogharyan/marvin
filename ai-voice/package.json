@@ -33,6 +33,7 @@
   "dependencies": {
     "@elevenlabs/elevenlabs-js": "^2.20.1",
     "@google/generative-ai": "^0.24.1",
+    "@letta-ai/letta-client": "^0.0.68665",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.4",
     "@types/node": "^24.9.1",
