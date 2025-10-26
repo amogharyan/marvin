@@ -79,7 +79,8 @@ serve(async (req) => {
                 user_id,
                 pattern_type: pattern.pattern_type,
                 pattern_data: pattern,
-                confidence_score: pattern.confidence || 0.5,
+                // Use nullish coalescing so legitimate 0 confidence is preserved
+                confidence_score: pattern.confidence ?? 0.5,
                 context: trigger_context
               })
           }
