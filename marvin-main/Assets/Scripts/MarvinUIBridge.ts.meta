@@ -30,7 +30,6 @@
     breadboardAROverlay: false
     breadboardAssistant: false
     contextualAssistant: false
-    detectionPipeline: false
     hintText: false
     hintTitle: false
     marvinAssistant: false
@@ -39,6 +38,7 @@
     sphereController: false
     startStopButton: false
     statusText: false
+    videoAnalysisHelper: false
   ScriptTypesHidden:
     {}
   ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
@@ -54,7 +54,7 @@
       breadboardAROverlay: !<MappingBased.AssignableType_3> 00000000-0000-0000-0000-000000000000
       sphereController: !<MappingBased.AssignableType_4> 00000000-0000-0000-0000-000000000000
       contextualAssistant: !<MappingBased.AssignableType_5> 00000000-0000-0000-0000-000000000000
-      detectionPipeline: !<MappingBased.AssignableType_6> 00000000-0000-0000-0000-000000000000
+      videoAnalysisHelper: !<MappingBased.AssignableType_6> 00000000-0000-0000-0000-000000000000
       startStopButton: !<MappingBased.AssignableType_7> 00000000-0000-0000-0000-000000000000
       hintTitle: !<reference.Text> 00000000-0000-0000-0000-000000000000
       hintText: !<reference.Text> 00000000-0000-0000-0000-000000000000
@@ -75,7 +75,7 @@
     - // @input AssignableType_3 breadboardAROverlay
     - // @input AssignableType_4 sphereController
     - // @input AssignableType_5 contextualAssistant
-    - '// @input AssignableType_6 detectionPipeline {"hint":"New simplified object detection pipeline"}'
+    - // @input AssignableType_6 videoAnalysisHelper
     - '// @ui {"widget":"group_end"}'
     - '// @ui {"widget":"separator"}'
     - '// @ui {"widget":"group_start", "label":"UI Elements"}'

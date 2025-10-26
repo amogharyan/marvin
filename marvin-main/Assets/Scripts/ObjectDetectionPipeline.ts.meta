@@ -1,20 +1,20 @@
-- !<AssetImportMetadata/7d26f6bc-ed47-4fd2-a9b7-f20e33d657f3>
+- !<AssetImportMetadata/13ec86b9-8464-4394-b9d9-373ae54191a3>
   ImportedAssetIds:
-    TypeScriptAsset: !<reference> f30e2d17-e8d0-410b-8fd1-1aa27065377c
+    TypeScriptAsset: !<reference> 063e8364-eaf1-46f9-b39b-e5749d918617
   ImporterName: TypeScriptAssetImporter
-  PrimaryAsset: !<reference> f30e2d17-e8d0-410b-8fd1-1aa27065377c
+  PrimaryAsset: !<reference> 063e8364-eaf1-46f9-b39b-e5749d918617
   PackageType: NotAPackage
   LegacyPackagePolicy: ~
   ExtraData:
     {}
   AssetDataMap:
-    TypeScriptAsset: !<own> e289e8ad-63fd-4c6b-9a9c-1235383aa859
+    TypeScriptAsset: !<own> c4ef76f7-7c03-4855-9de0-40d0942f6733
   DependentFiles:
     []
   ImporterSettings: !<AssetImporterSettings>
     {}
   CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
-- !<TypeScriptAssetData/e289e8ad-63fd-4c6b-9a9c-1235383aa859>
+- !<TypeScriptAssetData/c4ef76f7-7c03-4855-9de0-40d0942f6733>
   SvgIcon: ""
   SetupScript:
     code: ""
@@ -22,10 +22,14 @@
   VersionMajor: 0
   VersionMinor: 0
   VersionPatch: 0
-  ComponentUid: 3c2be8a0-8443-4aeb-9290-bbf754f8a83c
+  ComponentUid: c91dbbe0-6f57-409d-80bf-089b69338755
   ExportUid: 00000000-0000-0000-0000-000000000000
   PackagePolicy: CanBeUnpacked
   ScriptInputsHidden:
+    backpackDetectionEnabled: false
+    backpackMinConfidence: false
+    backpackPrompt: false
+    backpackTriggerOnce: false
     cameraCapture: false
     confidenceThreshold: false
     continuousMode: false
@@ -79,6 +83,10 @@
       phoneMinConfidence: 0.700000
       phonePrompt: "I notice you have your phone. Would you like me to help you stay focused?"
       phoneTriggerOnce: false
+      backpackDetectionEnabled: true
+      backpackMinConfidence: 0.700000
+      backpackPrompt: here
+      backpackTriggerOnce: false
   ScriptTypes:
     -
       {}
@@ -119,4 +127,10 @@
     - // @input float phoneMinConfidence = 0.7
     - '// @input string phonePrompt = "I notice you have your phone. Would you like me to help you stay focused?" {"widget":"text_area"}'
     - // @input bool phoneTriggerOnce
+    - '// @ui {"widget":"group_end"}'
+    - '// @ui {"widget":"group_start", "label":"Backpack Detection"}'
+    - // @input bool backpackDetectionEnabled = true
+    - // @input float backpackMinConfidence = 0.7
+    - '// @input string backpackPrompt = "here" {"widget":"text_area"}'
+    - // @input bool backpackTriggerOnce
     - '// @ui {"widget":"group_end"}'

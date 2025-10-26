@@ -3,7 +3,7 @@ import { MarvinAssistant } from "./MarvinAssistant";
 import { AROverlay } from "./AROverlay";
 import { SphereController } from "./SphereController";
 import { ContextualAssistant } from "./ContextualAssistant";
-import { ObjectDetectionPipeline } from "./ObjectDetectionPipeline";
+import { VideoAnalysisHelper } from "./VideoAnalysisHelper";
 import { LSTween } from "LSTween.lspkg/LSTween";
 import Easing from "LSTween.lspkg/TweenJS/Easing";
 import Event from "SpectaclesInteractionKit.lspkg/Utils/Event";
@@ -46,8 +46,7 @@ export class MarvinUIBridge extends BaseScriptComponent {
   private contextualAssistant: ContextualAssistant;
 
   @input
-  @hint("New simplified object detection pipeline")
-  private detectionPipeline: ObjectDetectionPipeline;
+  private videoAnalysisHelper: VideoAnalysisHelper;
   @ui.group_end
   @ui.separator
   @ui.group_start("UI Elements")
@@ -180,14 +179,14 @@ export class MarvinUIBridge extends BaseScriptComponent {
     this.isAnalysisActive = true;
     this.updateUIState(UIState.Analyzing);
 
-    // Start the assistant for voice interaction
+    // Start the assistant for object recognition
     this.marvinAssistant.createGeminiLiveSession();
     this.marvinAssistant.startAnalysis();
 
-    // Start the simplified detection pipeline
-    if (this.detectionPipeline) {
-      // Pipeline starts automatically, nothing else needed
-      print("[UI] Object detection pipeline is running");
+    // Start periodic video analysis
+    if (this.videoAnalysisHelper) {
+      this.videoAnalysisHelper.startAnalysis();
+      print("[UI] Started VideoAnalysisHelper for periodic scene analysis");
     }
 
     // Update UI for Marvin analysis mode
@@ -209,12 +208,16 @@ export class MarvinUIBridge extends BaseScriptComponent {
     this.isAnalysisActive = false;
     this.marvinAssistant.stopAnalysis();
 
-    // Note: Detection pipeline continues running in background (configurable in pipeline settings)
-    
+    // Stop periodic video analysis
+    if (this.videoAnalysisHelper) {
+      this.videoAnalysisHelper.stopAnalysis();
+      print("[UI] Stopped VideoAnalysisHelper");
+    }
+
     this.updateUIState(UIState.Initial);
     this.updateStatusText("Analysis stopped");
     
-    // Start 4-second timeout to revert to original state
+    // Start 10-second timeout to revert to original state
     this.startRevertTimeout();
     
     // Update button text
