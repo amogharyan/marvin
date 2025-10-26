@@ -1,5 +1,5 @@
 import { ContextMemoryService } from '../../src/services/contextMemoryService';
-import { createMockConversationContext, createMockDemoObject, testUtils } from '../utils/testHelpers';
+import { createMockConversationContext, testUtils } from '../utils/testHelpers';
 import { ConversationRole, ReminderFrequency } from '../../src/types/enums';
 import { UserPreferences } from '../../src/types';
 
@@ -54,9 +54,7 @@ describe('ContextMemoryService', () => {
   describe('generatePersonalizedSuggestions', () => {
     it('should generate suggestions for breakfast bowl object', async () => {
       // Arrange
-      const userId = testUtils.createUserId();
       const context = createMockConversationContext();
-      const objectContext = createMockDemoObject();
 
       // Act
       const suggestions = service.generatePersonalizedSuggestions(context);
@@ -73,7 +71,6 @@ describe('ContextMemoryService', () => {
 
     it('should generate suggestions without object context', async () => {
       // Arrange
-      const userId = testUtils.createUserId();
       const context = createMockConversationContext();
 
       // Act
@@ -86,11 +83,7 @@ describe('ContextMemoryService', () => {
 
     it('should generate medicine-related suggestions for medicine bottle', async () => {
       // Arrange
-      const userId = testUtils.createUserId();
       const context = createMockConversationContext();
-      const objectContext = createMockDemoObject({
-        name: 'medicine_bottle'
-      });
 
       // Act
       const suggestions = service.generatePersonalizedSuggestions(context);
@@ -140,7 +133,6 @@ describe('ContextMemoryService', () => {
 
     it('should merge user preferences when updating existing context', async () => {
       // Arrange
-      const sessionId = testUtils.createSessionId();
       const userId = testUtils.createUserId();
       
       const initialContext = createMockConversationContext({
@@ -203,7 +195,6 @@ describe('ContextMemoryService', () => {
 
     it('should handle undefined user preferences gracefully', async () => {
       // Arrange
-      const sessionId = testUtils.createSessionId();
       const userId = testUtils.createUserId();
       const context = createMockConversationContext({
         user_id: userId,

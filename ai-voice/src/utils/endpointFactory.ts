@@ -20,7 +20,7 @@ export interface EndpointResponse<T = any> {
 /**
  * Create a standardized endpoint handler with validation and error handling
  */
-export function createEndpoint<T = any, R = any>(
+export function createEndpoint<R = any>(
   handler: (req: EndpointRequest) => Promise<R>,
   requiredFields: string[] = [],
   handlerName?: string
@@ -85,7 +85,7 @@ export function createEndpoint<T = any, R = any>(
 /**
  * Create a GET endpoint handler (for endpoints that don't require body validation)
  */
-export function createGetEndpoint<T = any, R = any>(
+export function createGetEndpoint<R = any>(
   handler: (req: EndpointRequest) => Promise<R>,
   handlerName?: string
 ) {
@@ -218,7 +218,7 @@ export function validateRequestBody(body: any, schema: Record<string, 'required'
 /**
  * Create an endpoint with custom validation
  */
-export function createValidatedEndpoint<T = any, R = any>(
+export function createValidatedEndpoint<R = any>(
   handler: (req: EndpointRequest) => Promise<R>,
   validator: (body: any) => string[],
   handlerName?: string

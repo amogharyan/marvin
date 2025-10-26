@@ -3,7 +3,7 @@
 
 import { ConversationContext, DemoObject, ChatMessage, UserPreferences } from '../types';
 import { errorLog } from '../utils/secureLogger';
-import { ConversationRole, ReminderFrequency } from '../types/enums';
+import { ConversationRole } from '../types/enums';
 import { MemoryManager, MemoryEntry } from './contextMemory/memoryManager';
 import { PatternAnalyzer, LearningPattern } from './contextMemory/patternAnalyzer';
 import { SuggestionGenerator, PersonalizedSuggestion } from './contextMemory/suggestionGenerator';
@@ -101,10 +101,7 @@ export class ContextMemoryService {
   /**
    * Generate routine suggestions
    */
-  public generateRoutineSuggestions(
-    _context: ConversationContext,
-    _objectContext?: DemoObject
-  ): PersonalizedSuggestion[] {
+  public generateRoutineSuggestions(): PersonalizedSuggestion[] {
     // This would integrate with the suggestion generator
     return [];
   }
@@ -112,10 +109,7 @@ export class ContextMemoryService {
   /**
    * Generate preference suggestions
    */
-  public generatePreferenceSuggestions(
-    _context: ConversationContext,
-    _objectContext?: DemoObject
-  ): PersonalizedSuggestion[] {
+  public generatePreferenceSuggestions(): PersonalizedSuggestion[] {
     // This would integrate with the suggestion generator
     return [];
   }

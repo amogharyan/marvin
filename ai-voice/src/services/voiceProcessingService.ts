@@ -62,8 +62,7 @@ export class VoiceProcessingService {
    */
   private generateContextualResponse(
     voiceText: string,
-    objectContext?: DemoObject,
-    _conversationContext?: ConversationContext
+    objectContext?: DemoObject
   ): string {
     const lowerText = voiceText.toLowerCase();
     
@@ -113,8 +112,7 @@ export class VoiceProcessingService {
    */
   private generateObjectSpecificResponse(
     voiceText: string,
-    objectContext: DemoObject,
-    _objectConfig: any
+    objectContext: DemoObject
   ): string {
     const objectName = objectContext.name;
     
@@ -157,7 +155,7 @@ export class VoiceProcessingService {
   /**
    * Extract suggested actions from response
    */
-  private extractSuggestedActions(response: string, _objectContext?: DemoObject): string[] {
+  private extractSuggestedActions(response: string): string[] {
     const actions: string[] = [];
     
     if (response.includes('schedule') || response.includes('calendar')) {
