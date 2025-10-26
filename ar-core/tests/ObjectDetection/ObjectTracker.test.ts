@@ -13,7 +13,7 @@ const mockMLComponent = {
   state: 'Idle'
 };
 
-const mockSceneObject = {
+const _mockSceneObject = {
   enabled: true,
   name: 'TestObject',
   getTransform: jest.fn(() => ({
@@ -23,7 +23,7 @@ const mockSceneObject = {
 };
 
 describe('ObjectTracker', () => {
-  let objectTracker: any;
+  let _objectTracker: unknown;
 
   beforeEach(() => {
     jest.clearAllMocks();

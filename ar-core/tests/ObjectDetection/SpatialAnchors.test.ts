@@ -165,7 +165,7 @@ describe('SpatialAnchors', () => {
 
     test('should find nearest anchor to position', () => {
       // FAILING TEST: Nearest neighbor search needed
-      const queryPosition = { x: 0.9, y: 0, z: -1.4 };
+      const _queryPosition = { x: 0.9, y: 0, z: -1.4 };
       const anchors = [
         { type: 'keys', position: { x: 1, y: 0, z: -1.5 }, distance: 0.141 },
         { type: 'laptop', position: { x: -0.5, y: 0.8, z: -2 }, distance: 1.72 }
@@ -198,7 +198,7 @@ describe('SpatialAnchors', () => {
 
     test('should cleanup old anchors automatically', () => {
       // FAILING TEST: Automatic cleanup needed
-      const maxAge = 10000; // 10 seconds
+      const _maxAge = 10000; // 10 seconds
       const oldAnchor = {
         type: 'bowl',
         timestamp: Date.now() - 15000,
