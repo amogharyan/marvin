@@ -3,7 +3,7 @@ import { MarvinAssistant } from "./MarvinAssistant";
 import { AROverlay } from "./AROverlay";
 import { SphereController } from "./SphereController";
 import { ContextualAssistant } from "./ContextualAssistant";
-import { VideoAnalysisHelper } from "./VideoAnalysisHelper";
+import { ObjectDetectionPipeline } from "./ObjectDetectionPipeline";
 import { LSTween } from "LSTween.lspkg/LSTween";
 import Easing from "LSTween.lspkg/TweenJS/Easing";
 import Event from "SpectaclesInteractionKit.lspkg/Utils/Event";
@@ -46,7 +46,8 @@ export class MarvinUIBridge extends BaseScriptComponent {
   private contextualAssistant: ContextualAssistant;
 
   @input
-  private videoAnalysisHelper: VideoAnalysisHelper;
+  @hint("New simplified object detection pipeline")
+  private detectionPipeline: ObjectDetectionPipeline;
   @ui.group_end
   @ui.separator
   @ui.group_start("UI Elements")
@@ -102,6 +103,10 @@ export class MarvinUIBridge extends BaseScriptComponent {
     this.initializeUI();
     this.connectEvents();
     this.updateUIState(UIState.Initial);
+    
+    // Automatically start the Gemini Live session and analysis
+    print("[MarvinUI] Auto-starting Gemini Live session...");
+    this.startAnalysis();
   }
 
   private initializeUI() {
@@ -175,14 +180,14 @@ export class MarvinUIBridge extends BaseScriptComponent {
     this.isAnalysisActive = true;
     this.updateUIState(UIState.Analyzing);
 
-    // Start the assistant for object recognition
+    // Start the assistant for voice interaction
     this.marvinAssistant.createGeminiLiveSession();
     this.marvinAssistant.startAnalysis();
 
-    // Start periodic video analysis
-    if (this.videoAnalysisHelper) {
-      this.videoAnalysisHelper.startAnalysis();
-      print("[UI] Started VideoAnalysisHelper for periodic scene analysis");
+    // Start the simplified detection pipeline
+    if (this.detectionPipeline) {
+      // Pipeline starts automatically, nothing else needed
+      print("[UI] Object detection pipeline is running");
     }
 
     // Update UI for Marvin analysis mode
@@ -204,16 +209,12 @@ export class MarvinUIBridge extends BaseScriptComponent {
     this.isAnalysisActive = false;
     this.marvinAssistant.stopAnalysis();
 
-    // Stop periodic video analysis
-    if (this.videoAnalysisHelper) {
-      this.videoAnalysisHelper.stopAnalysis();
-      print("[UI] Stopped VideoAnalysisHelper");
-    }
-
+    // Note: Detection pipeline continues running in background (configurable in pipeline settings)
+    
     this.updateUIState(UIState.Initial);
     this.updateStatusText("Analysis stopped");
     
-    // Start 10-second timeout to revert to original state
+    // Start 4-second timeout to revert to original state
     this.startRevertTimeout();
     
     // Update button text

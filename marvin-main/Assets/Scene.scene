@@ -15,10 +15,12 @@
     - !<own> 24658d9e-69b8-4fff-9ead-2797a2d7680f
     - !<own> dc835c8f-6d13-4547-9e46-3924d04c24bd
     - !<own> 6ae800e4-2beb-4e20-8c86-039d3d9ad00b
+    - !<own> 6ae800e4-2beb-4e20-8c86-039d3d9ad00b
     - !<own> 6ab9e2ec-c483-48d6-8e59-5a126e8a1551
     - !<own> a46e7340-3fc9-48db-a35e-0816511d30a9
     - !<own> 30a0056a-fb61-4349-a470-5e7bf41cec71
     - !<own> 6985f6a1-d9d9-4da7-b92b-c0849a36e06c
+    - !<own> 1a40bc3d-7d6c-4045-b948-a4929e4b3c24
     - !<own> 1a40bc3d-7d6c-4045-b948-a4929e4b3c24
     - !<own> a068b954-a80f-457b-a1f4-81084d73ec0d
     - !<own> 6ce7c8ce-76f5-4dd3-ab9b-6e3102f8da3d
@@ -503,15 +505,20 @@
       laptopTriggerOncePerSession: false
       laptopMinConfidence: 0.700000
       laptopPrompt: "Tell this to the user: I see you're on your laptop! Would you like me to pull up your calendar for today?"
+      laptopPrompt: "Tell this to the user: I see you're on your laptop! Would you like me to pull up your calendar for today?"
       laptopCooldown: !<float> 30.000000
       personDetectionEnabled: true
       personTriggerOncePerSession: true
+      personDetectionEnabled: true
+      personTriggerOncePerSession: true
       personMinConfidence: 0.800000
+      personPrompt: "Ask this to the user: Hello! I see you there. How can I assist you today?"
       personPrompt: "Ask this to the user: Hello! I see you there. How can I assist you today?"
       personCooldown: !<float> 60.000000
       phoneDetectionEnabled: true
       phoneTriggerOncePerSession: true
       phoneMinConfidence: 0.700000
+      phonePrompt: "Ask this to the user: I notice you have your phone. Would you like me to help you stay focused on your work?"
       phonePrompt: "Ask this to the user: I notice you have your phone. Would you like me to help you stay focused on your work?"
       phoneCooldown: !<float> 45.000000
       backpackDetectionEnabled: true
@@ -776,6 +783,21 @@
     - !<own> 2b48df55-44c4-4516-b674-91f4c5d5481b
   Components:
     []
+- !<SceneObject/1a40bc3d-7d6c-4045-b948-a4929e4b3c24>
+  PrefabRemaps:
+    []
+  Name: ObjectDetectionPipeline
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 80011044-5600-400f-8c29-865222cc8677
 - !<SceneObject/1a40bc3d-7d6c-4045-b948-a4929e4b3c24>
   PrefabRemaps:
     []
@@ -3023,6 +3045,34 @@
   ScriptTypes:
     "":
       {}
+- !<ScriptComponent/5ab992ab-a328-477d-856d-8f7a879d5c6f>
+  PrefabRemaps:
+    []
+  Name: CalendarOverlay
+  Enabled: true
+  ScriptAsset: !<reference> 561f69aa-0bf2-4f56-a5cc-af7e896a5563
+  ScriptInputsDefault:
+    autoHideAfterSeconds: true
+    backgroundColor: true
+    textColor: true
+    animationDuration: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      calendarContainer: !<reference.SceneObject> 00000000-0000-0065-0000-000000000064
+      backgroundImage: !<reference.Image> 4f15c769-914c-4dfb-97d4-0901ec89d78a
+      titleText: !<reference.Text> ba710944-8232-4a06-b997-0837303f3da1
+      dateText: !<reference.Text> 679aa029-99e5-46ab-9d75-2f06437050fc
+      eventsText: !<reference.Text> 7591d592-0166-495f-a2c0-0baa10bca25b
+      closeButton: !<reference.SceneObject> 6ab9e2ec-c483-48d6-8e59-5a126e8a1551
+      autoHideAfterSeconds: !<float> 0.000000
+      backgroundColor: !<Vec4> {x: 0.100000, y: 0.100000, z: 0.150000, w: 0.950000}
+      textColor: !<Vec3> {x: 1.000000, y: 1.000000, z: 1.000000}
+      animationDuration: 0.300000
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/5abc1ef4-db66-4606-9d44-d1596f8d9818>
   PrefabRemaps:
     []
@@ -3412,6 +3462,21 @@
     - !<own> 2c8d046c-00f9-4368-b888-6af2949b0548
     - !<own> 32cb4123-c93d-4674-b19a-5e3e82ad9dd4
     - !<own> f67b9050-4c81-44df-bd49-a789223b06fd
+- !<SceneObject/6ae800e4-2beb-4e20-8c86-039d3d9ad00b>
+  PrefabRemaps:
+    []
+  Name: CalendarOverlay
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 5ab992ab-a328-477d-856d-8f7a879d5c6f
 - !<SceneObject/6ae800e4-2beb-4e20-8c86-039d3d9ad00b>
   PrefabRemaps:
     []
@@ -4390,6 +4455,7 @@
       breadboardAROverlay: !<MappingBased.AssignableType_3> 2c6ec376-7e3b-47c9-a4b3-9a4794b53592
       sphereController: !<MappingBased.AssignableType_4> 65c0f761-d132-4011-9db4-7793c56dfea0
       contextualAssistant: !<MappingBased.AssignableType_5> 5ab040cf-3ba2-4f2c-a0bb-0bedf61956f9
+      detectionPipeline: !<MappingBased.AssignableType_6> 80011044-5600-400f-8c29-865222cc8677
       detectionPipeline: !<MappingBased.AssignableType_6> 80011044-5600-400f-8c29-865222cc8677
       startStopButton: !<MappingBased.AssignableType_7> f473ba0f-0bcc-44d4-964a-19bb6cccd34a
       hintTitle: !<reference.Text> 679aa029-99e5-46ab-9d75-2f06437050fc
