@@ -43,7 +43,17 @@ app.use(express.urlencoded({ extended: true }));
 
 // Health check endpoint
 app.get('/health', createHealthEndpoint(
-  () => aiVoiceService.getDetailedHealthStatus(),
+  async () => {
+    if (!aiVoiceService) {
+      return {
+        status: 'initializing',
+        services: {},
+        timestamp: new Date().toISOString(),
+        message: 'Service is still initializing'
+      };
+    }
+    return await aiVoiceService.getDetailedHealthStatus();
+  },
   'Health Check'
 ));
 
@@ -287,10 +297,13 @@ async function startServer() {
   });
 }
 
-// Start the server
-startServer().catch(error => {
-  console.error('❌ Failed to start server:', error);
-  process.exit(1);
-});
+// Start the server unless running under tests
+if (process.env.NODE_ENV !== 'test') {
+    startServer().catch(error => {
+      console.error('❌ Failed to start server:', error);
+      process.exit(1);
+    });
+}
 
+// Export app for testing
 export default app;
