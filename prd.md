@@ -301,23 +301,6 @@ const GlassCard = styled.div`
 - Proof generation: Progressive wave animation
 - Success states: Confetti or particle burst
 
-### User Flow Architecture
-
-```mermaid
-graph LR
-		A[Landing] --> B{User Type}
-		B --> C[Patient Dashboard]
-		B --> D[Doctor Portal]
-		B --> E[Researcher Portal]
-		C --> F[Upload Genome]
-		F --> G[Encrypt & Pin to IPFS]
-		G --> H[Create On-chain Commitment]
-		H --> I[Request Proof Generation]
-		I --> J[Proof Generated]
-		J --> K[Share Proof with Doctor/Researcher]
-		K --> L[On-chain Verification]
-		K --> M[Aggregate Data (Research)]
-```
 
 ---
 
