@@ -1,0 +1,123 @@
+- !<AssetImportMetadata/a8d6d2a8-7315-476c-b713-a7e6389bbc45>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 24751859-8d31-4255-9f47-3028838d6892
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 24751859-8d31-4255-9f47-3028838d6892
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> d083e799-19b5-438e-8025-0ec3769082df
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/d083e799-19b5-438e-8025-0ec3769082df>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: cc479558-72c4-465a-8c44-3ad704990e15
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    customObjectCooldown: false
+    customObjectEnabled: false
+    customObjectMinConfidence: false
+    customObjectPrompt: false
+    customObjectTriggerOncePerSession: false
+    customObjectType: false
+    detectionManager: false
+    laptopCooldown: false
+    laptopDetectionEnabled: false
+    laptopMinConfidence: false
+    laptopPrompt: false
+    laptopTriggerOncePerSession: false
+    marvinAssistant: false
+    personCooldown: false
+    personDetectionEnabled: false
+    personMinConfidence: false
+    personPrompt: false
+    personTriggerOncePerSession: false
+    phoneCooldown: false
+    phoneDetectionEnabled: false
+    phoneMinConfidence: false
+    phonePrompt: false
+    phoneTriggerOncePerSession: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - marvinAssistant: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
+      detectionManager: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+      laptopDetectionEnabled: true
+      laptopTriggerOncePerSession: true
+      laptopMinConfidence: 0.700000
+      laptopPrompt: "I see you're on your laptop! Would you like me to pull up your calendar for today?"
+      laptopCooldown: !<float> 30.000000
+      personDetectionEnabled: false
+      personTriggerOncePerSession: false
+      personMinConfidence: 0.800000
+      personPrompt: "Hello! I see you there. How can I assist you today?"
+      personCooldown: !<float> 60.000000
+      phoneDetectionEnabled: false
+      phoneTriggerOncePerSession: false
+      phoneMinConfidence: 0.700000
+      phonePrompt: "I notice you have your phone. Would you like me to help you stay focused on your work?"
+      phoneCooldown: !<float> 45.000000
+      customObjectEnabled: false
+      customObjectTriggerOncePerSession: false
+      customObjectType: cup
+      customObjectMinConfidence: 0.700000
+      customObjectPrompt: I see a cup nearby. Staying hydrated is important!
+      customObjectCooldown: !<float> 60.000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"label", "label":"Object Detection → Gemini Bridge"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"group_start", "label":"Components"}'
+    - // @input AssignableType marvinAssistant
+    - // @input AssignableType_1 detectionManager
+    - '// @ui {"widget":"group_end"}'
+    - '// @ui {"widget":"group_start", "label":"Laptop Detection Rule"}'
+    - // @input bool laptopDetectionEnabled = true
+    - "// @input bool laptopTriggerOncePerSession = true {\"hint\":\"Only trigger once per session (won't repeat even after cooldown)\"}"
+    - '// @input float laptopMinConfidence = 0.7 {"hint":"Minimum confidence to trigger (0.0-1.0)"}'
+    - "// @input string laptopPrompt = \"I see you're on your laptop! Would you like me to pull up your calendar for today?\" {\"hint\":\"What Gemini should say when laptop detected\", \"widget\":\"text_area\"}"
+    - '// @input float laptopCooldown = 30 {"hint":"Cooldown between laptop detections (seconds, ignored if trigger once is enabled)"}'
+    - '// @ui {"widget":"group_end"}'
+    - '// @ui {"widget":"group_start", "label":"Person Detection Rule"}'
+    - // @input bool personDetectionEnabled
+    - // @input bool personTriggerOncePerSession
+    - // @input float personMinConfidence = 0.8
+    - '// @input string personPrompt = "Hello! I see you there. How can I assist you today?" {"widget":"text_area"}'
+    - // @input float personCooldown = 60
+    - '// @ui {"widget":"group_end"}'
+    - '// @ui {"widget":"group_start", "label":"Phone Detection Rule"}'
+    - // @input bool phoneDetectionEnabled
+    - // @input bool phoneTriggerOncePerSession
+    - // @input float phoneMinConfidence = 0.7
+    - '// @input string phonePrompt = "I notice you have your phone. Would you like me to help you stay focused on your work?" {"widget":"text_area"}'
+    - // @input float phoneCooldown = 45
+    - '// @ui {"widget":"group_end"}'
+    - '// @ui {"widget":"group_start", "label":"Custom Detection Rules"}'
+    - "// @input bool customObjectEnabled {\"hint\":\"Enable custom object detection (e.g., 'cup', 'book')\"}"
+    - // @input bool customObjectTriggerOncePerSession
+    - "// @input string customObjectType = \"cup\" {\"hint\":\"Object class name (e.g., 'cup', 'book', 'chair')\"}"
+    - // @input float customObjectMinConfidence = 0.7
+    - '// @input string customObjectPrompt = "I see a cup nearby. Staying hydrated is important!" {"widget":"text_area"}'
+    - // @input float customObjectCooldown = 60
+    - '// @ui {"widget":"group_end"}'

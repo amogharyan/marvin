@@ -10,9 +10,11 @@ import { VideoController } from "Remote Service Gateway.lspkg/Helpers/VideoContr
 
 import Event from "SpectaclesInteractionKit.lspkg/Utils/Event";
 import { setTimeout } from "SpectaclesInteractionKit.lspkg/Utils/FunctionTimingUtils";
+import { RemoteObjectDetectionManager, YOLODetection, YOLO_CATEGORIES } from "./RemoteObjectDetectionManager";
 
-// Component type definitions
+// Component type definitions - Extended with YOLO categories
 export enum ComponentType {
+  // Original electronic components
   Resistor = "resistor",
   OpAmp = "op_amp",
   Breadboard = "breadboard",
@@ -21,6 +23,89 @@ export enum ComponentType {
   Inductor = "inductor",
   Diode = "diode",
   Transistor = "transistor",
+
+  // YOLO object categories (80 classes)
+  Person = "person",
+  Bicycle = "bicycle",
+  Car = "car",
+  Motorcycle = "motorcycle",
+  Airplane = "airplane",
+  Bus = "bus",
+  Train = "train",
+  Truck = "truck",
+  Boat = "boat",
+  TrafficLight = "traffic light",
+  FireHydrant = "fire hydrant",
+  StopSign = "stop sign",
+  ParkingMeter = "parking meter",
+  Bench = "bench",
+  Bird = "bird",
+  Cat = "cat",
+  Dog = "dog",
+  Horse = "horse",
+  Sheep = "sheep",
+  Cow = "cow",
+  Elephant = "elephant",
+  Bear = "bear",
+  Zebra = "zebra",
+  Giraffe = "giraffe",
+  Backpack = "backpack",
+  Umbrella = "umbrella",
+  Handbag = "handbag",
+  Tie = "tie",
+  Suitcase = "suitcase",
+  Frisbee = "frisbee",
+  Skis = "skis",
+  Snowboard = "snowboard",
+  SportsBall = "sports ball",
+  Kite = "kite",
+  BaseballBat = "baseball bat",
+  BaseballGlove = "baseball glove",
+  Skateboard = "skateboard",
+  Surfboard = "surfboard",
+  TennisRacket = "tennis racket",
+  Bottle = "bottle",
+  WineGlass = "wine glass",
+  Cup = "cup",
+  Fork = "fork",
+  Knife = "knife",
+  Spoon = "spoon",
+  Bowl = "bowl",
+  Banana = "banana",
+  Apple = "apple",
+  Sandwich = "sandwich",
+  Orange = "orange",
+  Broccoli = "broccoli",
+  Carrot = "carrot",
+  HotDog = "hot dog",
+  Pizza = "pizza",
+  Donut = "donut",
+  Cake = "cake",
+  Chair = "chair",
+  Couch = "couch",
+  PottedPlant = "potted plant",
+  Bed = "bed",
+  DiningTable = "dining table",
+  Toilet = "toilet",
+  TV = "tv",
+  Laptop = "laptop",
+  Mouse = "mouse",
+  Remote = "remote",
+  Keyboard = "keyboard",
+  CellPhone = "cell phone",
+  Microwave = "microwave",
+  Oven = "oven",
+  Toaster = "toaster",
+  Sink = "sink",
+  Refrigerator = "refrigerator",
+  Book = "book",
+  Clock = "clock",
+  Vase = "vase",
+  Scissors = "scissors",
+  TeddyBear = "teddy bear",
+  HairDrier = "hair drier",
+  Toothbrush = "toothbrush",
+
   Unknown = "unknown"
 }
 
@@ -58,13 +143,16 @@ export class MarvinAssistant extends BaseScriptComponent {
   private websocketRequirementsObj: SceneObject;
   @input private dynamicAudioOutput: DynamicAudioOutput;
   @input private microphoneRecorder: MicrophoneRecorder;
+  @input
+  @hint("Optional: Remote Object Detection Manager for YOLO-based detection")
+  private remoteObjectDetectionManager: RemoteObjectDetectionManager;
   @ui.group_end
   @ui.separator
   @ui.group_start("Inputs")
   @input
   @widget(new TextAreaWidget())
   private instructions: string =
-    "You are Marvin, a work-focused AR assistant. ONLY respond when you see a laptop or computer in the video.\n\nIMPORTANT RULES:\n- If you see a LAPTOP/COMPUTER: Say EXACTLY 'I see you're on your laptop, would you like to see your work schedule for the day?'\n- If you DON'T see a laptop: Say NOTHING. Stay completely silent.\n- NEVER mention other objects like phones, keys, food, etc.\n- ONLY respond to laptops/computers with the exact phrase above.\n\nBe brief and use ONLY the specified phrase when you see a laptop.";
+    "You are Marvin, a silent AR assistant. CRITICAL RULES:\n\n1. DO NOT analyze the video feed on your own\n2. DO NOT speak unless you receive a DIRECT client message with specific instructions\n3. When you receive a client message, respond ONLY to what is asked\n4. Be natural and conversational when responding to client messages\n5. Keep responses brief (1-2 sentences)\n\nYou will ONLY speak when explicitly told what to say via client messages. Otherwise, remain completely silent and do not comment on anything you see in the video.";
   @input private haveVideoInput: boolean = true;
   @ui.group_end
   @ui.separator
@@ -119,6 +207,10 @@ export class MarvinAssistant extends BaseScriptComponent {
   public componentDetectedEvent: Event<any> = new Event<any>();
   public circuitCompleteEvent: Event<any> = new Event<any>();
   public placementGuidanceEvent: Event<{ component: DetectedComponent; targetHole: BreadboardHole }> = new Event<{ component: DetectedComponent; targetHole: BreadboardHole }>();
+
+  // YOLO detection events
+  public yoloDetectionEvent: Event<YOLODetection[]> = new Event<YOLODetection[]>();
+  public yoloDetectionCompleteEvent: Event<{ detections: YOLODetection[]; count: number }> = new Event<{ detections: YOLODetection[]; count: number }>();
 
   createGeminiLiveSession() {
     this.websocketRequirementsObj.enabled = true;
@@ -436,8 +528,62 @@ export class MarvinAssistant extends BaseScriptComponent {
   }
 
   public getDetectedComponents(): any[] {
-    // Return empty array for now - this would be populated by actual component detection logic
+    // Return detections from remote object detection manager if available
+    if (this.remoteObjectDetectionManager) {
+      return this.remoteObjectDetectionManager.getDetections();
+    }
     return [];
+  }
+
+  /**
+   * Trigger remote object detection using Hugging Face API
+   * This performs YOLO-based detection with depth estimation
+   */
+  public async triggerRemoteObjectDetection(texture: Texture): Promise<YOLODetection[]> {
+    if (!this.remoteObjectDetectionManager) {
+      print("[MARVIN] ERROR: Remote Object Detection Manager not configured");
+      return [];
+    }
+
+    try {
+      print("[MARVIN] Triggering remote object detection...");
+      const detections = await this.remoteObjectDetectionManager.detectObjects(texture);
+
+      // Fire detection events
+      this.yoloDetectionEvent.invoke(detections);
+      this.yoloDetectionCompleteEvent.invoke({
+        detections: detections,
+        count: detections.length
+      });
+
+      // Also convert to component detected events for backwards compatibility
+      detections.forEach((detection) => {
+        this.componentDetectedEvent.invoke({
+          type: detection.class_name,
+          position: { x: detection.center_2d[0], y: detection.center_2d[1] },
+          confidence: detection.confidence,
+          boundingBox: detection.bounding_box,
+          distance: detection.distance,
+          additionalInfo: detection
+        });
+      });
+
+      print(`[MARVIN] Remote detection complete: ${detections.length} objects found`);
+      return detections;
+    } catch (error) {
+      print(`[MARVIN] Remote detection error: ${error}`);
+      return [];
+    }
+  }
+
+  /**
+   * Clear all remote object detections
+   */
+  public clearRemoteDetections(): void {
+    if (this.remoteObjectDetectionManager) {
+      this.remoteObjectDetectionManager.clearDetections();
+      print("[MARVIN] Cleared all remote detections");
+    }
   }
 
   /**
@@ -471,26 +617,12 @@ export class MarvinAssistant extends BaseScriptComponent {
   }
 
   /**
-   * Parse Gemini's text response for LAPTOP mentions ONLY
+   * DEPRECATED: No longer parsing Gemini responses for object detection
+   * Object detection is now handled by YOLO via RemoteObjectDetectionManager
    */
   private parseObjectsFromResponse(text: string) {
-    if (!text) return;
-
-    const lowerText = text.toLowerCase();
-    print(`[OBJECT DETECTION] Parsing response: "${text.substring(0, 100)}..."`);
-
-    // Create a position (assuming object is in front of camera)
-    const defaultPosition = { x: 0, y: 0, z: 0.3 };
-
-    // ONLY check for laptop - ignore all other objects
-    if (lowerText.includes("laptop") || lowerText.includes("computer")) {
-      print("[OBJECT DETECTION] Detected: LAPTOP");
-      this.componentDetectedEvent.invoke({
-        type: "laptop",
-        position: defaultPosition,
-        confidence: 0.9
-      });
-    }
-    // All other object detection removed - laptop only!
+    // Disabled - YOLO handles all object detection now
+    // Gemini only responds to explicit prompts from ObjectDetectionTrigger
+    return;
   }
 }

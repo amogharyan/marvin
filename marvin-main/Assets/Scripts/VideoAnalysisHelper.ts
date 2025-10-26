@@ -2,25 +2,26 @@ import { MarvinAssistant } from "./MarvinAssistant";
 import { setTimeout } from "SpectaclesInteractionKit.lspkg/Utils/FunctionTimingUtils";
 
 /**
- * Helper component to periodically request video analysis from Gemini
- * This ensures Gemini actively analyzes the video stream
+ * DEPRECATED: This component is no longer needed
+ * Object detection now handled by YOLO + ObjectDetectionTrigger
+ * Keep enableAutoAnalysis = false to prevent Gemini from speaking unprompted
  */
 @component
 export class VideoAnalysisHelper extends BaseScriptComponent {
   @ui.separator
-  @ui.label("Video Analysis Helper - Triggers Gemini to analyze video")
+  @ui.label("⚠️ DEPRECATED - Keep enableAutoAnalysis = FALSE")
   @ui.separator
-  
+
   @input
   private marvinAssistant: MarvinAssistant;
-  
+
   @input
   @hint("Seconds between analysis requests")
   private analysisInterval: number = 5;
-  
+
   @input
-  @hint("Enable automatic periodic analysis - DEPRECATED: Use object-specific prompts instead")
-  private enableAutoAnalysis: boolean = false; // Disabled - now using targeted object-specific prompts
+  @hint("KEEP THIS FALSE - Gemini should only speak when YOLO detects objects")
+  private enableAutoAnalysis: boolean = false; // MUST stay false - YOLO handles detection now
   
   private lastAnalysisTime: number = 0;
   private isActive: boolean = false;

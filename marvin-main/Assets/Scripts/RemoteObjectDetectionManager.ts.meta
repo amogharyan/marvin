@@ -1,0 +1,71 @@
+- !<AssetImportMetadata/2d4b871e-8756-46d0-8cb4-95f309e2b366>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 556d51d2-abf9-439d-aee8-b667c1c7f78c
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 556d51d2-abf9-439d-aee8-b667c1c7f78c
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 70be3795-dd6a-4590-bb01-a52dcccf5da1
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/70be3795-dd6a-4590-bb01-a52dcccf5da1>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: 23b47f83-9eb6-41fe-9cc2-b6bbf3f150d4
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    confidenceThreshold: false
+    detectionPrefab: false
+    distanceThreshold: false
+    hfApiToken: false
+    hfSpaceUrl: false
+    modelSize: false
+    pinholeCapture: false
+    prefabBillboardEnabled: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - hfApiToken: ""
+      hfSpaceUrl: "https://agrancini-sc-simultaneous-segmented-depth-prediction.hf.space"
+      modelSize: Medium - Balanced performance and accuracy
+      confidenceThreshold: 0.500000
+      distanceThreshold: !<float> 10.000000
+      detectionPrefab: !<reference.ObjectPrefab> 00000000-0000-0000-0000-000000000000
+      prefabBillboardEnabled: false
+      pinholeCapture: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @ui {"widget":"group_start", "label":"API Configuration"}'
+    - // @input string hfApiToken
+    - '// @input string hfSpaceUrl = "https://agrancini-sc-simultaneous-segmented-depth-prediction.hf.space" {"hint":"Your Hugging Face Space URL (e.g., https://YOUR-USERNAME-space-name.hf.space)"}'
+    - '// @input string modelSize = "Medium - Balanced performance and accuracy" {"widget":"combobox", "values":[{"label":"Small - Better performance and less accuracy", "value":"Small - Better performance and less accuracy"}, {"label":"Medium - Balanced performance and accuracy", "value":"Medium - Balanced performance and accuracy"}, {"label":"Large - Slow performance and high accuracy", "value":"Large - Slow performance and high accuracy"}]}'
+    - // @input float confidenceThreshold = 0.5
+    - // @input float distanceThreshold = 10
+    - '// @ui {"widget":"group_end"}'
+    - '// @ui {"widget":"group_start", "label":"Detection Prefab"}'
+    - // @input Asset.ObjectPrefab detectionPrefab
+    - // @input bool prefabBillboardEnabled
+    - '// @ui {"widget":"group_end"}'
+    - '// @ui {"widget":"group_start", "label":"Camera Setup"}'
+    - // @input AssignableType pinholeCapture
+    - '// @ui {"widget":"group_end"}'

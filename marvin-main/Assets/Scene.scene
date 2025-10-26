@@ -8,6 +8,7 @@
     - !<own> e98b2a4f-f300-4094-a125-464834a4be87
     - !<own> 362d712d-3aa2-470c-8b9d-9b6467c32954
     - !<own> 96d0b561-304a-429a-a6e4-8e8867fcf17c
+    - !<own> 44eb9b75-4f01-470c-86e2-2feedcdedbd3
     - !<own> ad99ea71-2b03-479d-85f4-d77a6b399445
     - !<own> ba6cc979-e30b-4432-a0bc-e330c93331f6
     - !<own> bbbe070b-b297-4624-a319-c6839b2d4919
@@ -17,6 +18,11 @@
     - !<own> a46e7340-3fc9-48db-a35e-0816511d30a9
     - !<own> 30a0056a-fb61-4349-a470-5e7bf41cec71
     - !<own> 6985f6a1-d9d9-4da7-b92b-c0849a36e06c
+    - !<own> a068b954-a80f-457b-a1f4-81084d73ec0d
+    - !<own> 6ce7c8ce-76f5-4dd3-ab9b-6e3102f8da3d
+    - !<own> e04d488e-bf43-4c6f-ae3f-d32d6857ab41
+    - !<own> c304e435-d2a6-4348-a681-ebdf5608a1f5
+    - !<own> 05921466-7de6-42dd-991d-9e3cc5f181cc
   layers: !<Layers/267ee9a7-aff2-4f9d-9a49-f71214747d03>
     userLayers:
       []
@@ -228,6 +234,21 @@
     - !<own> c89d7e48-75a6-414e-a253-874f80bfe792
   Components:
     []
+- !<SceneObject/05921466-7de6-42dd-991d-9e3cc5f181cc>
+  PrefabRemaps:
+    []
+  Name: ObjectDetectionTrigger
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 11389772-e2bc-4a61-a945-23bec8613d4e
 - !<ScriptComponent/05b2200d-d356-4b4a-9b42-94932fb2ab3b>
   PrefabRemaps:
     []
@@ -446,6 +467,62 @@
     - !<own> 0f704a07-d079-4984-9aaf-bf4a989b3490
   Components:
     []
+- !<ScriptComponent/11389772-e2bc-4a61-a945-23bec8613d4e>
+  PrefabRemaps:
+    []
+  Name: ObjectDetectionTrigger
+  Enabled: true
+  ScriptAsset: !<reference> 24751859-8d31-4255-9f47-3028838d6892
+  ScriptInputsDefault:
+    laptopDetectionEnabled: true
+    laptopTriggerOncePerSession: true
+    laptopMinConfidence: true
+    laptopPrompt: true
+    laptopCooldown: true
+    personDetectionEnabled: true
+    personTriggerOncePerSession: true
+    personMinConfidence: true
+    personPrompt: true
+    personCooldown: true
+    phoneMinConfidence: true
+    phonePrompt: true
+    phoneCooldown: true
+    customObjectEnabled: true
+    customObjectTriggerOncePerSession: true
+    customObjectType: true
+    customObjectMinConfidence: true
+    customObjectPrompt: true
+    customObjectCooldown: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      marvinAssistant: !<MappingBased.AssignableType> cfc7e98d-a72e-4dfb-b300-c86cc00bf654
+      detectionManager: !<MappingBased.AssignableType_1> 2227b1a2-d383-40cd-9ab9-f6ab9923948b
+      laptopDetectionEnabled: true
+      laptopTriggerOncePerSession: true
+      laptopMinConfidence: 0.700000
+      laptopPrompt: "I see you're on your laptop! Would you like me to pull up your calendar for today?"
+      laptopCooldown: !<float> 30.000000
+      personDetectionEnabled: false
+      personTriggerOncePerSession: false
+      personMinConfidence: 0.800000
+      personPrompt: "Hello! I see you there. How can I assist you today?"
+      personCooldown: !<float> 60.000000
+      phoneDetectionEnabled: true
+      phoneTriggerOncePerSession: true
+      phoneMinConfidence: 0.700000
+      phonePrompt: "I notice you have your phone. Would you like me to help you stay focused on your work?"
+      phoneCooldown: !<float> 45.000000
+      customObjectEnabled: false
+      customObjectTriggerOncePerSession: false
+      customObjectType: cup
+      customObjectMinConfidence: 0.700000
+      customObjectPrompt: I see a cup nearby. Staying hydrated is important!
+      customObjectCooldown: !<float> 60.000000
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/11fcf3ea-da8b-4694-80a7-167693341344>
   PrefabRemaps:
     []
@@ -873,6 +950,31 @@
     - !<own> c0b69a6c-7f52-4120-8f1b-127745189a17
   Components:
     - !<own> 14154c3c-441b-4dd0-9d39-57709ce5d3c8
+- !<ScriptComponent/2227b1a2-d383-40cd-9ab9-f6ab9923948b>
+  PrefabRemaps:
+    []
+  Name: RemoteObjectDetectionManager
+  Enabled: true
+  ScriptAsset: !<reference> 556d51d2-abf9-439d-aee8-b667c1c7f78c
+  ScriptInputsDefault:
+    modelSize: true
+    confidenceThreshold: true
+    distanceThreshold: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      hfApiToken: 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
+      hfSpaceUrl: "https://applea12x-simultaneous-segmented-depth-prediction.hf.space"
+      modelSize: Medium - Balanced performance and accuracy
+      confidenceThreshold: 0.500000
+      distanceThreshold: !<float> 10.000000
+      detectionPrefab: !<reference.ObjectPrefab> 34558c10-7f16-47a0-babc-aba68210fadb
+      prefabBillboardEnabled: true
+      pinholeCapture: !<MappingBased.AssignableType> c2462743-2cdb-4cb8-80da-7a7730c359ac
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/24658d9e-69b8-4fff-9ead-2797a2d7680f>
   PrefabRemaps:
     []
@@ -1946,6 +2048,21 @@
     []
   Components:
     - !<own> 55be292f-0363-41f1-b55c-70fcb8e4dd25
+- !<SceneObject/44eb9b75-4f01-470c-86e2-2feedcdedbd3>
+  PrefabRemaps:
+    []
+  Name: YOLODetectionTrigger
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 71414c4f-5635-4e19-9285-4f8a78ad61d9
 - !<ScriptComponent/45c51641-463a-493c-aec0-de480f1cc12b>
   PrefabRemaps:
     []
@@ -3317,6 +3434,21 @@
   BlendNormals: false
   BlendShapes:
     {}
+- !<SceneObject/6ce7c8ce-76f5-4dd3-ab9b-6e3102f8da3d>
+  PrefabRemaps:
+    []
+  Name: PinholeCapture
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> c2462743-2cdb-4cb8-80da-7a7730c359ac
 - !<SceneObject/6dc5dd7a-4726-4cb6-b42f-a12f4b6416c3>
   PrefabRemaps:
     []
@@ -3332,6 +3464,27 @@
     - !<own> b376ea46-bee6-4eac-82cc-1f09a4389f34
   Components:
     []
+- !<ScriptComponent/71414c4f-5635-4e19-9285-4f8a78ad61d9>
+  PrefabRemaps:
+    []
+  Name: YOLODetectionTrigger
+  Enabled: true
+  ScriptAsset: !<reference> 158b3481-814a-42d0-9369-e268a9c753bf
+  ScriptInputsDefault:
+    startDelay: true
+    detectionInterval: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      marvinAssistant: !<MappingBased.AssignableType> cfc7e98d-a72e-4dfb-b300-c86cc00bf654
+      autoTriggerOnStart: true
+      startDelay: !<float> 3.000000
+      continuousDetection: true
+      detectionInterval: !<float> 5.000000
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/71dbdbcb-fedd-46c0-adcb-e1f2e8b92f5d>
   PrefabRemaps:
     []
@@ -3393,14 +3546,13 @@
   ScriptAsset: !<reference> 245c59ea-2659-43d5-8f63-9428db58054e
   ScriptInputsDefault:
     analysisInterval: true
-    enableAutoAnalysis: true
   ScriptTypesDefault:
     {}
   ScriptInputs:
     "":
       marvinAssistant: !<MappingBased.AssignableType> cfc7e98d-a72e-4dfb-b300-c86cc00bf654
       analysisInterval: !<float> 5.000000
-      enableAutoAnalysis: true
+      enableAutoAnalysis: false
   ScriptTypes:
     "":
       {}
@@ -3845,6 +3997,29 @@
     - !<own> da8e7366-5023-4531-a288-26ae4d7ef984
   Components:
     - !<own> c8c785a5-1402-4bf9-8920-d802c92cc8be
+- !<ScriptComponent/83485092-0fdb-4ba3-be3e-597d63e22b60>
+  PrefabRemaps:
+    []
+  Name: SimpleYOLOTest
+  Enabled: true
+  ScriptAsset: !<reference> 37756db4-c883-496f-becf-33e7614f524a
+  ScriptInputsDefault:
+    autoTrigger: true
+    triggerDelay: true
+    continuousInterval: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      marvinAssistant: !<MappingBased.AssignableType> cfc7e98d-a72e-4dfb-b300-c86cc00bf654
+      cameraCapture: !<MappingBased.AssignableType_1> b7cd7660-145f-4721-b24a-7f408c6b4ab7
+      autoTrigger: true
+      triggerDelay: !<float> 5.000000
+      enableContinuous: true
+      continuousInterval: !<float> 10.000000
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/85365650-4860-4e4b-9561-da197d9e1c40>
   PrefabRemaps:
     []
@@ -4436,6 +4611,21 @@
   BlendShapes:
     Pinch: 0.000000
     Z depth: 0.000000
+- !<SceneObject/a068b954-a80f-457b-a1f4-81084d73ec0d>
+  PrefabRemaps:
+    []
+  Name: RemoteObjectDetectionManager
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 2227b1a2-d383-40cd-9ab9-f6ab9923948b
 - !<ScriptComponent/a275506a-bce9-46de-bc62-a712db8cb04a>
   PrefabRemaps:
     []
@@ -5105,6 +5295,22 @@
     []
   Components:
     - !<own> a474d01c-23ce-4d2c-9675-f5e4ec4a8efd
+- !<ScriptComponent/b7cd7660-145f-4721-b24a-7f408c6b4ab7>
+  PrefabRemaps:
+    []
+  Name: CameraTextureCapture
+  Enabled: true
+  ScriptAsset: !<reference> d216c067-c87c-45ec-956f-61ed8f23ab32
+  ScriptInputsDefault:
+    {}
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      {}
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/b87e31e3-28fe-4073-941b-1fc02335e10c>
   PrefabRemaps:
     []
@@ -5536,6 +5742,22 @@
     []
   Components:
     []
+- !<ScriptComponent/c2462743-2cdb-4cb8-80da-7a7730c359ac>
+  PrefabRemaps:
+    []
+  Name: PinholeCapture
+  Enabled: true
+  ScriptAsset: !<reference> 3aa68ddb-1613-4fc2-aae1-febf9a77aec5
+  ScriptInputsDefault:
+    {}
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      {}
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/c2a3f250-ea25-4d54-a533-abe839f9bceb>
   PrefabRemaps:
     []
@@ -5551,6 +5773,21 @@
     - !<own> 11fcf3ea-da8b-4694-80a7-167693341344
   Components:
     - !<own> 3bbf27ea-a24a-4d9f-84a6-56b5830bb48e
+- !<SceneObject/c304e435-d2a6-4348-a681-ebdf5608a1f5>
+  PrefabRemaps:
+    []
+  Name: SimpleYOLOTest
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 83485092-0fdb-4ba3-be3e-597d63e22b60
 - !<SceneObject/c379df8f-498c-4c54-a558-bb0a021b9dad>
   PrefabRemaps:
     []
@@ -5881,7 +6118,10 @@
       websocketRequirementsObj: !<reference.SceneObject> 96d0b561-304a-429a-a6e4-8e8867fcf17c
       dynamicAudioOutput: !<MappingBased.AssignableType> aa2df9ae-bf35-4517-b5e0-89bc152196e6
       microphoneRecorder: !<MappingBased.AssignableType_1> 3bc4f56d-05e2-4ec4-9b53-d2232303cb7c
-      instructions: "You are a circuit analysis assistant for resistor op amp circuits. You help with two main tasks: 1) Identify resistor values by reading color bands, and 2) Show where resistors should be placed in op amp circuits. When the user asks about resistor placement, use the showResistorPlacement tool to highlight the correct location with a green marker."
+      remoteObjectDetectionManager: !<MappingBased.AssignableType_2> 2227b1a2-d383-40cd-9ab9-f6ab9923948b
+      instructions: |
+        "You are Marvin, a work-focused AR assistant. 
+
       haveVideoInput: true
       haveAudioOutput: true
       voice: Puck
@@ -6252,6 +6492,21 @@
     CapitalizationOverride: None
   DepthTest: false
   TwoSided: false
+- !<SceneObject/e04d488e-bf43-4c6f-ae3f-d32d6857ab41>
+  PrefabRemaps:
+    []
+  Name: CameraTextureCapture
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> b7cd7660-145f-4721-b24a-7f408c6b4ab7
 - !<SceneObject/e0b103d0-c0f0-4704-a927-287d342f0319>
   PrefabRemaps:
     []

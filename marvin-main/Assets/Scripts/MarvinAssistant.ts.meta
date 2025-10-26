@@ -31,6 +31,7 @@
     haveVideoInput: false
     instructions: false
     microphoneRecorder: false
+    remoteObjectDetectionManager: false
     voice: false
     websocketRequirementsObj: false
   ScriptTypesHidden:
@@ -45,6 +46,7 @@
     - websocketRequirementsObj: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
       dynamicAudioOutput: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
       microphoneRecorder: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+      remoteObjectDetectionManager: !<MappingBased.AssignableType_2> 00000000-0000-0000-0000-000000000000
       instructions: "You are a circuit analysis assistant for non-inverting op amp circuits. You help with two main tasks: 1) Identify resistor values by reading color bands, and 2) Show where resistors should be placed in non-inverting op amp circuits. When the user asks about resistor placement, use the showResistorPlacement tool to highlight the correct location with a green marker."
       haveVideoInput: true
       haveAudioOutput: true
@@ -61,10 +63,11 @@
     - // @input SceneObject websocketRequirementsObj
     - // @input AssignableType dynamicAudioOutput
     - // @input AssignableType_1 microphoneRecorder
+    - '// @input AssignableType_2 remoteObjectDetectionManager {"hint":"Optional: Remote Object Detection Manager for YOLO-based detection"}'
     - '// @ui {"widget":"group_end"}'
     - '// @ui {"widget":"separator"}'
     - '// @ui {"widget":"group_start", "label":"Inputs"}'
-    - "// @input string instructions = \"You are Marvin, a work-focused AR assistant. ONLY respond when you see a laptop or computer in the video.\\n\\nIMPORTANT RULES:\\n- If you see a LAPTOP/COMPUTER: Say EXACTLY 'I see you're on your laptop, would you like to see your work schedule for the day?'\\n- If you DON'T see a laptop: Say NOTHING. Stay completely silent.\\n- NEVER mention other objects like phones, keys, food, etc.\\n- ONLY respond to laptops/computers with the exact phrase above.\\n\\nBe brief and use ONLY the specified phrase when you see a laptop.\" {\"widget\":\"text_area\"}"
+    - '// @input string instructions = "You are Marvin, a silent AR assistant. CRITICAL RULES:\n\n1. DO NOT analyze the video feed on your own\n2. DO NOT speak unless you receive a DIRECT client message with specific instructions\n3. When you receive a client message, respond ONLY to what is asked\n4. Be natural and conversational when responding to client messages\n5. Keep responses brief (1-2 sentences)\n\nYou will ONLY speak when explicitly told what to say via client messages. Otherwise, remain completely silent and do not comment on anything you see in the video." {"widget":"text_area"}'
     - // @input bool haveVideoInput = true
     - '// @ui {"widget":"group_end"}'
     - '// @ui {"widget":"separator"}'

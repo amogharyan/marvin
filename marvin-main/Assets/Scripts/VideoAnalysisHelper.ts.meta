@@ -46,8 +46,8 @@
       {}
   InputLines:
     - '// @ui {"widget":"separator"}'
-    - '// @ui {"widget":"label", "label":"Video Analysis Helper - Triggers Gemini to analyze video"}'
+    - '// @ui {"widget":"label", "label":"⚠️ DEPRECATED - Keep enableAutoAnalysis = FALSE"}'
     - '// @ui {"widget":"separator"}'
     - // @input AssignableType marvinAssistant
     - '// @input float analysisInterval = 5 {"hint":"Seconds between analysis requests"}'
-    - '// @input bool enableAutoAnalysis {"hint":"Enable automatic periodic analysis - DEPRECATED: Use object-specific prompts instead"}'
+    - '// @input bool enableAutoAnalysis {"hint":"KEEP THIS FALSE - Gemini should only speak when YOLO detects objects"}'

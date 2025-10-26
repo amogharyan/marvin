@@ -1,0 +1,53 @@
+- !<AssetImportMetadata/d0e3babf-97c5-45ac-8c0b-cc46106acb8c>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 74151531-0b63-43a0-a218-e25d2783b129
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 74151531-0b63-43a0-a218-e25d2783b129
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> bd0d103e-7c4e-4397-8824-1b0d1c8ef0b4
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/bd0d103e-7c4e-4397-8824-1b0d1c8ef0b4>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: c1b9d69b-c7e9-4548-9eaa-b68cb5610b94
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    autoTriggerOnStart: false
+    marvinAssistant: false
+    startDelay: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - marvinAssistant: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
+      autoTriggerOnStart: true
+      startDelay: !<float> 5.000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"label", "label":"YOLO Detection from Video Stream"}'
+    - '// @ui {"widget":"separator"}'
+    - // @input AssignableType marvinAssistant
+    - '// @input bool autoTriggerOnStart = true {"hint":"Trigger detection automatically on start"}'
+    - '// @input float startDelay = 5 {"hint":"Delay before auto-trigger (seconds)"}'

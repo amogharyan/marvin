@@ -1,0 +1,127 @@
+- !<AssetImportMetadata/e7bd1956-fc94-48a0-be38-205b8d842e59>
+  ImportedAssetIds:
+    ObjectPrefab: !<reference> c68fc4d6-5de7-4357-b9ef-08a257cec9d6
+  ImporterName: ObjectPrefabImporter
+  PrimaryAsset: !<reference> c68fc4d6-5de7-4357-b9ef-08a257cec9d6
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    ObjectPrefab: !<own> ec2ea681-d0bf-4202-ad29-5388df39eb4f
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<SceneObject/00b55db1-5423-44b5-6c72-09cb9fb094a3>
+  PrefabRemaps:
+    []
+  Name: PointD
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: -10.000000, y: 10.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    []
+- !<SceneObject/0c781caa-7117-454b-7823-e2f1b1937bd2>
+  PrefabRemaps:
+    []
+  Name: "[POLYLINE]"
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> f04994d6-f193-4554-4110-f08bf000177d
+    - !<own> f43a1228-cd40-469b-6140-51f441e48282
+    - !<own> 64389256-af9e-4930-63d8-df28e6433f9d
+    - !<own> 00b55db1-5423-44b5-6c72-09cb9fb094a3
+  Components:
+    - !<own> ff5efc3c-f379-441a-43d2-ff94408795a3
+- !<SceneObject/64389256-af9e-4930-63d8-df28e6433f9d>
+  PrefabRemaps:
+    []
+  Name: PointC
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 10.000000, y: 10.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    []
+- !<ObjectPrefabAssetData/ec2ea681-d0bf-4202-ad29-5388df39eb4f>
+  Prototype: !<ObjectOwner/26892043-54d3-4665-9031-f2f6029a0fd0>
+    PackagePath: ""
+    objects:
+      - !<own> 0c781caa-7117-454b-7823-e2f1b1937bd2
+- !<SceneObject/f04994d6-f193-4554-4110-f08bf000177d>
+  PrefabRemaps:
+    []
+  Name: PointA
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: -10.000000, y: -10.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    []
+- !<SceneObject/f43a1228-cd40-469b-6140-51f441e48282>
+  PrefabRemaps:
+    []
+  Name: PointB
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 10.000000, y: -10.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    []
+- !<ScriptComponent/ff5efc3c-f379-441a-43d2-ff94408795a3>
+  PrefabRemaps:
+    []
+  Name: ClosedPolyline
+  Enabled: true
+  ScriptAsset: !<reference> 7f395584-5a82-4a2a-b9e7-193a9e913936
+  ScriptInputsDefault:
+    _color: true
+    lineWidth: true
+    lineStyle: true
+    continuousLine: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      points: !<reference.SceneObject[]>
+        - !<reference> f04994d6-f193-4554-4110-f08bf000177d
+        - !<reference> f43a1228-cd40-469b-6140-51f441e48282
+        - !<reference> 64389256-af9e-4930-63d8-df28e6433f9d
+        - !<reference> 00b55db1-5423-44b5-6c72-09cb9fb094a3
+      lineMaterial: !<reference.Material> def51e9e-9b13-48a8-9895-ab7b0b21a63a
+      _color: !<Vec3> {x: 1.000000, y: 1.000000, z: 0.000000}
+      lineWidth: 0.500000
+      lineStyle: !<float> 0.000000
+      continuousLine: true
+  ScriptTypes:
+    "":
+      {}

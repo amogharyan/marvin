@@ -1,0 +1,59 @@
+- !<AssetImportMetadata/0b8dde36-51fd-44a2-8ba2-abe0b128d97b>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 158b3481-814a-42d0-9369-e268a9c753bf
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 158b3481-814a-42d0-9369-e268a9c753bf
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 3ca08386-52f6-4798-b9a0-8e14b769fff1
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/3ca08386-52f6-4798-b9a0-8e14b769fff1>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: 0fb2320b-0543-4afa-ab05-1c4e0e6b5a04
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    autoTriggerOnStart: false
+    continuousDetection: false
+    detectionInterval: false
+    marvinAssistant: false
+    startDelay: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - marvinAssistant: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
+      autoTriggerOnStart: false
+      startDelay: !<float> 3.000000
+      continuousDetection: false
+      detectionInterval: !<float> 5.000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"label", "label":"YOLO Detection Test Trigger"}'
+    - '// @ui {"widget":"separator"}'
+    - // @input AssignableType marvinAssistant
+    - '// @input bool autoTriggerOnStart {"hint":"Trigger detection automatically on start"}'
+    - '// @input float startDelay = 3 {"hint":"Delay before auto-trigger (seconds)"}'
+    - '// @input bool continuousDetection {"hint":"Enable continuous detection (triggers repeatedly)"}'
+    - '// @input float detectionInterval = 5 {"hint":"Interval between detections (seconds)"}'

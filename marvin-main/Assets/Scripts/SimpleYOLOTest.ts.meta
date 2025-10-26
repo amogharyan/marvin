@@ -1,0 +1,62 @@
+- !<AssetImportMetadata/f9d48c03-cc49-41a2-8163-1a82793f37c8>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 37756db4-c883-496f-becf-33e7614f524a
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 37756db4-c883-496f-becf-33e7614f524a
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> aba4ec0f-1448-4ec7-8d50-1432f166e406
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/aba4ec0f-1448-4ec7-8d50-1432f166e406>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: e6cd8e63-edc9-41c1-8b0b-cbab3dd043f3
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    autoTrigger: false
+    cameraCapture: false
+    continuousInterval: false
+    enableContinuous: false
+    marvinAssistant: false
+    triggerDelay: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - marvinAssistant: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
+      cameraCapture: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+      autoTrigger: true
+      triggerDelay: !<float> 5.000000
+      enableContinuous: false
+      continuousInterval: !<float> 10.000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"label", "label":"Simple YOLO Test - Press trigger to detect"}'
+    - '// @ui {"widget":"separator"}'
+    - // @input AssignableType marvinAssistant
+    - // @input AssignableType_1 cameraCapture
+    - // @input bool autoTrigger = true
+    - // @input float triggerDelay = 5
+    - '// @input bool enableContinuous {"hint":"Enable continuous detection mode"}'
+    - '// @input float continuousInterval = 10 {"hint":"Seconds between continuous detections"}'

@@ -1,0 +1,57 @@
+- !<AssetImportMetadata/25084468-8958-4cf7-bfa2-a4ca403331f8>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> aa8f339b-306b-49da-85b4-dc2b409728a5
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> aa8f339b-306b-49da-85b4-dc2b409728a5
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 0b2ddcb6-ae2c-40ed-9f8c-0c5100072f7c
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/0b2ddcb6-ae2c-40ed-9f8c-0c5100072f7c>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: 9364cbfd-1639-4e3f-b7f7-5b544c4bbc12
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    billboard: false
+    categoryAndConfidence: false
+    distanceFromCamera: false
+    polyline: false
+    polylinePoints: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - categoryAndConfidence: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      distanceFromCamera: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      polyline: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
+      billboard: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+      polylinePoints: !<reference.SceneObject[]>
+        []
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input Component.Text categoryAndConfidence
+    - // @input Component.Text distanceFromCamera
+    - // @input AssignableType polyline
+    - // @input AssignableType_1 billboard
+    - "// @input SceneObject[] polylinePoints"
