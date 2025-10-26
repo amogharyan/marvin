@@ -20,7 +20,7 @@ export interface EndpointResponse<T = any> {
 /**
  * Create a standardized endpoint handler with validation and error handling
  */
-export function createEndpoint<R = any>(
+export function createEndpoint<R = unknown>(
   handler: (req: EndpointRequest) => Promise<R>,
   requiredFields: string[] = [],
   handlerName?: string
@@ -68,11 +68,11 @@ export function createEndpoint<R = any>(
       const duration = Date.now() - startTime;
       console.log(`✅ ${endpointName} completed in ${duration}ms`);
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Error response
       const errorResponse: EndpointResponse = {
         success: false,
-        error: error.message || 'Internal server error',
+        error: error instanceof Error ? error.message : 'Internal server error',
         timestamp: new Date().toISOString()
       };
 
@@ -85,7 +85,7 @@ export function createEndpoint<R = any>(
 /**
  * Create a GET endpoint handler (for endpoints that don't require body validation)
  */
-export function createGetEndpoint<R = any>(
+export function createGetEndpoint<R = unknown>(
   handler: (req: EndpointRequest) => Promise<R>,
   handlerName?: string
 ) {
@@ -114,11 +114,11 @@ export function createGetEndpoint<R = any>(
       const duration = Date.now() - startTime;
       console.log(`✅ ${endpointName} completed in ${duration}ms`);
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Error response
       const errorResponse: EndpointResponse = {
         success: false,
-        error: error.message || 'Internal server error',
+        error: error instanceof Error ? error.message : 'Internal server error',
         timestamp: new Date().toISOString()
       };
 
@@ -150,10 +150,10 @@ export function createHealthEndpoint(
       };
 
       res.json(response);
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorResponse: EndpointResponse = {
         success: false,
-        error: error.message || 'Health check failed',
+        error: error instanceof Error ? error.message : 'Health check failed',
         data: {
           status: 'unhealthy'
         },
@@ -184,10 +184,10 @@ export function createDemoEndpoint<T = any>(
       };
 
       res.json(response);
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorResponse: EndpointResponse = {
         success: false,
-        error: error.message || 'Failed to generate demo data',
+        error: error instanceof Error ? error.message : 'Failed to generate demo data',
         timestamp: new Date().toISOString()
       };
 
@@ -218,9 +218,9 @@ export function validateRequestBody(body: any, schema: Record<string, 'required'
 /**
  * Create an endpoint with custom validation
  */
-export function createValidatedEndpoint<R = any>(
+export function createValidatedEndpoint<R = unknown>(
   handler: (req: EndpointRequest) => Promise<R>,
-  validator: (body: any) => string[],
+  validator: (body: unknown) => string[],
   handlerName?: string
 ) {
   return async (req: Request, res: Response): Promise<void> => {
@@ -260,11 +260,11 @@ export function createValidatedEndpoint<R = any>(
       const duration = Date.now() - startTime;
       console.log(`✅ ${endpointName} completed in ${duration}ms`);
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Error response
       const errorResponse: EndpointResponse = {
         success: false,
-        error: error.message || 'Internal server error',
+        error: error instanceof Error ? error.message : 'Internal server error',
         timestamp: new Date().toISOString()
       };
 
