@@ -7,12 +7,14 @@ on:
     branches: [main, develop]
 
 jobs:
-  lint:
+  lint-workspaces:
+    name: Lint ${{ matrix.workspace }}
     runs-on: ubuntu-latest
     
     strategy:
+      fail-fast: false
       matrix:
-        workspace: [ai-voice]
+        workspace: [ai-voice, ar-core]
     
     steps:
       - name: Checkout code
@@ -50,3 +52,37 @@ jobs:
         continue-on-error: true
         env:
           NODE_ENV: test
+  
+  lint-edge-functions:
+    name: Lint Supabase Edge Functions
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+      
+      - name: Check if Edge Functions exist
+        id: check-functions
+        run: |
+          if [ -d "snap-cloud/functions" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Format check Edge Functions
+        if: steps.check-functions.outputs.exists == 'true'
+        run: deno fmt --check
+        working-directory: snap-cloud/functions
+        continue-on-error: true
+      
+      - name: Lint Edge Functions
+        if: steps.check-functions.outputs.exists == 'true'
+        run: deno lint
+        working-directory: snap-cloud/functions
+        continue-on-error: true
