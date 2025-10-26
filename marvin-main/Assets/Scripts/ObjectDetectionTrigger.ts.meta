@@ -26,6 +26,11 @@
   ExportUid: 00000000-0000-0000-0000-000000000000
   PackagePolicy: CanBeUnpacked
   ScriptInputsHidden:
+    backpackCooldown: false
+    backpackDetectionEnabled: false
+    backpackMinConfidence: false
+    backpackPrompt: false
+    backpackTriggerOncePerSession: false
     customObjectCooldown: false
     customObjectEnabled: false
     customObjectMinConfidence: false
@@ -75,6 +80,11 @@
       phoneMinConfidence: 0.700000
       phonePrompt: "I notice you have your phone. Would you like me to help you stay focused on your work?"
       phoneCooldown: !<float> 45.000000
+      backpackDetectionEnabled: true
+      backpackTriggerOncePerSession: false
+      backpackMinConfidence: 0.700000
+      backpackPrompt: here
+      backpackCooldown: !<float> 30.000000
       customObjectEnabled: false
       customObjectTriggerOncePerSession: false
       customObjectType: cup
@@ -112,6 +122,13 @@
     - // @input float phoneMinConfidence = 0.7
     - '// @input string phonePrompt = "I notice you have your phone. Would you like me to help you stay focused on your work?" {"widget":"text_area"}'
     - // @input float phoneCooldown = 45
+    - '// @ui {"widget":"group_end"}'
+    - '// @ui {"widget":"group_start", "label":"Backpack Detection Rule"}'
+    - // @input bool backpackDetectionEnabled = true
+    - "// @input bool backpackTriggerOncePerSession {\"hint\":\"Only trigger once per session (won't repeat even after cooldown)\"}"
+    - '// @input float backpackMinConfidence = 0.7 {"hint":"Minimum confidence to trigger (0.0-1.0)"}'
+    - '// @input string backpackPrompt = "here" {"hint":"What Gemini should say when backpack detected", "widget":"text_area"}'
+    - '// @input float backpackCooldown = 30 {"hint":"Cooldown between backpack detections (seconds, ignored if trigger once is enabled)"}'
     - '// @ui {"widget":"group_end"}'
     - '// @ui {"widget":"group_start", "label":"Custom Detection Rules"}'
     - "// @input bool customObjectEnabled {\"hint\":\"Enable custom object detection (e.g., 'cup', 'book')\"}"

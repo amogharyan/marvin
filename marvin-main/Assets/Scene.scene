@@ -14,10 +14,12 @@
     - !<own> bbbe070b-b297-4624-a319-c6839b2d4919
     - !<own> 24658d9e-69b8-4fff-9ead-2797a2d7680f
     - !<own> dc835c8f-6d13-4547-9e46-3924d04c24bd
+    - !<own> 6ae800e4-2beb-4e20-8c86-039d3d9ad00b
     - !<own> 6ab9e2ec-c483-48d6-8e59-5a126e8a1551
     - !<own> a46e7340-3fc9-48db-a35e-0816511d30a9
     - !<own> 30a0056a-fb61-4349-a470-5e7bf41cec71
     - !<own> 6985f6a1-d9d9-4da7-b92b-c0849a36e06c
+    - !<own> 1a40bc3d-7d6c-4045-b948-a4929e4b3c24
     - !<own> a068b954-a80f-457b-a1f4-81084d73ec0d
     - !<own> 6ce7c8ce-76f5-4dd3-ab9b-6e3102f8da3d
     - !<own> e04d488e-bf43-4c6f-ae3f-d32d6857ab41
@@ -475,18 +477,16 @@
   ScriptAsset: !<reference> 24751859-8d31-4255-9f47-3028838d6892
   ScriptInputsDefault:
     laptopDetectionEnabled: true
-    laptopTriggerOncePerSession: true
     laptopMinConfidence: true
-    laptopPrompt: true
     laptopCooldown: true
-    personDetectionEnabled: true
-    personTriggerOncePerSession: true
     personMinConfidence: true
-    personPrompt: true
     personCooldown: true
     phoneMinConfidence: true
-    phonePrompt: true
     phoneCooldown: true
+    backpackDetectionEnabled: true
+    backpackTriggerOncePerSession: true
+    backpackMinConfidence: true
+    backpackCooldown: true
     customObjectEnabled: true
     customObjectTriggerOncePerSession: true
     customObjectType: true
@@ -500,20 +500,27 @@
       marvinAssistant: !<MappingBased.AssignableType> cfc7e98d-a72e-4dfb-b300-c86cc00bf654
       detectionManager: !<MappingBased.AssignableType_1> 2227b1a2-d383-40cd-9ab9-f6ab9923948b
       laptopDetectionEnabled: true
-      laptopTriggerOncePerSession: true
+      laptopTriggerOncePerSession: false
       laptopMinConfidence: 0.700000
-      laptopPrompt: "I see you're on your laptop! Would you like me to pull up your calendar for today?"
+      laptopPrompt: "Tell this to the user: I see you're on your laptop! Would you like me to pull up your calendar for today?"
       laptopCooldown: !<float> 30.000000
-      personDetectionEnabled: false
-      personTriggerOncePerSession: false
+      personDetectionEnabled: true
+      personTriggerOncePerSession: true
       personMinConfidence: 0.800000
-      personPrompt: "Hello! I see you there. How can I assist you today?"
+      personPrompt: "Ask this to the user: Hello! I see you there. How can I assist you today?"
       personCooldown: !<float> 60.000000
       phoneDetectionEnabled: true
       phoneTriggerOncePerSession: true
       phoneMinConfidence: 0.700000
-      phonePrompt: "I notice you have your phone. Would you like me to help you stay focused on your work?"
+      phonePrompt: "Ask this to the user: I notice you have your phone. Would you like me to help you stay focused on your work?"
       phoneCooldown: !<float> 45.000000
+      backpackDetectionEnabled: true
+      backpackTriggerOncePerSession: false
+      backpackMinConfidence: 0.700000
+      backpackPrompt: |
+        Tell the user: Here is your commute for today
+
+      backpackCooldown: !<float> 30.000000
       customObjectEnabled: false
       customObjectTriggerOncePerSession: false
       customObjectType: cup
@@ -769,6 +776,21 @@
     - !<own> 2b48df55-44c4-4516-b674-91f4c5d5481b
   Components:
     []
+- !<SceneObject/1a40bc3d-7d6c-4045-b948-a4929e4b3c24>
+  PrefabRemaps:
+    []
+  Name: ObjectDetectionPipeline
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 80011044-5600-400f-8c29-865222cc8677
 - !<SceneObject/1a90888e-d4d2-4c81-b8cb-9e2370b94e8a>
   PrefabRemaps:
     []
@@ -2973,6 +2995,34 @@
   ScriptTypes:
     "":
       {}
+- !<ScriptComponent/5ab992ab-a328-477d-856d-8f7a879d5c6f>
+  PrefabRemaps:
+    []
+  Name: CalendarOverlay
+  Enabled: true
+  ScriptAsset: !<reference> 561f69aa-0bf2-4f56-a5cc-af7e896a5563
+  ScriptInputsDefault:
+    autoHideAfterSeconds: true
+    backgroundColor: true
+    textColor: true
+    animationDuration: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      calendarContainer: !<reference.SceneObject> 00000000-0000-0065-0000-000000000064
+      backgroundImage: !<reference.Image> 4f15c769-914c-4dfb-97d4-0901ec89d78a
+      titleText: !<reference.Text> ba710944-8232-4a06-b997-0837303f3da1
+      dateText: !<reference.Text> 679aa029-99e5-46ab-9d75-2f06437050fc
+      eventsText: !<reference.Text> 7591d592-0166-495f-a2c0-0baa10bca25b
+      closeButton: !<reference.SceneObject> 6ab9e2ec-c483-48d6-8e59-5a126e8a1551
+      autoHideAfterSeconds: !<float> 0.000000
+      backgroundColor: !<Vec4> {x: 0.100000, y: 0.100000, z: 0.150000, w: 0.950000}
+      textColor: !<Vec3> {x: 1.000000, y: 1.000000, z: 1.000000}
+      animationDuration: 0.300000
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/5abc1ef4-db66-4606-9d44-d1596f8d9818>
   PrefabRemaps:
     []
@@ -3362,6 +3412,21 @@
     - !<own> 2c8d046c-00f9-4368-b888-6af2949b0548
     - !<own> 32cb4123-c93d-4674-b19a-5e3e82ad9dd4
     - !<own> f67b9050-4c81-44df-bd49-a789223b06fd
+- !<SceneObject/6ae800e4-2beb-4e20-8c86-039d3d9ad00b>
+  PrefabRemaps:
+    []
+  Name: CalendarOverlay
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 5ab992ab-a328-477d-856d-8f7a879d5c6f
 - !<SceneObject/6bf04e34-6299-4f27-8f48-259345a32666>
   PrefabRemaps:
     []
@@ -3912,6 +3977,67 @@
     - !<own> 440d9903-0516-47eb-a79f-3764e57df5b3
   Components:
     []
+- !<ScriptComponent/80011044-5600-400f-8c29-865222cc8677>
+  PrefabRemaps:
+    []
+  Name: ObjectDetectionPipeline
+  Enabled: true
+  ScriptAsset: !<reference> f30e2d17-e8d0-410b-8fd1-1aa27065377c
+  ScriptInputsDefault:
+    hfSpaceUrl: true
+    modelSize: true
+    confidenceThreshold: true
+    continuousMode: true
+    detectionInterval: true
+    initialDelay: true
+    laptopDetectionEnabled: true
+    laptopMinConfidence: true
+    laptopPrompt: true
+    laptopTriggerOnce: true
+    personDetectionEnabled: true
+    personMinConfidence: true
+    personPrompt: true
+    personTriggerOnce: true
+    phoneDetectionEnabled: true
+    phoneMinConfidence: true
+    phonePrompt: true
+    phoneTriggerOnce: true
+    backpackDetectionEnabled: true
+    backpackMinConfidence: true
+    backpackTriggerOnce: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      marvinAssistant: !<MappingBased.AssignableType> cfc7e98d-a72e-4dfb-b300-c86cc00bf654
+      cameraCapture: !<MappingBased.AssignableType_1> b7cd7660-145f-4721-b24a-7f408c6b4ab7
+      pinholeCapture: !<MappingBased.AssignableType_2> c2462743-2cdb-4cb8-80da-7a7730c359ac
+      hfApiToken: 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
+      hfSpaceUrl: "https://agrancini-sc-simultaneous-segmented-depth-prediction.hf.space"
+      modelSize: Medium - Balanced performance and accuracy
+      confidenceThreshold: 0.700000
+      continuousMode: true
+      detectionInterval: !<float> 10.000000
+      initialDelay: !<float> 5.000000
+      laptopDetectionEnabled: true
+      laptopMinConfidence: 0.700000
+      laptopPrompt: "I see you're on your laptop! Would you like me to pull up your calendar for today?"
+      laptopTriggerOnce: true
+      personDetectionEnabled: false
+      personMinConfidence: 0.800000
+      personPrompt: "Hello! I see you there. How can I assist you today?"
+      personTriggerOnce: false
+      phoneDetectionEnabled: false
+      phoneMinConfidence: 0.700000
+      phonePrompt: "I notice you have your phone. Would you like me to help you stay focused?"
+      phoneTriggerOnce: false
+      backpackDetectionEnabled: true
+      backpackMinConfidence: 0.700000
+      backpackPrompt: "Say this: Here is your navigation tp work this morning"
+      backpackTriggerOnce: false
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/805bb70d-0e93-48e5-a665-76bd8c8928ce>
   PrefabRemaps:
     []
@@ -4264,7 +4390,7 @@
       breadboardAROverlay: !<MappingBased.AssignableType_3> 2c6ec376-7e3b-47c9-a4b3-9a4794b53592
       sphereController: !<MappingBased.AssignableType_4> 65c0f761-d132-4011-9db4-7793c56dfea0
       contextualAssistant: !<MappingBased.AssignableType_5> 5ab040cf-3ba2-4f2c-a0bb-0bedf61956f9
-      videoAnalysisHelper: !<MappingBased.AssignableType_6> 74366e4f-1511-4d13-b870-a57a59e686a6
+      detectionPipeline: !<MappingBased.AssignableType_6> 80011044-5600-400f-8c29-865222cc8677
       startStopButton: !<MappingBased.AssignableType_7> f473ba0f-0bcc-44d4-964a-19bb6cccd34a
       hintTitle: !<reference.Text> 679aa029-99e5-46ab-9d75-2f06437050fc
       hintText: !<reference.Text> ba710944-8232-4a06-b997-0837303f3da1

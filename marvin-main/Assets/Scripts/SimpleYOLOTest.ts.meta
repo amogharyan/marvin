@@ -58,5 +58,5 @@
     - // @input AssignableType_1 cameraCapture
     - // @input bool autoTrigger = true
     - // @input float triggerDelay = 5
-    - '// @input bool enableContinuous {"hint":"Enable continuous detection mode"}'
+    - '// @input bool enableContinuous = true {"hint":"Enable continuous detection mode"}'
     - '// @input float continuousInterval = 10 {"hint":"Seconds between continuous detections"}'
