@@ -2,11 +2,12 @@
 import '@testing-library/jest-dom';
 
 // Mock Lens Studio global objects
-global.print = jest.fn((...args) => console.log(...args));
-global.printError = jest.fn((...args) => console.error(...args));
+(global as any).print = jest.fn((...args: any[]) => console.log(...args));
+(global as any).printError = jest.fn((...args: any[]) => console.error(...args));
+(global as any).getTime = jest.fn(() => Date.now() / 1000); // Returns time in seconds like Lens Studio
 
 // Mock common Lens Studio classes
-global.vec3 = class vec3 {
+(global as any).vec3 = class vec3 {
   x: number;
   y: number;
   z: number;
@@ -26,7 +27,7 @@ global.vec3 = class vec3 {
   }
 };
 
-global.quat = class quat {
+(global as any).quat = class quat {
   x: number;
   y: number;
   z: number;
@@ -45,7 +46,7 @@ global.quat = class quat {
 };
 
 // Suppress console warnings in tests
-global.console = {
+(global as any).console = {
   ...console,
   warn: jest.fn(),
   error: jest.fn(),
