@@ -301,27 +301,17 @@ const GlassCard = styled.div`
 - Proof generation: Progressive wave animation
 - Success states: Confetti or particle burst
 
-### User Flow Architecture
-
-```mermaid
-graph LR
-		A[Landing] --> B{User Type}
-		B --> C[Patient Dashboard]
-		B --> D[Doctor Portal]
-		B --> E[Researcher Portal]
-		C --> F[Upload Genome]
-		F --> G[Encrypt & Pin to IPFS]
-		G --> H[Create On-chain Commitment]
-		H --> I[Request Proof Generation]
-		I --> J[Proof Generated]
-		J --> K[Share Proof with Doctor/Researcher]
-		K --> L[On-chain Verification]
-		K --> M[Aggregate Data (Research)]
-```
 
 ---
 
-#### System Architecture (Supabase-Focused)
+#### System Architecture (Supabase-Direct Integration via InternetModule)
+
+**IMPORTANT: This project uses InternetModule (experimental API) to bypass Snap Cloud**
+- Supabase URL and anon key are hardcoded in Lens Studio
+- Direct REST API calls to Supabase using InternetModule.fetch()
+- No SupabaseClient.lspkg needed - simpler and more direct
+- Based on Supabase-Select-YC-Hackathon framework
+
 ```
 ┌───────────────────────────────────────────────────────────────┐
 │              Snap Spectacles (AR Frontend)                    │
@@ -334,15 +324,18 @@ graph LR
               │                      │                      │
               ▼                      ▼                      ▼
 ┌───────────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐
-│ Gemini Live WebSocket │  │InternetModule Bridge │  │ Supabase Realtime    │
-│   (Primary AI)        │  │  (HTTP Requests)     │  │  (Data Sync)         │
+│ Gemini Live WebSocket │  │ InternetModule       │  │  InternetModule      │
+│   (Primary AI)        │  │ Direct Supabase REST │  │  (Realtime via SSE)  │
 │      Dev 1            │  │      Dev 1           │  │       Dev 1          │
 │  ┌────────────────┐   │  │  ┌──────────────┐   │  │  ┌──────────────┐   │
-│  │ Vision + Voice │   │  │  │   Fetch API  │   │  │  │   Database   │   │
-│  │   Streaming    │   │  │  │   Requests   │   │  │  │   Subscribe  │   │
-│  │  <2s Response  │   │  │  │to Edge Funcs │   │  │  │              │   │
+│  │ Vision + Voice │   │  │  │   fetch() to │   │  │  │   Database   │   │
+│  │   Streaming    │   │  │  │   REST API   │   │  │  │ Read/Write   │   │
+│  │  <2s Response  │   │  │  │   /rest/v1/  │   │  │  │ Direct HTTP  │   │
 │  └────────────────┘   │  │  └──────────────┘   │  │  └──────────────┘   │
 └───────────────────────┘  └──────────────────────┘  └──────────────────────┘
+              │                      │                      │
+              │   Hardcoded: supabaseUrl + supabaseAnonKey
+              │   Headers: { apikey, Authorization, Content-Type }
               │                      │                      │
               └──────────────────────┼──────────────────────┘
                                      ▼
@@ -350,8 +343,8 @@ graph LR
 │           Supabase Edge Functions (Dev 2)                     │
 │         Deno TypeScript - AI Processing Layer                 │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐       │
-│  │ai-coord  │ │letta-sync│ │ voice-   │ │ calendar │       │
-│  │ination   │ │ (NEW)    │ │ enhance  │ │  -sync   │       │
+│  │ai-coord  │ │letta-sync│ │ voice-   │ │ chroma-  │       │
+│  │ination   │ │ (NEW)    │ │ enhance  │ │ learning │       │
 │  │          │ │          │ │ (OPT)    │ │          │       │
 │  └──────────┘ └──────────┘ └──────────┘ └──────────┘       │
 └───────────────────────────────────────────────────────────────┘
@@ -382,9 +375,10 @@ graph LR
 └───────────────────────────────────────────────────────────────┘
 
 KEY ARCHITECTURAL DECISIONS:
-✅ Dev 1: Lens Studio AR + Gemini WebSocket + InternetModule for HTTP calls
-✅ Dev 2: Supabase Edge Functions (replace mock responses with real APIs)
-✅ Dev 3: Supabase backend (database, storage, realtime subscriptions)
+✅ Dev 1: Lens Studio AR + Gemini WebSocket + InternetModule for direct Supabase
+✅ Dev 1: NO SupabaseClient.lspkg - use InternetModule.fetch() with hardcoded credentials
+✅ Dev 2: Supabase Edge Functions (AI coordination, Letta sync, voice enhancement)
+✅ Dev 3: Supabase backend (database, storage, realtime via Server-Sent Events)
 ✅ Dev 4: TDD framework + continuous integration + merge management
 ✅ Separation: Dev 2 handles AI logic, Dev 3 handles data persistence
 ```
@@ -393,12 +387,19 @@ KEY ARCHITECTURAL DECISIONS:
 
 | Role | Developer | Primary Responsibilities | Key Deliverables |
 |------|-----------|-------------------------|------------------|
-| **AR Core Developer** | Dev 1 | Lens Studio integration, object detection, spatial tracking, AR overlays, Gemini WebSocket, InternetModule HTTP calls | Lens Studio project, object recognition, gesture handling, AR UI, Gemini integration |
-| **AI Edge Functions** | Dev 2 | Supabase Edge Functions development, fix mock responses, integrate real APIs (Gemini, ElevenLabs, Chroma, Letta, LiveKit) | ai-coordination, letta-sync, voice-enhance, calendar-sync Edge Functions |
+| **AR Core Developer** | Dev 1 | Lens Studio integration, object detection, spatial tracking, AR overlays, Gemini WebSocket, **InternetModule for direct Supabase REST API calls** (no SupabaseClient.lspkg) | Lens Studio project, object recognition, gesture handling, AR UI, Gemini integration, Supabase connector using InternetModule.fetch() |
+| **AI Edge Functions** | Dev 2 | Supabase Edge Functions development, fix mock responses, integrate real APIs (Gemini, ElevenLabs, Chroma, Letta, LiveKit) | ai-coordination, letta-sync, voice-enhance, chroma-learning Edge Functions |
 | **Database & Backend** | Dev 3 | Supabase database schema, Realtime subscriptions, Storage buckets, Row Level Security policies, authentication | Database tables, RLS policies, Realtime channels, storage configuration |
 | **DevOps & Integration** | Dev 4 | TDD framework, integration testing, CI/CD pipeline, merge management, demo orchestration | Test suites, integration tests, GitHub Actions workflows, merge strategy |
 
-### Architecture Decisions (Supabase-Focused)
+### Architecture Decisions (Supabase-Direct via InternetModule)
+
+**CRITICAL: Using InternetModule (Experimental API) - No Snap Cloud**
+- Based on **Supabase-Select-YC-Hackathon-10-04-25** reference framework
+- Hardcode Supabase URL and anon key in Lens Studio scripts
+- Use `internetModule.fetch()` for direct REST API calls to Supabase
+- Headers: `{ "apikey": anonKey, "Authorization": "Bearer " + anonKey, "Content-Type": "application/json" }`
+- Example from reference: `Example1-SupabaseConnector/SupabaseConnector.ts`
 
 #### System Architecture
 ```
@@ -409,12 +410,17 @@ KEY ARCHITECTURAL DECISIONS:
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐   │
 │  │ Object   │ │    AR    │ │ Gemini   │   │
 │  │Detection │ │ Overlays │ │ WebSocket│   │
-│  │          │ │          │ │ +Internet│   │
-│  │          │ │          │ │  Module  │   │
+│  │          │ │          │ │          │   │
+│  ├──────────┤ ├──────────┤ ├──────────┤   │
+│  │ Internet │ │ Internet │ │ Internet │   │
+│  │ Module   │ │ Module   │ │ Module   │   │
+│  │ Supabase │ │ Realtime │ │ Edge Fn  │   │
+│  │   REST   │ │ via SSE  │ │  Calls   │   │
 │  └──────────┘ └──────────┘ └──────────┘   │
 └──────────────────────────────────────────────┘
-                      │
-                      ▼
+          │ Direct HTTP (No Snap Cloud)
+          │ Hardcoded: supabaseUrl + anonKey
+          ▼
 ┌──────────────────────────────────────────────┐
 │         Supabase Edge Functions              │
 │              Deno TypeScript                 │
@@ -450,7 +456,7 @@ KEY ARCHITECTURAL DECISIONS:
 #### Merge Schedule (Tight Integration)
 ```
 Hour 0-6:   Core Foundation
-├── Dev 1: Lens Studio setup + object detection + Gemini WebSocket
+├── Dev 1: Lens Studio setup + object detection + Gemini WebSocket + InternetModule Supabase connector
 ├── Dev 2: Create Edge Functions structure + fix ai-coordination mocks
 ├── Dev 3: Supabase schema + tables + RLS policies
 └── Dev 4: TDD framework + write failing tests for all components

@@ -1,5 +1,33 @@
 # Implementation Task List: Marvin AR Morning Assistant on Snap Spectacles
 
+## 🚨 IMPORTANT: Supabase Integration Approach
+
+**Using InternetModule (Experimental API) - No Snap Cloud Required**
+
+This project uses the **Supabase-Select-YC-Hackathon-10-04-25** framework for direct Supabase integration:
+- **Reference Folder:** `Supabase-Select-YC-Hackathon-10-04-25/lens-studio-project/Assets/Supabase/`
+- **Key Examples:**
+  - `Example1-SupabaseConnector/` - Basic database CRUD operations
+  - `Example2-RealTimeCursor/` - Realtime subscriptions via Server-Sent Events
+  - `Example3-LoadAssets/` - Storage bucket asset loading
+  - `Example4-EdgeFunctions/` - Calling Supabase Edge Functions
+
+**Architecture:**
+- ✅ Use **InternetModule.fetch()** for direct HTTP requests to Supabase REST API
+- ✅ Hardcode **supabaseUrl** and **supabaseAnonKey** in Lens Studio scripts
+- ❌ NO SupabaseClient.lspkg needed
+- ❌ NO Snap Cloud integration required
+
+**Headers for all Supabase requests:**
+```typescript
+{
+  "Content-Type": "application/json",
+  "apikey": supabaseAnonKey,
+  "Authorization": `Bearer ${supabaseAnonKey}`,
+  "Prefer": "return=representation"
+}
+```
+
 ## Developer Assignment Key
 
 - **[Dev 1]** = AR Core (Lens Studio: Object Detection, AR UI, Gemini WebSocket, InternetModule HTTP)
@@ -54,63 +82,76 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
 
 ### Install Required Packages [Dev 1]
 
+**IMPORTANT: Using InternetModule (Experimental API) - No SupabaseClient.lspkg needed**
+**Reference Framework: Supabase-Select-YC-Hackathon-10-04-25/**
+
 - [ ] **0.15** Open Lens Studio > Window > Asset Library
-- [ ] **0.16** Install **Remote Service Gateway Token Generator** plugin
+- [ ] **0.16** Install **Remote Service Gateway Token Generator** plugin (for Gemini WebSocket)
 - [ ] **0.17** Install **SpectaclesInteractionKit.lspkg** package
-- [ ] **0.18** Install **SupabaseClient.lspkg** package
+- [ ] **0.18** ~~Install SupabaseClient.lspkg~~ **SKIP - Using InternetModule instead**
 - [ ] **0.19** Install **SpectaclesUIKit.lspkg** package
+- [ ] **0.20** Add **InternetModule** to project (for direct Supabase REST API calls)
 
-### Configure Remote Service Gateway [Dev 2]
+### Configure Remote Service Gateway [Dev 1 + Dev 2]
 
-- [ ] **0.20** Generate token: Window > Remote Service Gateway Token > Generate Token
-- [ ] **0.21** Create "RemoteServiceGatewayCredentials" object in scene hierarchy
-- [ ] **0.22** Paste token into credentials object in Inspector
-- [ ] **0.23** Test connection with sample Gemini API call
+- [ ] **0.21** [Dev 1] Generate token: Window > Remote Service Gateway Token > Generate Token
+- [ ] **0.22** [Dev 1] Create "RemoteServiceGatewayCredentials" object in scene hierarchy
+- [ ] **0.23** [Dev 1] Paste token into credentials object in Inspector
+- [ ] **0.24** [Dev 2] Test connection with sample Gemini API call
 
-### Configure Snap Cloud (Supabase) [Dev 3]
+### Configure Direct Supabase Integration [Dev 1 + Dev 3]
 
-- [ ] **0.24** Open Window > Supabase in Lens Studio
-- [ ] **0.25** Login with Lens Studio credentials
-- [ ] **0.26** Click "Create a New Project" in Supabase plugin
-- [ ] **0.27** Click "Import Credentials" to generate SupabaseProject asset
-- [ ] **0.28** Create `snap-cloud/` folder outside Lens Studio project for Edge Functions
-- [ ] **0.29** Initialize Supabase CLI: `supabase init` in snap-cloud/
+**Using InternetModule (No Snap Cloud) - Based on Supabase-Select Framework**
+
+- [ ] **0.25** [Dev 3] Create Supabase project at https://supabase.com
+- [ ] **0.26** [Dev 3] Copy **Project URL** from Settings > API (e.g., `https://xxxxx.supabase.co`)
+- [ ] **0.27** [Dev 3] Copy **anon/public API key** from Settings > API
+- [ ] **0.28** [Dev 1] Create `Assets/Scripts/Storage/SupabaseConnector.ts` (based on Example1-SupabaseConnector)
+- [ ] **0.29** [Dev 1] Hardcode Supabase URL and anon key in SupabaseConnector.ts:
+  ```typescript
+  @input public supabaseUrl: string = "https://your-project.supabase.co";
+  @input public supabaseAnonKey: string = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
+  @input public internetModule: InternetModule;
+  ```
+- [ ] **0.30** [Dev 1] Test direct Supabase connection with `internetModule.fetch()`
+- [ ] **0.31** [Dev 3] Create `snap-cloud/` folder outside Lens Studio project for Edge Functions
+- [ ] **0.32** [Dev 3] Initialize Supabase CLI: `supabase init` in snap-cloud/
 
 ### Testing Infrastructure Setup [Dev 4]
 
 **Objective:** Set up TDD framework before other developers start coding  
 **Reference:** See `devops/TDD-STRATEGY.md` for complete details
 
-- [ ] **0.30** Install Jest and TypeScript testing dependencies:
+- [ ] **0.33** Install Jest and TypeScript testing dependencies:
   - `npm install --save-dev jest ts-jest @types/jest @testing-library/jest-dom`
   - Create `jest.config.js` with TypeScript support
   - Create `__tests__/setup.ts` with global configuration
 
-- [ ] **0.31** Create Lens Studio API mocks in `__tests__/mocks/lens-studio.ts`:
-  - MockInternetModule (for Fetch API)
+- [ ] **0.34** Create Lens Studio API mocks in `__tests__/mocks/lens-studio.ts`:
+  - MockInternetModule (for direct Supabase REST API calls via fetch())
   - MockRemoteServiceModule (for Gemini)
   - MockMLComponent (for object detection)
   - MockObjectTracking3D
   - MockAudioComponent
   - MockEvent<T>
-  - MockSupabaseClient
+  - ~~MockSupabaseClient~~ **SKIP - Using InternetModule directly**
   
-- [ ] **0.32** Write FAILING test templates for Phase 1 components:
+- [ ] **0.35** Write FAILING test templates for Phase 1 components:
   - `__tests__/unit/ObjectDetection/DemoObjectTracker.test.ts`
   - `__tests__/unit/Core/GeminiAssistant.test.ts`
   - `__tests__/unit/Core/ElevenLabsVoice.test.ts`
   - `__tests__/unit/Core/VoiceHandler.test.ts`
-  - `__tests__/unit/Storage/SupabaseClient.test.ts`
+  - `__tests__/unit/Storage/SupabaseConnector.test.ts` (replaces SupabaseClient)
   - `__tests__/unit/Storage/ChromaLearning.test.ts`
   - `__tests__/unit/AROverlays/OverlayManager.test.ts`
   - All tests should FAIL (RED phase) - no implementation yet
 
-- [ ] **0.33** Set up GitHub Actions CI/CD:
+- [ ] **0.36** Set up GitHub Actions CI/CD:
   - Create `.github/workflows/test.yml` for automated testing on PR
   - Create `.github/workflows/lint.yml` for linting and type checking
   - Configure test coverage reporting with Codecov
 
-- [ ] **0.34** Configure GitHub branch protection rules:
+- [ ] **0.37** Configure GitHub branch protection rules:
   - Require status checks to pass before merging
   - Require test workflow to pass
   - Require 1 approval from Dev 4
@@ -430,12 +471,18 @@ main → develop → feature/[lens-studio|ai-integration|snap-cloud|integration]
   - Add animation for attention direction
   - Test visibility in various environments
 
-- [ ] **1.22** [Dev 3] **Implement MarvinSupabaseClient.ts**
-  - Create `Assets/Scripts/Storage/SupabaseClient.ts`
-  - Import SupabaseClient from SupabaseClient.lspkg
-  - Implement database CRUD operations
-  - Set up real-time subscriptions for updates
-  - Configure authentication with Snapchat ID
+- [ ] **1.22** [Dev 1] **Implement SupabaseConnector.ts using InternetModule**
+  - Create `Assets/Scripts/Storage/SupabaseConnector.ts` (based on Example1-SupabaseConnector)
+  - **Use InternetModule.fetch() for direct REST API calls** (no SupabaseClient.lspkg)
+  - Hardcode supabaseUrl and supabaseAnonKey as @input properties
+  - Set headers: `{ "apikey": anonKey, "Authorization": "Bearer " + anonKey, "Content-Type": "application/json" }`
+  - Implement database operations:
+    - `selectFromTable(table, columns, query)` using GET to `/rest/v1/{table}`
+    - `insertIntoTable(table, data)` using POST to `/rest/v1/{table}`
+    - `updateTable(table, data, match)` using PATCH to `/rest/v1/{table}`
+    - `deleteFromTable(table, match)` using DELETE to `/rest/v1/{table}`
+  - Add error handling and logging (use print() for console output)
+  - Reference: `Supabase-Select-YC-Hackathon-10-04-25/lens-studio-project/Assets/Supabase/Example1-SupabaseConnector/`
 
 ### 1.X Testing & Integration (Dev 4)
 
