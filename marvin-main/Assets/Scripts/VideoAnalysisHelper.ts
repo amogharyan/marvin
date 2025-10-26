@@ -2,26 +2,25 @@ import { MarvinAssistant } from "./MarvinAssistant";
 import { setTimeout } from "SpectaclesInteractionKit.lspkg/Utils/FunctionTimingUtils";
 
 /**
- * DEPRECATED: This component is no longer needed
- * Object detection now handled by YOLO + ObjectDetectionTrigger
- * Keep enableAutoAnalysis = false to prevent Gemini from speaking unprompted
+ * Helper component to periodically request video analysis from Gemini
+ * This ensures Gemini actively analyzes the video stream
  */
 @component
 export class VideoAnalysisHelper extends BaseScriptComponent {
   @ui.separator
-  @ui.label("⚠️ DEPRECATED - Keep enableAutoAnalysis = FALSE")
+  @ui.label("Video Analysis Helper - Triggers Gemini to analyze video")
   @ui.separator
-
+  
   @input
   private marvinAssistant: MarvinAssistant;
-
+  
   @input
   @hint("Seconds between analysis requests")
   private analysisInterval: number = 5;
-
+  
   @input
-  @hint("KEEP THIS FALSE - Gemini should only speak when YOLO detects objects")
-  private enableAutoAnalysis: boolean = false; // MUST stay false - YOLO handles detection now
+  @hint("Enable automatic periodic analysis - DEPRECATED: Use object-specific prompts instead")
+  private enableAutoAnalysis: boolean = false; // Disabled - now using targeted object-specific prompts
   
   private lastAnalysisTime: number = 0;
   private isActive: boolean = false;
@@ -62,7 +61,7 @@ export class VideoAnalysisHelper extends BaseScriptComponent {
     // Send a client message asking Gemini to describe what it sees
     // This will be spoken back to the user and trigger object detection
     this.marvinAssistant.sendClientMessage(
-      "If you see a laptop or computer, say 'I see you're on your laptop, would you like to see your work schedule for the day?', only ask this question once per session"
+      ""
     );
   }
   

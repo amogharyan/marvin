@@ -28,7 +28,7 @@ export class SimpleYOLOTest extends BaseScriptComponent {
 
   @input
   @hint("Seconds between continuous detections")
-  continuousInterval: number = 8;
+  continuousInterval: number = 10;
 
   private lastDetectionTime: number = 0;
 

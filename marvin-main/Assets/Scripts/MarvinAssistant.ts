@@ -152,7 +152,7 @@ export class MarvinAssistant extends BaseScriptComponent {
   @input
   @widget(new TextAreaWidget())
   private instructions: string =
-    "You are Marvin, a silent AR assistant. CRITICAL RULES:\n\n1. DO NOT analyze the video feed on your own\n2. DO NOT speak unless you receive a DIRECT client message with specific instructions\n3. When you receive a client message, respond ONLY to what is asked\n4. Be natural and conversational when responding to client messages\n5. Keep responses brief (1-2 sentences)\n\nYou will ONLY speak when explicitly told what to say via client messages. Otherwise, remain completely silent and do not comment on anything you see in the video.";
+    "You are Marvin, a work-focused AR assistant.";
   @input private haveVideoInput: boolean = true;
   @ui.group_end
   @ui.separator
@@ -617,12 +617,26 @@ export class MarvinAssistant extends BaseScriptComponent {
   }
 
   /**
-   * DEPRECATED: No longer parsing Gemini responses for object detection
-   * Object detection is now handled by YOLO via RemoteObjectDetectionManager
+   * Parse Gemini's text response for LAPTOP mentions ONLY
    */
   private parseObjectsFromResponse(text: string) {
-    // Disabled - YOLO handles all object detection now
-    // Gemini only responds to explicit prompts from ObjectDetectionTrigger
-    return;
+    if (!text) return;
+
+    const lowerText = text.toLowerCase();
+    print(`[OBJECT DETECTION] Parsing response: "${text.substring(0, 100)}..."`);
+
+    // Create a position (assuming object is in front of camera)
+    const defaultPosition = { x: 0, y: 0, z: 0.3 };
+
+    // ONLY check for laptop - ignore all other objects
+    if (lowerText.includes("laptop") || lowerText.includes("computer")) {
+      print("[OBJECT DETECTION] Detected: LAPTOP");
+      this.componentDetectedEvent.invoke({
+        type: "laptop",
+        position: defaultPosition,
+        confidence: 0.9
+      });
+    }
+    // All other object detection removed - laptop only!
   }
 }
